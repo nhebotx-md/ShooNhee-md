@@ -1,0 +1,36 @@
+{
+  "users": {
+    "62881027174423@s.whatsapp.net": {
+      "wallet": {
+        "balance": 56000
+      },
+      "income": [
+        {
+          "amount": 76000,
+          "note": "sisah",
+          "date": 1777396922039
+        }
+      ],
+      "expense": [],
+      "targets": [
+        {
+          "id": "1777396974454",
+          "name": "IP+",
+          "amount": 10000000,
+          "collected": 10000,
+          "createdAt": 1777396974454,
+          "completed": false,
+          "completedAt": null
+        }
+      ],
+      "salary": {
+        "base": 0,
+        "workDays": 0
+      },
+      "meta": {
+        "createdAt": 1777396811947,
+        "resetAt": 1777396811947
+      }
+    }
+  }
+}
