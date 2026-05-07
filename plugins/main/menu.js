@@ -2,12 +2,12 @@ import config from "../../config.js";
 import {
   formatUptime,
   getTimeGreeting,
-} from "../../src/lib/ourin-formatter.js";
+} from "../../src/lib/Shon-formatter.js";
 import {
   getCommandsByCategory,
   getCategories,
-} from "../../src/lib/ourin-plugins.js";
-import { getDatabase } from "../../src/lib/ourin-database.js";
+} from "../../src/lib/Shon-plugins.js";
+import { getDatabase } from "../../src/lib/Shon-database.js";
 import fs from "fs";
 import path from "path";
 let _sharp = null;
@@ -15,7 +15,7 @@ async function getSharp() {
   if (!_sharp) _sharp = (await import("sharp")).default;
   return _sharp;
 }
-import { generateWAMessageFromContent, proto } from "ourin";
+import { generateWAMessageFromContent, proto } from "ShooNhee";
 import axios from "axios";
 
 const pluginConfig = {
@@ -205,19 +205,19 @@ function getSortedCategories(m, botMode) {
 }
 
 async function formatTime(date) {
-  const timeHelper = await import("../../src/lib/ourin-time.js");
+  const timeHelper = await import("../../src/lib/Shon-time.js");
   return timeHelper.formatTime("HH:mm");
 }
 
 async function formatDateShort(date) {
-  const timeHelper = await import("../../src/lib/ourin-time.js");
+  const timeHelper = await import("../../src/lib/Shon-time.js");
   return timeHelper.formatFull("dddd, DD MMMM YYYY");
 }
 
 async function buildMenuText(m, botConfig, db, uptime, botMode = "md") {
   const prefix = botConfig.command?.prefix || ".";
   const user = db.getUser(m.sender);
-  const timeHelper = await import("../../src/lib/ourin-time.js");
+  const timeHelper = await import("../../src/lib/Shon-time.js");
   const timeStr = timeHelper.formatTime("HH:mm");
   const dateStr = timeHelper.formatFull("dddd, DD MMMM YYYY");
 
@@ -230,7 +230,7 @@ async function buildMenuText(m, botConfig, db, uptime, botMode = "md") {
   }
 
   const { getCaseCount, getCasesByCategory } =
-    await import("../../case/ourin.js");
+    await import("../../case/ShooNhee.js");
   const totalCases = getCaseCount();
   const casesByCategory = getCasesByCategory();
 
@@ -259,19 +259,19 @@ async function buildMenuText(m, botConfig, db, uptime, botMode = "md") {
 
   let txt = `Hai *@${m.pushName || "User"}* 🪸
 
-Aku ${botConfig.bot?.name || "Ourin-AI"}, bot WhatsApp yang siap bantu kamu.  
+Aku ${botConfig.bot?.name || "ShooNhee-AI"}, bot WhatsApp yang siap bantu kamu.  
 
 Kamu bisa pakai aku buat cari info, ambil data, atau bantu hal-hal sederhana langsung lewat WhatsApp — praktis tanpa ribet.`;
 
   txt += `\n\n╭─〔 🤖 *ʙᴏᴛ ɪɴꜰᴏ* 〕\n`;
-  txt += `*│* 🖐 ɴᴀᴍᴀ     : *${botConfig.bot?.name || "Ourin-AI"}*\n`;
+  txt += `*│* 🖐 ɴᴀᴍᴀ     : *${botConfig.bot?.name || "ShooNhee-AI"}*\n`;
   txt += `*│* 🔑 ᴠᴇʀsɪ    : *v${botConfig.bot?.version || "1.2.0"}*\n`;
   txt += `*│* ⚙️ ᴍᴏᴅᴇ     : *${(botConfig.mode || "public").toUpperCase()}*\n`;
   txt += `*│* 🧶 ᴘʀᴇꜰɪx    : *[ ${prefix} ]*\n`;
   txt += `*│* ⏱ ᴜᴘᴛɪᴍᴇ   : *${uptimeFormatted}*\n`;
   txt += `*│* 👥 ᴛᴏᴛᴀʟ    : *${totalUsers} Users*\n`;
   txt += `*│* 🏷 ɢʀᴏᴜᴘ     : *${botMode.toUpperCase()}*\n`;
-  txt += `*│* 👑 ᴏᴡɴᴇʀ    : *${botConfig.owner?.name || "Ourin-AI"}*\n`;
+  txt += `*│* 👑 ᴏᴡɴᴇʀ    : *${botConfig.owner?.name || "ShooNhee-AI"}*\n`;
   txt += `╰────────────────⬣\n\n`;
 
   txt += `╭─〔 👤 *ᴜsᴇʀ ɪɴꜰᴏ* 〕\n`;
@@ -391,7 +391,7 @@ function getContextInfo(
 ) {
   const saluranId = botConfig.saluran?.id || "120363208449943317@newsletter";
   const saluranName =
-    botConfig.saluran?.name || botConfig.bot?.name || "Ourin-AI";
+    botConfig.saluran?.name || botConfig.bot?.name || "ShooNhee-AI";
   const saluranLink = botConfig.saluran?.link || "";
 
   const ctx = {
@@ -399,7 +399,7 @@ function getContextInfo(
     forwardingScore: 9,
     isForwarded: true,
     externalAdReply: {
-      title: botConfig.bot?.name || "Ourin-AI",
+      title: botConfig.bot?.name || "ShooNhee-AI",
       body: `BOT WHATSAPP MULTI DEVICE`,
       sourceUrl: saluranLink,
       previewType: "VIDEO",
@@ -415,8 +415,8 @@ function getContextInfo(
 function getVerifiedQuoted(botConfig) {
   return {
     key: {
-      participant: `0@s.whatsapp.net`,
-      remoteJid: `status@broadcast`,
+      participant: `13135550002@s.whatsapp.net`,
+      remoteJid: `13135550002@s.whatsapp.net`,
     },
     message: {
       contactMessage: {
@@ -472,7 +472,7 @@ async function handler(m, { sock, config: botConfig, db, uptime }) {
 
   const imagePath = path.join(process.cwd(), "assets", "images", "ShooNhee.jpg");
   const thumbPath = path.join(process.cwd(), "assets", "images", "ShooNhee2.jpg");
-  const videoPath = path.join(process.cwd(), "assets", "video", "ourin.mp4");
+  const videoPath = path.join(process.cwd(), "assets", "video", "ShooNhee.mp4");
 
   let imageBuffer = fs.existsSync(imagePath)
     ? fs.readFileSync(imagePath)
@@ -487,7 +487,7 @@ async function handler(m, { sock, config: botConfig, db, uptime }) {
   const prefix = botConfig.command?.prefix || ".";
   const saluranId = botConfig.saluran?.id || "120363208449943317@newsletter";
   const saluranName =
-    botConfig.saluran?.name || botConfig.bot?.name || "Ourin-AI";
+    botConfig.saluran?.name || botConfig.bot?.name || "ShooNhee-AI";
   const saluranLink =
     botConfig.saluran?.link ||
     "https://whatsapp.com/channel/0029VbB37bgBfxoAmAlsgE0t";
@@ -539,14 +539,14 @@ async function handler(m, { sock, config: botConfig, db, uptime }) {
 
         let contextThumb = thumbBuffer;
         try {
-          const ourinPath = path.join(
+          const ShooNheePath = path.join(
             process.cwd(),
             "assets",
             "images",
             "ShooNhee.jpg",
           );
-          if (fs.existsSync(ourinPath)) {
-            contextThumb = fs.readFileSync(ourinPath);
+          if (fs.existsSync(ShooNheePath)) {
+            contextThumb = fs.readFileSync(ShooNheePath);
           }
         } catch (e) {}
 
@@ -603,11 +603,11 @@ async function handler(m, { sock, config: botConfig, db, uptime }) {
 
         let headerText = `*@${m.pushName || "User"}* 🪸
 
-Aku ${botConfig.bot?.name || "Ourin-AI"}, bot WhatsApp yang siap bantu kamu.  
+Aku ${botConfig.bot?.name || "ShooNhee-AI"}, bot WhatsApp yang siap bantu kamu.  
 
 Kamu bisa pakai aku buat cari info, ambil data, atau bantu hal-hal sederhana langsung lewat WhatsApp — praktis tanpa ribet.\n\n`;
         headerText += `╭┈┈⬡「 🤖 *ʙᴏᴛ ɪɴꜰᴏ* 」\n`;
-        headerText += `┃ \`◦\` ɴᴀᴍᴀ: *${botConfig.bot?.name || "Ourin-AI"}*\n`;
+        headerText += `┃ \`◦\` ɴᴀᴍᴀ: *${botConfig.bot?.name || "ShooNhee-AI"}*\n`;
         headerText += `┃ \`◦\` ᴠᴇʀsɪ: *v${botConfig.bot?.version || "1.2.0"}*\n`;
         headerText += `┃ \`◦\` ᴍᴏᴅᴇ: *${(botConfig.mode || "public").toUpperCase()}*\n`;
         headerText += `┃ \`◦\` ᴜᴘᴛɪᴍᴇ: *${uptimeFormatted}*\n`;
@@ -616,7 +616,7 @@ Kamu bisa pakai aku buat cari info, ambil data, atau bantu hal-hal sederhana lan
         headerText += `📋 *Pilih kategori di bawah untuk melihat daftar command*`;
 
         try {
-          const { generateWAMessageFromContent, proto } = await import("ourin");
+          const { generateWAMessageFromContent, proto } = await import("ShooNhee");
 
           const buttons = [
             {
@@ -650,7 +650,7 @@ Kamu bisa pakai aku buat cari info, ambil data, atau bantu hal-hal sederhana lan
           let headerMedia = null;
           if (imageBuffer) {
             try {
-              const { prepareWAMessageMedia } = await import("ourin");
+              const { prepareWAMessageMedia } = await import("ShooNhee");
               headerMedia = await prepareWAMessageMedia(
                 {
                   image: imageBuffer,
@@ -678,11 +678,11 @@ Kamu bisa pakai aku buat cari info, ambil data, atau bantu hal-hal sederhana lan
                       }),
                       footer:
                         proto.Message.InteractiveMessage.Footer.fromObject({
-                          text: `© ${botConfig.bot?.name || "Ourin-AI"} | ${menuSorted.length} Categories`,
+                          text: `© ${botConfig.bot?.name || "ShooNhee-AI"} | ${menuSorted.length} Categories`,
                         }),
                       header:
                         proto.Message.InteractiveMessage.Header.fromObject({
-                          title: `${botConfig.bot?.name || "Ourin-AI"}`,
+                          title: `${botConfig.bot?.name || "ShooNhee-AI"}`,
                           hasMediaAttachment: !!headerMedia,
                           ...(headerMedia || {}),
                         }),
@@ -736,7 +736,7 @@ Kamu bisa pakai aku buat cari info, ambil data, atau bantu hal-hal sederhana lan
         const saluranIdV6 =
           botConfig.saluran?.id || "120363208449943317@newsletter";
         const saluranNameV6 =
-          botConfig.saluran?.name || botConfig.bot?.name || "Ourin-AI";
+          botConfig.saluran?.name || botConfig.bot?.name || "ShooNhee-AI";
         const saluranLinkV6 =
           botConfig.saluran?.link ||
           "https://whatsapp.com/channel/0029VbB37bgBfxoAmAlsgE0t";
@@ -769,7 +769,7 @@ Kamu bisa pakai aku buat cari info, ambil data, atau bantu hal-hal sederhana lan
             serverMessageId: 127,
           },
           externalAdReply: {
-            title: botConfig.bot?.name || "Ourin-AI",
+            title: botConfig.bot?.name || "ShooNhee-AI",
             body: `v${botConfig.bot?.version || "1.0.1"} • Fast Response Bot`,
             sourceUrl: saluranLinkV6,
             mediaType: 1,
@@ -783,7 +783,7 @@ Kamu bisa pakai aku buat cari info, ambil data, atau bantu hal-hal sederhana lan
           await sock.sendMessage(
             m.chat,
             {
-              document: imageBuffer || Buffer.from("Ourin-AI Menu"),
+              document: imageBuffer || Buffer.from("ShooNhee-AI Menu"),
               mimetype: "application/pdf",
               fileName: `ɴᴏ ᴘᴀɪɴ ɴᴏ ɢᴀɪɴ`,
               fileLength: 9999999999,
@@ -813,7 +813,7 @@ Kamu bisa pakai aku buat cari info, ambil data, atau bantu hal-hal sederhana lan
       case 7: {
         try {
           const { prepareWAMessageMedia, generateWAMessageFromContent, proto } =
-            await import("ourin");
+            await import("ShooNhee");
           const carouselCards = [];
 
           for (const { cat, cmds, emoji } of menuSorted) {
@@ -879,7 +879,7 @@ Kamu bisa pakai aku buat cari info, ambil data, atau bantu hal-hal sederhana lan
                 text: cardBody,
               }),
               footer: proto.Message.InteractiveMessage.Footer.create({
-                text: `${botConfig.bot?.name || "Ourin-AI"} • ${cat}`,
+                text: `${botConfig.bot?.name || "ShooNhee-AI"} • ${cat}`,
               }),
               nativeFlowMessage:
                 proto.Message.InteractiveMessage.NativeFlowMessage.fromObject({
@@ -919,7 +919,7 @@ Kamu bisa pakai aku buat cari info, ambil data, atau bantu hal-hal sederhana lan
                       }),
                       footer:
                         proto.Message.InteractiveMessage.Footer.fromObject({
-                          text: `${botConfig.bot?.name || "Ourin-AI"} v${botConfig.bot?.version || "1.0"}`,
+                          text: `${botConfig.bot?.name || "ShooNhee-AI"} v${botConfig.bot?.version || "1.0"}`,
                         }),
                       carouselMessage:
                         proto.Message.InteractiveMessage.CarouselMessage.fromObject(
@@ -952,7 +952,7 @@ Kamu bisa pakai aku buat cari info, ambil data, atau bantu hal-hal sederhana lan
       }
 
       case 8: {
-        const timeHelper = await import("../../src/lib/ourin-time.js");
+        const timeHelper = await import("../../src/lib/Shon-time.js");
         const time = timeHelper.formatTime("HH:mm");
         const date = timeHelper.formatFull("DD/MM/YYYY");
         const user = db.getUser(m.sender);
@@ -1018,7 +1018,7 @@ Kamu bisa pakai aku buat cari info, ambil data, atau bantu hal-hal sederhana lan
         menuText += `╭━━〔 💡 *𝗧𝗜𝗣𝗦* 〕━━╮\n`;
         menuText += `│ ❸ Follow channel ${saluranLink}\n`;
         menuText += `╰━━━━━━━━━━━━━━━━━━╯\n\n`;
-        menuText += `> ${randomSparkle()} *${botConfig.bot?.name || "Ourin"}* v${botConfig.bot?.version || "1.7.1"} ${randomSparkle()}`;
+        menuText += `> ${randomSparkle()} *${botConfig.bot?.name || "ShooNhee"}* v${botConfig.bot?.version || "1.7.1"} ${randomSparkle()}`;
 
         let thumbV8 = thumbBuffer;
         if (thumbBuffer) {
@@ -1035,8 +1035,8 @@ Kamu bisa pakai aku buat cari info, ambil data, atau bantu hal-hal sederhana lan
         const ftroliQuoted = {
           key: {
             fromMe: false,
-            participant: "0@s.whatsapp.net",
-            remoteJid: "status@broadcast",
+            participant: "13135550002@s.whatsapp.net",
+            remoteJid: "13135550002@s.whatsapp.net",
           },
           message: {
             orderMessage: {
@@ -1045,12 +1045,12 @@ Kamu bisa pakai aku buat cari info, ambil data, atau bantu hal-hal sederhana lan
               itemCount: totalCmds,
               status: "INQUIRY",
               surface: "CATALOG",
-              message: `${botConfig.bot?.name || "Ourin-AI"} Menu`,
+              message: `${botConfig.bot?.name || "ShooNhee-AI"} Menu`,
               orderTitle: `📋 ${totalCmds} Commands`,
               sellerJid: botConfig.botNumber
                 ? `${botConfig.botNumber}@s.whatsapp.net`
                 : m.sender,
-              token: "ourin-menu-v8",
+              token: "Shon-menu-v8",
               totalAmount1000: 0,
               totalCurrencyCode: "IDR",
               contextInfo: {
@@ -1083,7 +1083,7 @@ Kamu bisa pakai aku buat cari info, ambil data, atau bantu hal-hal sederhana lan
       case 9: {
         try {
           const { prepareWAMessageMedia, generateWAMessageFromContent, proto } =
-            await import("ourin");
+            await import("ShooNhee");
           let headerMedia = null;
           if (imageBuffer) {
             try {
@@ -1143,7 +1143,7 @@ Kamu bisa pakai aku buat cari info, ambil data, atau bantu hal-hal sederhana lan
                       }),
                       footer:
                         proto.Message.InteractiveMessage.Footer.fromObject({
-                          text: `© ${botConfig.bot?.name || "Ourin-AI"} v${botConfig.bot?.version || "1.9.0"}`,
+                          text: `© ${botConfig.bot?.name || "ShooNhee-AI"} v${botConfig.bot?.version || "1.9.0"}`,
                         }),
                       header:
                         proto.Message.InteractiveMessage.Header.fromObject({
@@ -1155,15 +1155,15 @@ Kamu bisa pakai aku buat cari info, ambil data, atau bantu hal-hal sederhana lan
                           {
                             messageParamsJson: JSON.stringify({
                               limited_time_offer: {
-                                text: botConfig.bot?.name || "Ourin-AI",
+                                text: botConfig.bot?.name || "ShooNhee-AI",
                                 url: saluranLink,
-                                copy_code: botConfig.owner?.name || "Ourin-AI",
+                                copy_code: botConfig.owner?.name || "ShooNhee-AI",
                                 expiration_time: Date.now() * 999,
                               },
                               bottom_sheet: {
                                 in_thread_buttons_energi: 2,
                                 divider_indices: [1, 2, 3, 4, 5, 999],
-                                list_title: botConfig.bot?.name || "Ourin-AI",
+                                list_title: botConfig.bot?.name || "ShooNhee-AI",
                                 button_title: "🍀 ριℓιн кαтєgσяι",
                               },
                             }),
@@ -1207,7 +1207,7 @@ Kamu bisa pakai aku buat cari info, ambil data, atau bantu hal-hal sederhana lan
       case 10: {
         try {
           const { prepareWAMessageMedia, generateWAMessageFromContent, proto } =
-            await import("ourin");
+            await import("ShooNhee");
 
           let productImage = null;
           try {
@@ -1238,12 +1238,12 @@ Kamu bisa pakai aku buat cari info, ambil data, atau bantu hal-hal sederhana lan
           const footerText = `
 Hai *@${m.pushName || "User"}* 🪸
 
-Aku ${botConfig.bot?.name || "Ourin-AI"}, bot WhatsApp yang siap bantu kamu.  
+Aku ${botConfig.bot?.name || "ShooNhee-AI"}, bot WhatsApp yang siap bantu kamu.  
 
 Kamu bisa pakai aku buat cari info, ambil data, atau bantu hal-hal sederhana langsung lewat WhatsApp — praktis tanpa ribet.
 
 ─────────────────────────
-Nama    : ${botConfig.bot?.name || "Ourin-AI"}
+Nama    : ${botConfig.bot?.name || "ShooNhee-AI"}
 Versi : v${botConfig.bot?.version || "1.9.0"}
 Runtime : Node.js ${process.version}
 Bot Up  : ${uptimeFormatted}
@@ -1256,7 +1256,7 @@ Klik tombol di bawah untuk menampilkan menu`;
             {
               name: "quick_reply",
               buttonParamsJson: JSON.stringify({
-                display_text: botConfig.bot?.name || "Ourin-AI",
+                display_text: botConfig.bot?.name || "ShooNhee-AI",
                 id: `${prefix}allmenu`,
               }),
             },
@@ -1280,24 +1280,24 @@ Klik tombol di bawah untuk menampilkan menu`;
                     proto.Message.InteractiveMessage.fromObject({
                       header:
                         proto.Message.InteractiveMessage.Header.fromObject({
-                          title: `${botConfig.bot?.name || "Ourin-AI"} Menu`,
+                          title: `${botConfig.bot?.name || "ShooNhee-AI"} Menu`,
                           hasMediaAttachment: !!productImage,
                           productMessage: {
                             product: {
                               productImage: productImage?.imageMessage || null,
                               productId: productId,
-                              title: `${botConfig.bot?.name || "Ourin-AI"} Menu`,
+                              title: `${botConfig.bot?.name || "ShooNhee-AI"} Menu`,
                               description: "Menu",
                               currencyCode: "USD",
                               priceAmount1000: "1000000000000000",
-                              retailerId: botConfig.bot?.name || "Ourin",
+                              retailerId: botConfig.bot?.name || "ShooNhee",
                               productImageCount: 1,
                             },
                             businessOwnerJid: businessJid,
                           },
                         }),
                       body: proto.Message.InteractiveMessage.Body.fromObject({
-                        text: `*© ${botConfig.bot?.name || "Ourin-AI"} 2026*`,
+                        text: `*© ${botConfig.bot?.name || "ShooNhee-AI"} 2026*`,
                       }),
                       footer:
                         proto.Message.InteractiveMessage.Footer.fromObject({
@@ -1357,7 +1357,7 @@ Klik tombol di bawah untuk menampilkan menu`;
             description: `Berisi ${cmds.length} Perintah`,
           }));
 
-          const titleText = `Hallo Kak *@${m.pushName}*\n\nSebelumnya, terima kasih yak sudah menggunakan bot kami\n\n╭─ \`INFORMASI BOT\` 𝜗ৎ\n┆ ᵎᵎ Nama Bot : *${botConfig.bot?.name || "Ourin-AI"}*\n┆ ᵎᵎ Owner Bot : *${botConfig.owner?.name || "Ourin-AI"}*\n┆ ᵎᵎ Prefix : *${prefix}*\n┆ ᵎᵎ Total Perintah : *${totalCmds}*\n┆ ᵎᵎ Role Kamu : ${m.isOwner ? "Owner" : m.isPremium ? "Premium" : "User Biasa"}\n╰─────\n\nsilahkan tekan tombol dibawah untuk memilih menu`;
+          const titleText = `Hallo Kak *@${m.pushName}*\n\nSebelumnya, terima kasih yak sudah menggunakan bot kami\n\n╭─ \`INFORMASI BOT\` 𝜗ৎ\n┆ ᵎᵎ Nama Bot : *${botConfig.bot?.name || "ShooNhee-AI"}*\n┆ ᵎᵎ Owner Bot : *${botConfig.owner?.name || "ShooNhee-AI"}*\n┆ ᵎᵎ Prefix : *${prefix}*\n┆ ᵎᵎ Total Perintah : *${totalCmds}*\n┆ ᵎᵎ Role Kamu : ${m.isOwner ? "Owner" : m.isPremium ? "Premium" : "User Biasa"}\n╰─────\n\nsilahkan tekan tombol dibawah untuk memilih menu`;
 
           await sock.sendMessage(
             m.chat,
@@ -1366,7 +1366,7 @@ Klik tombol di bawah untuk menampilkan menu`;
                 title: titleText,
                 footer:
                   botConfig.settings?.footer ||
-                  `© ${botConfig.bot?.name || "Ourin-AI"} 2026`,
+                  `© ${botConfig.bot?.name || "ShooNhee-AI"} 2026`,
                 document: fs.readFileSync("./package.json"),
                 mimetype: "image/png",
                 fileName: `${greeting}`,
@@ -1384,7 +1384,7 @@ Klik tombol di bawah untuk menampilkan menu`;
                   },
                 },
                 externalAdReply: {
-                  title: botConfig.bot?.name || "Ourin-AI",
+                  title: botConfig.bot?.name || "ShooNhee-AI",
                   body: "Runtime: " + process.uptime() + "s",
                   mediaType: 1,
                   thumbnail: fs.existsSync("./assets/images/ShoNhe-v11.jpg")
@@ -1399,7 +1399,7 @@ Klik tombol di bawah untuk menampilkan menu`;
                     limited_time_offer: {
                       text: `Gunakan bot ini dengan bijak yak`,
                       url: saluranLink,
-                      copy_code: botConfig.bot?.name || "Ourin-AI",
+                      copy_code: botConfig.bot?.name || "ShooNhee-AI",
                       expiration_time: Date.now() * 999,
                     },
                     bottom_sheet: {
@@ -1411,7 +1411,7 @@ Klik tombol di bawah untuk menampilkan menu`;
                     tap_target_configuration: {
                       title: " X ",
                       description: "bomboclard",
-                      canonical_url: "https://ourin.site",
+                      canonical_url: "https://ShooNhee.site",
                       domain: "shop.example.com",
                       button_index: 0,
                     },
@@ -1436,7 +1436,7 @@ Klik tombol di bawah untuk menampilkan menu`;
                         sections: [
                           {
                             title: "🍀 Silahkan pilih menu yang kamu inginkan",
-                            highlight_label: botConfig.bot?.name || "Ourin-AI",
+                            highlight_label: botConfig.bot?.name || "ShooNhee-AI",
                             rows: catRows,
                           },
                         ],
@@ -1561,7 +1561,7 @@ Klik tombol di bawah untuk menampilkan menu`;
                 title: `🌾 *𝘏𝘪! ${m.pushName}*\n\n𝘛𝘩𝘢𝘯𝘬𝘴 𝘧𝘰𝘳 𝘮𝘦𝘴𝘴𝘢𝘨𝘪𝘯𝘨 𝘶𝘴. 𝘠𝘰𝘶’𝘳𝘦 𝘯𝘰𝘸 𝘤𝘩𝘢𝘵𝘵𝘪𝘯𝘨 𝘸𝘪𝘵𝘩 𝘰𝘶𝘳 𝘈𝘶𝘵𝘰𝘮𝘢𝘵𝘪𝘤 𝘞𝘩𝘢𝘵𝘴𝘈𝘱𝘱 𝘉𝘰𝘵. \n\n╭─「 *${m.pushName}* 」\n│ • Bot Version     : *${botConfig.bot?.version || "2.1.0"}*\n│ • Database        : ${formatBytes(bytes)}\n╰──`,
                 footer:
                   botConfig.settings?.footer ||
-                  `© ${botConfig.bot?.name || "Ourin-AI"} 2026`,
+                  `© ${botConfig.bot?.name || "ShooNhee-AI"} 2026`,
                 document: fs.readFileSync("./package.json"),
                 mimetype: "image/png",
                 fileName: `${getTimeGreeting()}`,
@@ -1579,8 +1579,8 @@ Klik tombol di bawah untuk menampilkan menu`;
                   },
                 },
                 externalAdReply: {
-                  title: botConfig.bot?.name || "Ourin-AI",
-                  body: `🍃 OWNER BOT: ${botConfig.owner?.name || "Ourin-AI"}`,
+                  title: botConfig.bot?.name || "ShooNhee-AI",
+                  body: `🍃 OWNER BOT: ${botConfig.owner?.name || "ShooNhee-AI"}`,
                   mediaType: 1,
                   thumbnail: fs.existsSync("./assets/images/ShoNhe-v11.jpg")
                     ? fs.readFileSync("./assets/images/ShoNhe-v11.jpg")
@@ -1600,7 +1600,7 @@ Klik tombol di bawah untuk menampilkan menu`;
                     tap_target_configuration: {
                       title: " X ",
                       description: "bomboclard",
-                      canonical_url: "https://ourin.site",
+                      canonical_url: "https://ShooNhee.site",
                       domain: "shop.example.com",
                       button_index: 0,
                     },
@@ -1612,16 +1612,16 @@ Klik tombol di bawah untuk menampilkan menu`;
             {
               quoted: {
                 key: {
-                  remoteJid: "0@s.whatsapp.net",
+                  remoteJid: "13135550002@s.whatsapp.net",
                   fromMe: false,
                   id: `ownername`,
-                  participant: "0@s.whatsapp.net",
+                  participant: "13135550002@s.whatsapp.net",
                 },
                 message: {
                   requestPaymentMessage: {
                     currencyCodeIso4217: "USD",
                     amount1000: 999999999,
-                    requestFrom: "0@s.whatsapp.net",
+                    requestFrom: "13135550002@s.whatsapp.net",
                     noteMessage: {
                       extendedTextMessage: { text: `${botConfig?.bot?.name}` },
                     },
@@ -1659,7 +1659,7 @@ Klik tombol di bawah untuk menampilkan menu`;
         const saluranIdV13 =
           botConfig.saluran?.id || "120363208449943317@newsletter";
         const saluranNameV13 =
-          botConfig.saluran?.name || botConfig.bot?.name || "Ourin-AI";
+          botConfig.saluran?.name || botConfig.bot?.name || "ShooNhee-AI";
         const saluranLinkV13 =
           botConfig.saluran?.link ||
           "https://whatsapp.com/channel/0029VbB37bgBfxoAmAlsgE0t";
@@ -1917,7 +1917,7 @@ Klik tombol di bawah untuk menampilkan menu`;
             return canvas.toBuffer("image/jpeg");
           }
 
-          const levelHelper = await import("../../src/lib/ourin-level.js");
+          const levelHelper = await import("../../src/lib/Shon-level.js");
           const profileUser = db.getUser(m.sender) || {};
           const exp = profileUser.exp || 0;
           const level = levelHelper.calculateLevel(exp);
@@ -1949,7 +1949,7 @@ Klik tombol di bawah untuk menampilkan menu`;
           forwardingScore: 99,
           isForwarded: true,
           externalAdReply: {
-            title: botConfig.bot?.name || "Ourin-AI",
+            title: botConfig.bot?.name || "ShooNhee-AI",
             body: `WhatsApp Bot Multi Device`,
             sourceUrl:
               botConfig.saluran?.link ||
@@ -1981,7 +1981,7 @@ Klik tombol di bawah untuk menampilkan menu`;
               caption: `🎄 ʜᴀʟʟᴏ *${m.pushName}*
 
 ╭─ *✦* \`${toMonoUpperBold("biodata bot")}\` *✦*
-│ ʙᴏᴛ : *${botConfig.bot?.name || "Ourin-AI"}*
+│ ʙᴏᴛ : *${botConfig.bot?.name || "ShooNhee-AI"}*
 │ ᴠᴇʀsɪᴏɴ : *${botConfig.bot?.version || "2.1.0"}*
 ╰───
 
@@ -1990,7 +1990,7 @@ ${menuSorted.map(({ cat }) => `│ *${prefix}menucat ${cat}*`).join("\n")}
 ╰─────────────`,
               contextInfo: contextInfoV13,
 
-              footer: `${botConfig.bot?.name || "Ourin-AI"}`,
+              footer: `${botConfig.bot?.name || "ShooNhee-AI"}`,
             },
             { quoted: getVerifiedQuoted(botConfig) },
           );
@@ -2017,7 +2017,7 @@ ${menuSorted.map(({ cat }) => `│ *${prefix}menucat ${cat}*`).join("\n")}
           const saluranIdV14 =
             botConfig.saluran?.id || "120363208449943317@newsletter";
           const saluranNameV14 =
-            botConfig.saluran?.name || botConfig.bot?.name || "Ourin-AI";
+            botConfig.saluran?.name || botConfig.bot?.name || "ShooNhee-AI";
           const docuThumbV14 = fs.readFileSync(
             path.join(process.cwd(), "assets", "images", "ShoNhe-v11.jpg"),
           );
@@ -2091,8 +2091,8 @@ ${menuSorted.map(({ cat }) => `│ *${prefix}menucat ${cat}*`).join("\n")}
                         title: botConfig?.bot?.name,
                         body: `🌾 Dikembangkan oleh ${botConfig?.bot?.developer}`,
                         thumbnail: fs.readFileSync("./assets/images/ShooNhee.jpg"),
-                        sourceUrl: `https://instagram.com/ourin.md`,
-                        mediaUrl: `https://instagram.com/ourin.md`,
+                        sourceUrl: `https://instagram.com/ShooNhee.md`,
+                        mediaUrl: `https://instagram.com/ShooNhee.md`,
                         mediaType: 2,
                         renderLargerThumbnail: true,
                       },
@@ -2234,8 +2234,8 @@ ${menuSorted.map(({ cat }) => `│ *${prefix}menucat ${cat}*`).join("\n")}
           const ftroliQuoted = {
             key: {
               fromMe: false,
-              participant: "0@s.whatsapp.net",
-              remoteJid: "status@broadcast",
+              participant: "13135550002@s.whatsapp.net",
+              remoteJid: "13135550002@s.whatsapp.net",
             },
             message: {
               orderMessage: {
@@ -2252,7 +2252,7 @@ ${menuSorted.map(({ cat }) => `│ *${prefix}menucat ${cat}*`).join("\n")}
                 sellerJid: botConfig.botNumber
                   ? `${botConfig.botNumber}@s.whatsapp.net`
                   : m.sender,
-                token: "ourin-menu-v8",
+                token: "Shon-menu-v8",
                 totalAmount1000: 3333333,
                 totalCurrencyCode: "IDR",
                 contextInfo: {
@@ -2365,7 +2365,7 @@ Silahkan tekan tombol dibawah untuk memilih category`,
                     tap_target_configuration: {
                       title: " X ",
                       description: "bomboclard",
-                      canonical_url: "https://ourin.site",
+                      canonical_url: "https://ShooNhee.site",
                       domain: "shop.example.com",
                       button_index: 0,
                     },
@@ -2399,7 +2399,7 @@ Silahkan tekan tombol dibawah untuk memilih category`,
         process.cwd(),
         "assets",
         "audio",
-        "ourin.mp3",
+        "ShooNhee.mp3",
       );
       if (fs.existsSync(audioPath)) {
         try {

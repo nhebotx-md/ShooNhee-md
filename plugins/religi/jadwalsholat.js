@@ -1,8 +1,8 @@
 import moment from 'moment-timezone'
 import config from '../../config.js'
 import fs from 'fs'
-import { searchKota, getTodaySchedule, extractPrayerTimes } from '../../src/lib/ourin-sholat-api.js'
-import te from '../../src/lib/ourin-error.js'
+import { searchKota, getTodaySchedule, extractPrayerTimes } from '../../src/lib/Shon-sholat-api.js'
+import te from '../../src/lib/Shon-error.js'
 const pluginConfig = {
     name: 'jadwalsholat',
     alias: ['sholat', 'prayertime', 'jadwalsolat', 'waktusolat', 'waktusholat'],
@@ -39,7 +39,7 @@ async function handler(m, { sock }) {
         const today = moment.tz('Asia/Jakarta').format('dddd, DD MMMM YYYY');
 
         const saluranId = config.saluran?.id || '120363208449943317@newsletter';
-        const saluranName = config.saluran?.name || config.bot?.name || 'Ourin-AI';
+        const saluranName = config.saluran?.name || config.bot?.name || 'ShooNhee-AI';
 
         let thumbnail = null;
         try {

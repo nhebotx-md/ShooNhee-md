@@ -1,7 +1,7 @@
 import axios from 'axios'
 import config from '../../config.js'
-import { f } from '../../src/lib/ourin-http.js'
-import te from '../../src/lib/ourin-error.js'
+import { f } from '../../src/lib/Shon-http.js'
+import te from '../../src/lib/Shon-error.js'
 const pluginConfig = {
     name: 'kisahnabi',
     alias: ['nabi', 'storynabi', 'ceritanabi'],
@@ -47,7 +47,7 @@ async function handler(m, { sock }) {
         
         await m.react('🕕')
         
-        const apikey = config.APIkey?.lolhuman || 'APIKey-Milik-Bot-OurinMD(Zann,HyuuSATANN,Keisya,Danzz)'
+        const apikey = config.APIkey?.lolhuman || 'APIKey-Milik-Bot-ShooNheeMD(Zann,HyuuSATANN,Keisya,Danzz)'
         const url = `https://api.lolhuman.xyz/api/kisahnabi/${nabiName}?apikey=${apikey}`
         
         const response = await f(url)
@@ -60,7 +60,7 @@ async function handler(m, { sock }) {
         
         const result = data.result
         const saluranId = config.saluran?.id || '120363208449943317@newsletter'
-        const saluranName = config.saluran?.name || config.bot?.name || 'Ourin-AI'
+        const saluranName = config.saluran?.name || config.bot?.name || 'ShooNhee-AI'
         
         let story = result.story || ''
         if (story.length > 3500) {

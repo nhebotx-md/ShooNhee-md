@@ -1,7 +1,7 @@
-import { getRandomItem, createSession, getSession, endSession, hasActiveSession, setSessionTimer, getRemainingTime, formatRemainingTime, isSurrender, isReplyToGame, GAME_REWARD, getRandomReward, getProgressiveHint } from '../../src/lib/ourin-game-data.js'
-import { getDatabase } from '../../src/lib/ourin-database.js'
-import { addExpWithLevelCheck } from '../../src/lib/ourin-level.js'
-import { getGameContextInfo } from '../../src/lib/ourin-context.js'
+import { getRandomItem, createSession, getSession, endSession, hasActiveSession, setSessionTimer, getRemainingTime, formatRemainingTime, isSurrender, isReplyToGame, GAME_REWARD, getRandomReward, getProgressiveHint } from '../../src/lib/Shon-game-data.js'
+import { getDatabase } from '../../src/lib/Shon-database.js'
+import { addExpWithLevelCheck } from '../../src/lib/Shon-level.js'
+import { getGameContextInfo } from '../../src/lib/Shon-context.js'
 const pluginConfig = {
     name: 'family100',
     alias: ['f100', 'survei'],

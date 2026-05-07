@@ -58,7 +58,7 @@
   "publicAdmin": false,
   "_lastEnergiDefault": 99999,
   "_lastEnergiPremium": 99999999,
-  "lastLimitReset": "2026-04-29T19:19:37.752Z",
+  "lastLimitReset": "2026-05-06T18:06:18.501Z",
   "onlyThisGroup": null,
   "autoJpm": {
     "enabled": false,
@@ -81,6 +81,16 @@
   "autoJoinGc": false,
   "autoSholat": false,
   "errorLog": [
+    {
+      "cmd": "unknown",
+      "err": "Connection Closed",
+      "at": 1778078052508
+    },
+    {
+      "cmd": "unknown",
+      "err": "cleanNumber is not defined",
+      "at": 1778043080244
+    },
     {
       "cmd": "unknown",
       "err": "Cannot read properties of undefined (reading 'addExpWithLevelCheck')",

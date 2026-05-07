@@ -1,6 +1,6 @@
 import config from '../../config.js'
-import te from '../../src/lib/ourin-error.js'
-import { addExifToWebp, isAnimatedWebp, DEFAULT_METADATA } from '../../src/lib/ourin-exif.js'
+import te from '../../src/lib/Shon-error.js'
+import { addExifToWebp, isAnimatedWebp, DEFAULT_METADATA } from '../../src/lib/Shon-exif.js'
 
 const pluginConfig = {
     name: 'swm',
@@ -27,8 +27,8 @@ async function handler(m, { sock, config: botConfig }) {
             `> Reply sticker dengan caption:\n` +
             `> \`${m.prefix}swm packname\`\n\n` +
             `*ᴄᴏɴᴛᴏʜ:*\n` +
-            `> \`${m.prefix}swm Ourin-AI\`\n` +
-            `> \`${m.prefix}swm Ourin-AI|LuckyArchz\` _(packname + author)_`
+            `> \`${m.prefix}swm ShooNhee-AI\`\n` +
+            `> \`${m.prefix}swm ShooNhee-AI|LuckyArchz\` _(packname + author)_`
         )
     }
     
@@ -43,8 +43,8 @@ async function handler(m, { sock, config: botConfig }) {
             `❌ *ɢᴀɢᴀʟ*\n\n` +
             `> Masukkan packname\n\n` +
             `*ᴄᴏɴᴛᴏʜ:*\n` +
-            `> \`${m.prefix}swm Ourin-AI\`\n` +
-            `> \`${m.prefix}swm Ourin-AI|LuckyArchz\` _(+ author)_`
+            `> \`${m.prefix}swm ShooNhee-AI\`\n` +
+            `> \`${m.prefix}swm ShooNhee-AI|LuckyArchz\` _(+ author)_`
         )
     }
     

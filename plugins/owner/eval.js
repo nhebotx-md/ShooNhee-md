@@ -1,4 +1,4 @@
-import { getDatabase } from '../../src/lib/ourin-database.js'
+import { getDatabase } from '../../src/lib/Shon-database.js'
 import config from '../../config.js'
 import util from 'util'
 const pluginConfig = {

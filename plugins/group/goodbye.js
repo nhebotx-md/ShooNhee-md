@@ -1,10 +1,10 @@
 import config from "../../config.js";
-import { getDatabase } from "../../src/lib/ourin-database.js";
-import { createGoodbyeCard } from "../../src/lib/ourin-welcome-card.js";
-import { resolveAnyLidToJid } from "../../src/lib/ourin-lid.js";
+import { getDatabase } from "../../src/lib/Shon-database.js";
+import { createGoodbyeCard } from "../../src/lib/Shon-welcome-card.js";
+import { resolveAnyLidToJid } from "../../src/lib/Shon-lid.js";
 import path from "path";
 import fs from "fs";
-import te from "../../src/lib/ourin-error.js";
+import te from "../../src/lib/Shon-error.js";
 const pluginConfig = {
   name: "goodbye",
   alias: ["bye", "leave"],
@@ -99,7 +99,7 @@ Doakan yang terbaik untuknya ya.`,
       .replace(/{date}/gi, now.format("DD/MM/YYYY"))
       .replace(/{time}/gi, now.format("HH:mm"))
       .replace(/{day}/gi, dayId)
-      .replace(/{bot}/gi, config.bot?.name || "Ourin")
+      .replace(/{bot}/gi, config.bot?.name || "ShooNhee")
       .replace(/{prefix}/gi, prefix);
   }
 
@@ -137,7 +137,7 @@ async function sendGoodbyeMessage(sock, groupJid, participant, groupMeta) {
       isLid,
       isLidConverted,
       lidToJid,
-    } = await import("../../src/lib/ourin-lid.js");
+    } = await import("../../src/lib/Shon-lid.js");
 
     if (groupMeta?.participants) {
       cacheParticipantLids(groupMeta.participants);
@@ -186,7 +186,7 @@ async function sendGoodbyeMessage(sock, groupJid, participant, groupMeta) {
     );
 
     const saluranId = config.saluran?.id || "120363208449943317@newsletter";
-    const saluranName = config.saluran?.name || config.bot?.name || "Ourin-AI";
+    const saluranName = config.saluran?.name || config.bot?.name || "ShooNhee-AI";
 
     if (goodbyeType === 2) {
       await sock.sendMessage(groupJid, {
@@ -212,7 +212,7 @@ async function sendGoodbyeMessage(sock, groupJid, participant, groupMeta) {
                 name: "cta_url",
                 buttonParamsJson: JSON.stringify({
                   display_text: "🌐 Website",
-                  url: config.info?.website || "https://sc.ourin.my.id/",
+                  url: config.info?.website || "https://sc.ShooNhee.my.id/",
                 }),
               },
             ],
@@ -305,8 +305,8 @@ async function sendGoodbyeMessage(sock, groupJid, participant, groupMeta) {
             serverMessageId: 127,
           },
           externalAdReply: {
-            sourceUrl: config.info?.website || "https://sc.ourin.my.id/",
-            mediaUrl: config.info?.website || "https://sc.ourin.my.id/",
+            sourceUrl: config.info?.website || "https://sc.ShooNhee.my.id/",
+            mediaUrl: config.info?.website || "https://sc.ShooNhee.my.id/",
             mediaType: 3,
             thumbnailUrl: ppUrl,
             title: `Goodbye ${userName}`,

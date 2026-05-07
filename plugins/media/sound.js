@@ -1,6 +1,6 @@
 import config from '../../config.js'
 import fs from 'fs'
-import te from '../../src/lib/ourin-error.js'
+import te from '../../src/lib/Shon-error.js'
 const soundCommands = ['sound']
 for (let i = 1; i <= 250; i++) {
     soundCommands.push(`sound${i}`)

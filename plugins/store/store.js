@@ -1,5 +1,5 @@
-import { getDatabase } from '../../src/lib/ourin-database.js'
-import pkg from 'ourin';
+import { getDatabase } from '../../src/lib/Shon-database.js'
+import pkg from 'ShooNhee';
 const { generateWAMessageFromContent, proto } = pkg;
 import fs from 'fs'
 import path from 'path'
@@ -83,7 +83,7 @@ async function handler(m, { sock, config }) {
     }))
     
     try {
-        const { prepareWAMessageMedia } = await import('ourin')
+        const { prepareWAMessageMedia } = await import('ShooNhee')
         
         let headerMedia = null
         if (imageBuffer) {
@@ -135,7 +135,7 @@ async function handler(m, { sock, config }) {
                             text: txt
                         }),
                         footer: proto.Message.InteractiveMessage.Footer.fromObject({
-                            text: `© ${storeName} | ${config?.bot?.name || 'Ourin-AI'}`
+                            text: `© ${storeName} | ${config?.bot?.name || 'ShooNhee-AI'}`
                         }),
                         header: proto.Message.InteractiveMessage.Header.fromObject({
                             title: storeName,

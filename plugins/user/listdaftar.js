@@ -1,4 +1,4 @@
-import { getDatabase } from '../../src/lib/ourin-database.js'
+import { getDatabase } from '../../src/lib/Shon-database.js'
 import config from '../../config.js'
 const pluginConfig = {
     name: 'listdaftar',
@@ -27,7 +27,7 @@ async function handler(m, { sock }) {
     }
     
     const saluranId = config.saluran?.id || '120363208449943317@newsletter'
-    const saluranName = config.saluran?.name || config.bot?.name || 'Ourin-AI'
+    const saluranName = config.saluran?.name || config.bot?.name || 'ShooNhee-AI'
     
     let text = `📋 *ᴅᴀꜰᴛᴀʀ ᴜsᴇʀ ᴛᴇʀᴅᴀꜰᴛᴀʀ*\n\n`
     text += `> Total: *${registeredUsers.length}* user\n\n`

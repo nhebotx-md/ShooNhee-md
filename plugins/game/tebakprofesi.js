@@ -1,4 +1,4 @@
-import { games } from '../../src/lib/ourin-games.js'
+import { games } from '../../src/lib/Shon-games.js'
 
 games.register('tebakprofesi', {
     alias: ['tp', 'guessjob'],

@@ -1,5 +1,5 @@
 import nanoBanana from '../../src/scraper/nanobanana.js'
-import te from '../../src/lib/ourin-error.js'
+import te from '../../src/lib/Shon-error.js'
 import { live3d } from '../../src/scraper/seaart.js'
 const pluginConfig = {
     name: 'tofigure3',

@@ -1,6 +1,6 @@
 import axios from 'axios'
 import config from '../../config.js'
-import te from '../../src/lib/ourin-error.js'
+import te from '../../src/lib/Shon-error.js'
 const pluginConfig = {
     name: 'stikerwa',
     alias: ['stickerwa', 'wasearch', 'wassticker', 'stkrwa'],
@@ -75,7 +75,7 @@ async function handler(m, { sock }) {
                     })
                     
                     await sock.sendImageAsSticker(m.chat, Buffer.from(stickerRes.data), m, {
-                        packname: selectedPack.title || 'Ourin-AI',
+                        packname: selectedPack.title || 'ShooNhee-AI',
                         author: selectedPack.author || 'Bot'
                     })
                     

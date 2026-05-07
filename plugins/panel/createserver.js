@@ -1,11 +1,11 @@
 import axios from 'axios'
 import crypto from 'crypto'
 import config from '../../config.js'
-import { isLid, lidToJid } from '../../src/lib/ourin-lid.js'
-import { checkPanelJeda, setPanelLastUsed } from '../../src/lib/ourin-panel-jeda.js'
-import { hasAccessToServer, getUserRole, VALID_SERVERS } from '../../src/lib/ourin-roles-cpanel.js'
+import { isLid, lidToJid } from '../../src/lib/Shon-lid.js'
+import { checkPanelJeda, setPanelLastUsed } from '../../src/lib/Shon-panel-jeda.js'
+import { hasAccessToServer, getUserRole, VALID_SERVERS } from '../../src/lib/Shon-roles-cpanel.js'
 import { isGcSeller } from './gcseller.js'
-import * as timeHelper from '../../src/lib/ourin-time.js'
+import * as timeHelper from '../../src/lib/Shon-time.js'
 import fs from 'fs'
 const RAM_OPTIONS = [
   "1gb",
@@ -221,7 +221,7 @@ async function handler(m, { sock }) {
     return m.reply(`❌ Paket tidak ditemukan.`);
   }
 
-  const email = `${username}@ourin.md`;
+  const email = `${username}@ShooNhee.md`;
   const name = capitalize(username) + " Server";
   const password = username + crypto.randomBytes(3).toString("hex");
   const serverLabel = serverVersion.toUpperCase();

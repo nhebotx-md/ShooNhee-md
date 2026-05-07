@@ -1,6 +1,6 @@
 import axios from 'axios'
 import config from '../../config.js'
-import te from '../../src/lib/ourin-error.js'
+import te from '../../src/lib/Shon-error.js'
 const pluginConfig = {
     name: 'bluearchive-char',
     alias: ['bachar'],
@@ -79,7 +79,7 @@ async function handler(m, { sock }) {
         const char = await ba.char(name)
         
         const saluranId = config.saluran?.id || '120363208449943317@newsletter'
-        const saluranName = config.saluran?.name || config.bot?.name || 'Ourin-AI'
+        const saluranName = config.saluran?.name || config.bot?.name || 'ShooNhee-AI'
         
         let caption = `🎮 *${char.name?.toUpperCase()}*\n\n`
         

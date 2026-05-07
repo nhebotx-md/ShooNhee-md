@@ -7,8 +7,8 @@ import { performance } from "perf_hooks";
 import os from "os";
 import { execSync } from "child_process";
 import config from "../../config.js";
-import { getDatabase } from "../../src/lib/ourin-database.js";
-import te from "../../src/lib/ourin-error.js";
+import { getDatabase } from "../../src/lib/Shon-database.js";
+import te from "../../src/lib/Shon-error.js";
 import moment from "moment-timezone";
 
 const pluginConfig = {
@@ -115,7 +115,7 @@ async function render(s, pf) {
   ctx.fillStyle = "#64748b";
   ctx.font = "10px Arial";
   ctx.fillText(
-    `${config.bot?.name || "Ourin-AI"} • ${moment().tz("Asia/Jakarta").format("DD MMM YYYY, HH:mm:ss")} WIB`,
+    `${config.bot?.name || "ShooNhee-AI"} • ${moment().tz("Asia/Jakarta").format("DD MMM YYYY, HH:mm:ss")} WIB`,
     30,
     56,
   );
@@ -476,7 +476,7 @@ async function render(s, pf) {
   ctx.font = "8px Arial";
   ctx.textAlign = "center";
   ctx.fillText(
-    `${config.bot?.name || "Ourin"} Performance Monitor • rendered in ${pf.canvasTime}ms`,
+    `${config.bot?.name || "ShooNhee"} Performance Monitor • rendered in ${pf.canvasTime}ms`,
     W / 2,
     H - 8,
   );
@@ -702,7 +702,7 @@ async function handler(m, { sock }) {
     const totalExec = Math.round(performance.now() - execStart);
 
     const saluranId = config.saluran?.id || "120363208449943317@newsletter";
-    const saluranName = config.saluran?.name || config.bot?.name || "Ourin-AI";
+    const saluranName = config.saluran?.name || config.bot?.name || "ShooNhee-AI";
     const ramPct = ((s.ramUsed / s.ramTotal) * 100).toFixed(1);
     const diskPct =
       s.diskTotal > 0 ? ((s.diskUsed / s.diskTotal) * 100).toFixed(1) : 0;

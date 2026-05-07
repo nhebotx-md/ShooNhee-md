@@ -2,7 +2,7 @@ import config from "../../config.js";
 import axios from "axios";
 import fs from "fs";
 import path from "path";
-import te from "../../src/lib/ourin-error.js";
+import te from "../../src/lib/Shon-error.js";
 const pluginConfig = {
   name: "get",
   alias: ["fetch", "http", "request", "curl"],
@@ -205,7 +205,7 @@ async function handler(m, { sock }) {
       validateStatus: () => true,
       responseType: "arraybuffer",
       headers: {
-        "User-Agent": "Ourin-Bot/2.0",
+        "User-Agent": "ShooNhee-Bot/2.0",
         Accept: "*/*",
         ...(jsonBody ? { "Content-Type": "application/json" } : {}),
         ...customHeaders,

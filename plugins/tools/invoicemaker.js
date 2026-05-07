@@ -1,6 +1,6 @@
 import axios from 'axios'
 import config from '../../config.js'
-import te from '../../src/lib/ourin-error.js'
+import te from '../../src/lib/Shon-error.js'
 const pluginConfig = {
     name: 'invoicemaker',
     alias: ['invoice', 'faktur', 'nota'],
@@ -17,7 +17,7 @@ const pluginConfig = {
     isEnabled: true
 }
 
-const NEOXR_APIKEY = config.APIkey?.neoxr || 'Milik-Bot-OurinMD'
+const NEOXR_APIKEY = config.APIkey?.neoxr || 'Milik-Bot-ShooNheeMD'
 
 async function handler(m, { sock }) {
     const args = m.args || []
@@ -94,7 +94,7 @@ async function handler(m, { sock }) {
         const data = response.data.data
         
         const saluranId = config.saluran?.id || '120363208449943317@newsletter'
-        const saluranName = config.saluran?.name || config.bot?.name || 'Ourin-AI'
+        const saluranName = config.saluran?.name || config.bot?.name || 'ShooNhee-AI'
         
         let caption = `🧾 *ɪɴᴠᴏɪᴄᴇ ɢᴇɴᴇʀᴀᴛᴇᴅ*\n\n`
         caption += `╭┈┈⬡「 📋 *ᴅᴇᴛᴀɪʟ* 」\n`

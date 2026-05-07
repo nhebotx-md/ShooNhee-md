@@ -1,8 +1,8 @@
-import { getFullSchedulerStatus, formatTimeRemaining, getMsUntilTime } from '../../src/lib/ourin-scheduler.js'
-import { initSholatScheduler, stopSholatScheduler } from '../../src/lib/ourin-sholat-scheduler.js'
-import { getDatabase } from '../../src/lib/ourin-database.js'
-import { getTodaySchedule, extractPrayerTimes } from '../../src/lib/ourin-sholat-api.js'
-import te from '../../src/lib/ourin-error.js'
+import { getFullSchedulerStatus, formatTimeRemaining, getMsUntilTime } from '../../src/lib/Shon-scheduler.js'
+import { initSholatScheduler, stopSholatScheduler } from '../../src/lib/Shon-sholat-scheduler.js'
+import { getDatabase } from '../../src/lib/Shon-database.js'
+import { getTodaySchedule, extractPrayerTimes } from '../../src/lib/Shon-sholat-api.js'
+import te from '../../src/lib/Shon-error.js'
 const pluginConfig = {
     name: 'cekschedule',
     alias: ['cekscheduler', 'schedulerstatus', 'schedstatus'],

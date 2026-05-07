@@ -1,6 +1,6 @@
 import axios from 'axios'
 import config from '../../config.js'
-import te from '../../src/lib/ourin-error.js'
+import te from '../../src/lib/Shon-error.js'
 const pluginConfig = {
     name: 'qc',
     alias: ['qcstc', 'stcqc', 'qcstic', 'qcstick', 'quotesticker'],
@@ -165,7 +165,7 @@ async function handler(m, { sock }) {
         const buffer = Buffer.from(response.data, 'base64')
         
         await sock.sendImageAsSticker(m.chat, buffer, m, {
-            packname: config.sticker?.packname || 'Ourin-AI',
+            packname: config.sticker?.packname || 'ShooNhee-AI',
             author: config.sticker?.author || 'Bot'
         })
         

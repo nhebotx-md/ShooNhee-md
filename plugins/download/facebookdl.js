@@ -1,5 +1,5 @@
 import { fbdown } from 'btch-downloader'
-import te from '../../src/lib/ourin-error.js'
+import te from '../../src/lib/Shon-error.js'
 const pluginConfig = {
     name: 'facebookdl',
     alias: ['fbdown', 'fb', 'facebook'],

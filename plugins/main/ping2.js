@@ -2,8 +2,8 @@ import os from 'os'
 import { performance } from 'perf_hooks'
 import { execSync } from 'child_process'
 import config from '../../config.js'
-import { getDatabase } from '../../src/lib/ourin-database.js'
-import te from '../../src/lib/ourin-error.js'
+import { getDatabase } from '../../src/lib/Shon-database.js'
+import te from '../../src/lib/Shon-error.js'
 
 const pluginConfig = {
     name: 'ping2',
@@ -133,7 +133,7 @@ async function handler(m, { sock }) {
             tableData,
             m,
             {
-                headerText: `${config.bot?.name || 'Ourin-AI'} *STATUS*\n\n- 🎄 Dibawah ini adalah statistik bot kita`,
+                headerText: `${config.bot?.name || 'ShooNhee-AI'} *STATUS*\n\n- 🎄 Dibawah ini adalah statistik bot kita`,
                 footer: '🍃 Realtime Monitoring'
             }
         )

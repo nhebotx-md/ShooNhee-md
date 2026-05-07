@@ -1,5 +1,5 @@
-import { getDatabase } from './src/lib/ourin-database.js';
-import * as ownerPremiumDb from './src/lib/ourin-premium-db.js';
+import { getDatabase } from './src/lib/Shon-database.js';
+import * as ownerPremiumDb from './src/lib/Shon-premium-db.js';
 
 // ═══════════════════════════════════════════════════════════════════════════
 // CONFIGURATION OBJECT
@@ -9,11 +9,11 @@ import * as ownerPremiumDb from './src/lib/ourin-premium-db.js';
 const config = {
   info: {
     website: 't.me/Yamaguchihost',
-    grupwa: 'https://chat.whatsapp.com/EXSRw7UtYCi0yyhErYjFsX?mode=gi_t'
+    grupwa: 'https://chat.whatsapp.com/HCAjTYQjwB5Dk91D2RjRVV?mode=gi_t'
   },
 
   owner: {
-    name: 'ɱг 𝖙ŋɢχ',                    // Nama owner
+    name: 'ᴹᴿ᭄𝖙ŋɢχོ ×፝֟͜×',                    // Lintang Pratama
     number: ['62881027174423']         // Format: 628xxx (tanpa + atau 0)
   },
 
@@ -23,9 +23,9 @@ const config = {
   },
 
   bot: {
-    name: 'ᴹᴿ᭄𝖙ŋɢχོ ×፝֟͜×',           // Nama bot
+    name: 'S͟h͟o͟N͟h͟e͟',           // Nama bot
     version: '2.4.0',                 // Versi bot
-    developer: 'Akbarz Store'          // Nama developer
+    developer: 'ᴹᴿ᭄𝖙ŋɢχོ ×፝֟͜×'          // Nama developer
   },
 
   mode: 'public',
@@ -41,19 +41,19 @@ const config = {
 
   store: {
     payment: [
-      { name: 'Dana', number: '083126313052', holder: 'Unarmah' },
-      { name: 'OVO', number: '62xxxxxxxxx', holder: 'Nama Pemilik' },
-      { name: 'GoPay', number: '62xxxxxxxxx', holder: 'Nama Pemilik' },
-      { name: 'ShopeePay', number: '62xxxxxxxxx', holder: 'Nama Pemilik' }
+      { name: 'Dana', number: '62881027174423', holder: 'Lintang Pratama A.K' },
+      { name: 'OVO', number: '62881027174423', holder: 'Lintang Pratama A.K' },
+      { name: 'GoPay', number: '62881027174423', holder: 'Lintang Pratama A.K' },
+      { name: 'ShopeePay', number: '62881027174423', holder: 'Lintang Pratama A.K' }
     ],
     qris: 'https'
   },
 
   donasi: {
     payment: [
-      { name: 'Dana', number: '083126313052', holder: 'Unarmah' },
-      { name: 'GoPay', number: '08xxxxxxxxxx', holder: 'Nama Owner' },
-      { name: 'OVO', number: '08xxxxxxxxxx', holder: 'Nama Owner' }
+      { name: 'Dana', number: '0881027174423', holder: 'Lintang Pratama A.K' },
+      { name: 'GoPay', number: '0881027174423', holder: 'Lintang Pratama' },
+      { name: 'OVO', number: '0881027174423', holder: 'Lintang Pratama' }
     ],
     links: [
       { name: 'Saweria', url: 'saweria.co/username' },
@@ -76,14 +76,14 @@ const config = {
   },
 
   sticker: {
-    packname: 'ᴹᴿ᭄𝖙ŋɢχོ ×፝֟͜×',             // Nama pack sticker
-    author: 'ɱг 𝖙ŋɢχ'  // Author sticker
+    packname: 'S͟h͟o͟N͟h͟e͟',             // Nama pack sticker
+    author: 'ᴹᴿ᭄𝖙ŋɢχོ ×፝֟͜×'  // Author sticker
   },
 
   saluran: {
-    id: '120363424976130148@newsletter',    // ID saluran (contoh: 120363xxx@newsletter)
-    name: 'WHATSAPP BOT MULTI DEVICE',       // Nama saluran
-    link: 'https://whatsapp.com/channel/0029VbCCHiO1iUxbVJ0OCs28'  // Link saluran
+    id: '120363401521421919@newsletter',    // ID saluran (contoh: 120363xxx@newsletter)
+    name: 'Meta AI | © ShoNhe™',       // Nama saluran
+    link: 'https://whatsapp.com/channel/0029Vb645eTAzNbqauQMsA0G'  // Link saluran
   },
 
   groupProtection: {
@@ -215,9 +215,9 @@ _Jika masalah berlanjut, silahkan hubungi owner bot_`,
   //  APIkey
   APIkey: {
     // kalian bisa daftar di https://api.lolhuman.xyz, lalu ambil apikeynya
-    lolhuman: 'APIKey-Milik-Bot-OurinMD(Zann,HyuuSATANN,Keisya,Danzz)',
+    lolhuman: 'APIKey-Milik-Bot-ShooNheeMD(Zann,HyuuSATANN,Keisya,Danzz)',
     // kalian bisa daftar di https://api.neoxr.eu, lalu ambil apikeynya
-    neoxr: 'Milik-Bot-OurinMD',
+    neoxr: 'Milik-Bot-ShooNheeMD',
     fgsi: 'fgsiapi-20c1605c-6d',
     google: '',
     groq: '', // API Key Groq untuk fitur transkrip (gratis di console.groq.com)

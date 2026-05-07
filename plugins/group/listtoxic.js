@@ -1,4 +1,4 @@
-import { getDatabase } from '../../src/lib/ourin-database.js'
+import { getDatabase } from '../../src/lib/Shon-database.js'
 import { DEFAULT_TOXIC_WORDS } from './antitoxic.js'
 const pluginConfig = {
     name: 'listtoxic',

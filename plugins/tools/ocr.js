@@ -6,7 +6,7 @@ async function getTesseract() {
   if (!_tesseract) _tesseract = await import("tesseract.js");
   return _tesseract;
 }
-import te from "../../src/lib/ourin-error.js";
+import te from "../../src/lib/Shon-error.js";
 const pluginConfig = {
   name: "ocr",
   alias: ["totext", "imagetotext", "readtext"],
@@ -36,7 +36,7 @@ try {
 
 async function getContextInfo(title = "📖 *ᴏᴄʀ*", body = "Text extraction") {
   const saluranId = config.saluran?.id || "120363208449943317@newsletter";
-  const saluranName = config.saluran?.name || config.bot?.name || "Ourin-AI";
+  const saluranName = config.saluran?.name || config.bot?.name || "ShooNhee-AI";
 
   const contextInfo = {
     forwardingScore: 9999,

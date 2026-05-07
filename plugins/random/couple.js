@@ -1,8 +1,8 @@
 import config from '../../config.js'
-import { downloadMediaMessage } from 'ourin'
+import { downloadMediaMessage } from 'ShooNhee'
 import fs from 'fs'
 import { default as axios } from 'axios'
-import te from '../../src/lib/ourin-error.js'
+import te from '../../src/lib/Shon-error.js'
 const pluginConfig = {
     name: 'ppcouple',
     alias: ['cp', 'ppcp'],

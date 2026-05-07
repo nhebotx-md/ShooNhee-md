@@ -1,6 +1,6 @@
 import axios from 'axios'
 import FormData from 'form-data'
-import { f } from '../lib/ourin-http.js'
+import { f } from '../lib/Shon-http.js'
 async function uploadToTempFiles(buffer, filename) {
     const form = new FormData()
     form.append('file', buffer, { filename, contentType: 'image/jpeg' })

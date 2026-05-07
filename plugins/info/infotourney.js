@@ -2,7 +2,7 @@ import axios from 'axios'
 import * as cheerio from 'cheerio'
 import moment from 'moment-timezone'
 import config from '../../config.js'
-import te from '../../src/lib/ourin-error.js'
+import te from '../../src/lib/Shon-error.js'
 const pluginConfig = {
     name: 'infotourney',
     alias: ['tourney', 'turnamen', 'mltourney'],
@@ -68,7 +68,7 @@ async function handler(m, { sock }) {
         }
         
         const saluranId = config.saluran?.id || '120363208449943317@newsletter'
-        const saluranName = config.saluran?.name || config.bot?.name || 'Ourin-AI'
+        const saluranName = config.saluran?.name || config.bot?.name || 'ShooNhee-AI'
         
         let text = `🏆 *ɪɴꜰᴏ ᴛᴜʀɴᴀᴍᴇɴ ᴍᴏʙɪʟᴇ ʟᴇɢᴇɴᴅs*\n\n`
         text += `> 5 Turnamen Terbaru\n\n`

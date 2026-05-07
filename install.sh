@@ -11,7 +11,7 @@ NC='\033[0m'
 CLR='\033[K'
 
 LOGDIR="${TMPDIR:-${PREFIX:-/usr}/tmp}"
-LOGFILE="$LOGDIR/ourin_install.log"
+LOGFILE="$LOGDIR/ShooNhee_install.log"
 > "$LOGFILE"
 
 clear

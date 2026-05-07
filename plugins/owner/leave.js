@@ -1,5 +1,5 @@
 import config from '../../config.js'
-import te from '../../src/lib/ourin-error.js'
+import te from '../../src/lib/Shon-error.js'
 const pluginConfig = {
     name: 'leave',
     alias: ['leavegrup', 'leavegroup', 'keluar', 'bye'],
@@ -79,7 +79,7 @@ async function handler(m, { sock }) {
         global.sewaLeaving = true
         
         const saluranId = config.saluran?.id || '120363424976130148@newsletter'
-        const saluranName = config.saluran?.name || config.bot?.name || 'Ourin-AI'
+        const saluranName = config.saluran?.name || config.bot?.name || 'ShooNhee-AI'
         
         if (m.isGroup && targetGroupJid === m.chat) {
             await sock.sendMessage(m.chat, {

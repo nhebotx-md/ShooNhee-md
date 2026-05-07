@@ -2,16 +2,16 @@ import config from "../../config.js";
 import {
   formatUptime,
   getTimeGreeting,
-} from "../../src/lib/ourin-formatter.js";
+} from "../../src/lib/Shon-formatter.js";
 import {
   getCommandsByCategory,
   getCategories,
   getPluginCount,
   getPlugin,
   getPluginsByCategory,
-} from "../../src/lib/ourin-plugins.js";
-import { getDatabase } from "../../src/lib/ourin-database.js";
-import { getCasesByCategory, getCaseCount } from "../../case/ourin.js";
+} from "../../src/lib/Shon-plugins.js";
+import { getDatabase } from "../../src/lib/Shon-database.js";
+import { getCasesByCategory, getCaseCount } from "../../case/ShooNhee.js";
 import fs from "fs";
 import path from "path";
 let _sharp = null;
@@ -86,7 +86,7 @@ function getCommandSymbols(cmdName) {
 function getContextInfo(botConfig, m, thumbBuffer) {
   const saluranId = botConfig.saluran?.id || "120363208449943317@newsletter";
   const saluranName =
-    botConfig.saluran?.name || botConfig.bot?.name || "Ourin-AI";
+    botConfig.saluran?.name || botConfig.bot?.name || "ShooNhee-AI";
   const saluranLink = botConfig.saluran?.link || "";
 
   return {
@@ -131,7 +131,7 @@ async function handler(m, { sock, config: botConfig, db, uptime }) {
   const greeting = getTimeGreeting();
 
   let txt = `Hai *@${m.pushName || "User"}* 🪸
-Aku ${botConfig.bot?.name || "Ourin-AI"}, bot WhatsApp yang siap bantu kamu.  
+Aku ${botConfig.bot?.name || "ShooNhee-AI"}, bot WhatsApp yang siap bantu kamu.  
 
 Kamu bisa pakai aku buat cari info, ambil data, atau bantu hal-hal sederhana langsung lewat WhatsApp — praktis tanpa ribet.
 
@@ -225,7 +225,7 @@ Kamu bisa pakai aku buat cari info, ambil data, atau bantu hal-hal sederhana lan
     txt += `╰───────⬣\n\n`;
   }
 
-  txt += `_© ${botConfig.bot?.name || "Ourin-AI"} | ${new Date().getFullYear()}_\n`;
+  txt += `_© ${botConfig.bot?.name || "ShooNhee-AI"} | ${new Date().getFullYear()}_\n`;
   txt += `_ᴅᴇᴠᴇʟᴏᴘᴇʀ: ${botConfig.bot?.developer || "Lucky Archz"}_`;
 
   const imagePath = path.join(process.cwd(), "assets", "images", "ShooNhee.jpg");
@@ -243,7 +243,7 @@ Kamu bisa pakai aku buat cari info, ambil data, atau bantu hal-hal sederhana lan
 
   const saluranId = botConfig.saluran?.id || "120363208449943317@newsletter";
   const saluranName =
-    botConfig.saluran?.name || botConfig.bot?.name || "Ourin-AI";
+    botConfig.saluran?.name || botConfig.bot?.name || "ShooNhee-AI";
   const saluranLink = botConfig.saluran?.link || "";
 
   const fullContextInfo = {
@@ -256,7 +256,7 @@ Kamu bisa pakai aku buat cari info, ambil data, atau bantu hal-hal sederhana lan
       serverMessageId: 127,
     },
     externalAdReply: {
-      title: botConfig.bot?.name || "Ourin-AI",
+      title: botConfig.bot?.name || "ShooNhee-AI",
       body: `Owner: ${botConfig.owner?.name || "Lucky Archz"}`,
       sourceUrl: saluranLink,
       mediaType: 1,
@@ -313,7 +313,7 @@ Kamu bisa pakai aku buat cari info, ambil data, atau bantu hal-hal sederhana lan
             mimetype: "image/png",
             fileLength: 999999999999,
             fileSize: 999999999999,
-            fileName: `${toSmallCaps(botConfig.bot?.name || "Ourin-AI")} — ᴀʟʟ ᴍᴇɴᴜ`,
+            fileName: `${toSmallCaps(botConfig.bot?.name || "ShooNhee-AI")} — ᴀʟʟ ᴍᴇɴᴜ`,
             caption: txt,
             jpegThumbnail: resizedThumb,
             contextInfo: fullContextInfo,
@@ -324,7 +324,7 @@ Kamu bisa pakai aku buat cari info, ambil data, atau bantu hal-hal sederhana lan
       }
 
       case 4: {
-        const { generateWAMessageFromContent, proto } = await import("ourin");
+        const { generateWAMessageFromContent, proto } = await import("ShooNhee");
         const categoryRows = sortedCategories
           .filter((cat) => {
             if (cat === "owner" && !m.isOwner) return false;
@@ -377,7 +377,7 @@ Kamu bisa pakai aku buat cari info, ambil data, atau bantu hal-hal sederhana lan
         let headerMedia = null;
         if (imageBuffer) {
           try {
-            const { prepareWAMessageMedia } = await import("ourin");
+            const { prepareWAMessageMedia } = await import("ShooNhee");
             headerMedia = await prepareWAMessageMedia(
               { image: imageBuffer },
               { upload: sock.waUploadToServer },
@@ -400,10 +400,10 @@ Kamu bisa pakai aku buat cari info, ambil data, atau bantu hal-hal sederhana lan
                       text: txt,
                     }),
                     footer: proto.Message.InteractiveMessage.Footer.fromObject({
-                      text: `© ${botConfig.bot?.name || "Ourin-AI"}`,
+                      text: `© ${botConfig.bot?.name || "ShooNhee-AI"}`,
                     }),
                     header: proto.Message.InteractiveMessage.Header.fromObject({
-                      title: botConfig.bot?.name || "Ourin-AI",
+                      title: botConfig.bot?.name || "ShooNhee-AI",
                       hasMediaAttachment: !!headerMedia,
                       ...(headerMedia || {}),
                     }),
@@ -430,7 +430,7 @@ Kamu bisa pakai aku buat cari info, ambil data, atau bantu hal-hal sederhana lan
           {
             interactiveMessage: {
               title: txt,
-              footer: botConfig.bot?.name || "Ourin-AI",
+              footer: botConfig.bot?.name || "ShooNhee-AI",
               image: thumbBuffer,
               contextInfo: {
                 mentionedJid: [m.sender],
@@ -438,7 +438,7 @@ Kamu bisa pakai aku buat cari info, ambil data, atau bantu hal-hal sederhana lan
                 isForwarded: true,
               },
               externalAdReply: {
-                title: botConfig.bot?.name || "Ourin-AI",
+                title: botConfig.bot?.name || "ShooNhee-AI",
                 body: `Owner: ${botConfig.owner?.name || "Lucky Archz"}`,
                 mediaType: 1,
                 thumbnail: imageBuffer,
@@ -450,8 +450,8 @@ Kamu bisa pakai aku buat cari info, ambil data, atau bantu hal-hal sederhana lan
                 messageParamsJson: JSON.stringify({
                   limited_time_offer: {
                     text: "Hai " + m.pushName,
-                    url: "https://ourin.site",
-                    copy_code: botConfig.owner?.name || "Ourin-AI",
+                    url: "https://ShooNhee.site",
+                    copy_code: botConfig.owner?.name || "ShooNhee-AI",
                     expiration_time: Date.now(),
                   },
                   bottom_sheet: {

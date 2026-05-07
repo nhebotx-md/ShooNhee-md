@@ -1,5 +1,5 @@
 import config from '../../config.js'
-import { getRoles, getUserRole, getAccessibleServers, VALID_SERVERS } from '../../src/lib/ourin-roles-cpanel.js'
+import { getRoles, getUserRole, getAccessibleServers, VALID_SERVERS } from '../../src/lib/Shon-roles-cpanel.js'
 const pluginConfig = {
     name: 'cpanel',
     alias: ['panelmenu', 'menupanel'],
@@ -104,7 +104,7 @@ async function handler(m, { sock }) {
     txt += `┃ \`${prefix}turnon\` | \`${prefix}turnoff\` | \`${prefix}restartvps\`\n`
     txt += `╰───────────────\n\n`
     
-    txt += `> _Powered by ${config.info?.website || 'OurinAI'}_`
+    txt += `> _Powered by ${config.info?.website || 'ShooNheeAI'}_`
     
     await m.reply(txt)
 }

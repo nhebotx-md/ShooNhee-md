@@ -1,5 +1,5 @@
-import { getQuotedStickerHash, addStickerCommand, listStickerCommands } from '../../src/lib/ourin-sticker-command.js'
-import { getPlugin } from '../../src/lib/ourin-plugins.js'
+import { getQuotedStickerHash, addStickerCommand, listStickerCommands } from '../../src/lib/Shon-sticker-command.js'
+import { getPlugin } from '../../src/lib/Shon-plugins.js'
 const pluginConfig = {
     name: 'addcmdsticker',
     alias: ['addstickercmd', 'setsticker', 'stickeradd'],

@@ -3,8 +3,8 @@ import fetch from 'node-fetch'
 import fs from 'fs'
 import mime from 'mime-types'
 import { fileTypeFromBuffer } from 'file-type'
-import { downloadMediaMessage, getContentType } from 'ourin'
-import te from '../../src/lib/ourin-error.js'
+import { downloadMediaMessage, getContentType } from 'ShooNhee'
+import te from '../../src/lib/Shon-error.js'
 const pluginConfig = {
     name: 'tourl',
     alias: ['upload', 'catbox', 'url'],

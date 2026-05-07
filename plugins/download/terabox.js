@@ -1,5 +1,5 @@
 import config from '../../config.js'
-import { f } from '../../src/lib/ourin-http.js'
+import { f } from '../../src/lib/Shon-http.js'
 const pluginConfig = {
     name: 'terabox',
     alias: ['tb','tera'],

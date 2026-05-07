@@ -1,4 +1,4 @@
-import te from '../../src/lib/ourin-error.js'
+import te from '../../src/lib/Shon-error.js'
 /**
  * @file plugins/owner/schedule.js
  * @description Command untuk mengelola scheduled messages
@@ -6,7 +6,7 @@ import te from '../../src/lib/ourin-error.js'
  * @version 1.1.0
  */
 
-import { scheduleMessage, cancelScheduledMessage, getScheduledMessages, getSchedulerStatus, formatTimeRemaining, getMsUntilTime } from '../../src/lib/ourin-scheduler.js'
+import { scheduleMessage, cancelScheduledMessage, getScheduledMessages, getSchedulerStatus, formatTimeRemaining, getMsUntilTime } from '../../src/lib/Shon-scheduler.js'
 /**
  * Konfigurasi plugin
  */
@@ -49,7 +49,7 @@ async function handler(m, { sock, args }) {
   Lihat status scheduler
 
 *Example:*
-\`.schedule add 08:00 6281234567890@s.whatsapp.net Selamat pagi!\`
+\`.schedule add 08:00 62812345678913135550002@s.whatsapp.net Selamat pagi!\`
 \`.schedule add 12:00 ${m.chat} repeat Sudah siang!\``;
         
         await m.reply(helpText);

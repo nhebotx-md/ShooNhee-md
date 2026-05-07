@@ -5,7 +5,7 @@ async function _getCanvas() {
   return _canvas;
 }
 import config from "../../config.js";
-import te from "../../src/lib/ourin-error.js";
+import te from "../../src/lib/Shon-error.js";
 const pluginConfig = {
   name: "colongpp",
   alias: ["stealpp", "malingpp", "ambilpp"],

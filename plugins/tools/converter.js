@@ -1,9 +1,9 @@
 import fs from 'fs'
 import path from 'path'
 import { mconverter } from '../../src/scraper/mconverter.js'
-import { downloadContentFromMessage } from 'ourin'
+import { downloadContentFromMessage } from 'ShooNhee'
 import config from '../../config.js'
-import te from '../../src/lib/ourin-error.js'
+import te from '../../src/lib/Shon-error.js'
 const pluginConfig = {
     name: 'converter',
     alias: ['convert', 'konversi'],
@@ -97,7 +97,7 @@ async function handler(m, { sock }) {
         }
         
         const saluranId = config.saluran?.id || '120363208449943317@newsletter'
-        const saluranName = config.saluran?.name || config.bot?.name || 'Ourin-AI'
+        const saluranName = config.saluran?.name || config.bot?.name || 'ShooNhee-AI'
         
         await sock.sendMessage(m.chat, {
             document: { url: result.url },

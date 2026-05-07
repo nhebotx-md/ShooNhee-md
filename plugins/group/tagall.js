@@ -1,5 +1,5 @@
-import { getParticipantJid, getParticipantJids } from '../../src/lib/ourin-lid.js'
-import te from '../../src/lib/ourin-error.js'
+import { getParticipantJid, getParticipantJids } from '../../src/lib/Shon-lid.js'
+import te from '../../src/lib/Shon-error.js'
 const pluginConfig = {
     name: 'tagall',
     alias: ['all', 'everyone'],

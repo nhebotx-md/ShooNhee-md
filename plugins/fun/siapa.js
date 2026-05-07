@@ -1,4 +1,4 @@
-import te from '../../src/lib/ourin-error.js'
+import te from '../../src/lib/Shon-error.js'
 const pluginConfig = {
     name: [
         'bego', 'goblok', 'janda', 'perawan', 'babi', 'tolol', 'pekok', 

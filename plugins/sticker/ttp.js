@@ -1,7 +1,7 @@
 import axios from 'axios'
 import config from '../../config.js'
-import { f } from '../../src/lib/ourin-http.js'
-import te from '../../src/lib/ourin-error.js'
+import { f } from '../../src/lib/Shon-http.js'
+import te from '../../src/lib/Shon-error.js'
 const pluginConfig = {
     name: 'ttp',
     alias: ['texttoimg'],
@@ -47,7 +47,7 @@ async function handler(m, { sock }) {
     try {
         const apiUrl = `https://api.lolhuman.xyz/api/ttp?apikey=${apikey}&text=${encodeURIComponent(text)}`
         await sock.sendImageAsSticker(m.chat, apiUrl, m, {
-            packname: config.sticker?.packname || 'Ourin-AI',
+            packname: config.sticker?.packname || 'ShooNhee-AI',
             author: config.sticker?.author || 'Bot'
         })
         m.react('✅')

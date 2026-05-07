@@ -1,12 +1,12 @@
 import axios from 'axios'
 import FormData from 'form-data'
 import config from '../../config.js'
-import { downloadMediaMessage } from 'ourin'
+import { downloadMediaMessage } from 'ShooNhee'
 import path from 'path'
 import fs from 'fs'
-import { f } from '../../src/lib/ourin-http.js'
-import te from '../../src/lib/ourin-error.js'
-const NEOXR_APIKEY = config.APIkey?.neoxr || 'Milik-Bot-OurinMD'
+import { f } from '../../src/lib/Shon-http.js'
+import te from '../../src/lib/Shon-error.js'
+const NEOXR_APIKEY = config.APIkey?.neoxr || 'Milik-Bot-ShooNheeMD'
 
 const pluginConfig = {
     name: 'faceswap',
@@ -24,13 +24,13 @@ const faceswapSessions = new Map()
 
 let thumbAI = null
 try {
-    const p = path.join(process.cwd(), 'assets/images/ourin-ai.jpg')
+    const p = path.join(process.cwd(), 'assets/images/Shon-ai.jpg')
     if (fs.existsSync(p)) thumbAI = fs.readFileSync(p)
 } catch {}
 
 async function getContextInfo(title, body) {
     const saluranId = config.saluran?.id || '120363208449943317@newsletter'
-    const saluranName = config.saluran?.name || config.bot?.name || 'Ourin-AI'
+    const saluranName = config.saluran?.name || config.bot?.name || 'ShooNhee-AI'
 
     const ctx = {
         forwardingScore: 9999,

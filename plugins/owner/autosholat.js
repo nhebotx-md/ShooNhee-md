@@ -1,7 +1,7 @@
-import { getDatabase } from '../../src/lib/ourin-database.js'
+import { getDatabase } from '../../src/lib/Shon-database.js'
 import config from '../../config.js'
-import { getTodaySchedule, extractPrayerTimes, searchKota } from '../../src/lib/ourin-sholat-api.js'
-import te from '../../src/lib/ourin-error.js'
+import { getTodaySchedule, extractPrayerTimes, searchKota } from '../../src/lib/Shon-sholat-api.js'
+import te from '../../src/lib/Shon-error.js'
 const pluginConfig = {
     name: 'autosholat',
     alias: ['sholat', 'autoadzan'],
@@ -160,7 +160,7 @@ async function runAutoSholat(sock) {
         isya: times.isya
     };
 
-    const { default: timeHelper } = await import('../../src/lib/ourin-time.js')
+    const { default: timeHelper } = await import('../../src/lib/Shon-time.js')
     const timeNow = timeHelper.getCurrentTimeString();
 
     if (!global.autoSholatLock) global.autoSholatLock = {};
@@ -176,7 +176,7 @@ async function runAutoSholat(sock) {
                 const groupList = Object.keys(groupsObj);
 
                 const saluranId = config.saluran?.id || '120363208449943317@newsletter';
-                const saluranName = config.saluran?.name || config.bot?.name || 'Ourin-AI';
+                const saluranName = config.saluran?.name || config.bot?.name || 'ShooNhee-AI';
 
                 const closeGroup = db.setting('autoSholatCloseGroup') || false;
                 const duration = db.setting('autoSholatDuration') || 5;

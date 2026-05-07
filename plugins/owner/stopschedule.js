@@ -1,7 +1,7 @@
-import { stopSchedulerByName, getFullSchedulerStatus } from '../../src/lib/ourin-scheduler.js'
-import { stopSholatScheduler } from '../../src/lib/ourin-sholat-scheduler.js'
-import { getDatabase } from '../../src/lib/ourin-database.js'
-import te from '../../src/lib/ourin-error.js'
+import { stopSchedulerByName, getFullSchedulerStatus } from '../../src/lib/Shon-scheduler.js'
+import { stopSholatScheduler } from '../../src/lib/Shon-sholat-scheduler.js'
+import { getDatabase } from '../../src/lib/Shon-database.js'
+import te from '../../src/lib/Shon-error.js'
 const pluginConfig = {
     name: 'stopschedule',
     alias: ['stopscheduler', 'schedstop', 'pauseschedule'],

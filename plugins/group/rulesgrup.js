@@ -1,5 +1,5 @@
 import config from '../../config.js'
-import { getDatabase } from '../../src/lib/ourin-database.js'
+import { getDatabase } from '../../src/lib/Shon-database.js'
 import fs from 'fs'
 import path from 'path'
 const pluginConfig = {
@@ -41,7 +41,7 @@ async function handler(m, { sock, config: botConfig }) {
     let imageBuffer = fs.existsSync(imagePath) ? fs.readFileSync(imagePath) : null
 
     const saluranId = botConfig.saluran?.id || '120363208449943317@newsletter'
-    const saluranName = botConfig.saluran?.name || botConfig.bot?.name || 'Ourin-AI'
+    const saluranName = botConfig.saluran?.name || botConfig.bot?.name || 'ShooNhee-AI'
 
     if (imageBuffer) {
         await sock.sendMedia(m.chat, imageBuffer, rulesText, m, {

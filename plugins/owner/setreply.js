@@ -1,6 +1,6 @@
 import config from '../../config.js'
-import { getDatabase } from '../../src/lib/ourin-database.js'
-import pkg from 'ourin';
+import { getDatabase } from '../../src/lib/Shon-database.js'
+import pkg from 'ShooNhee';
 const { generateWAMessageFromContent, proto } = pkg;
 const pluginConfig = {
     name: 'setreply',
@@ -91,7 +91,7 @@ async function handler(m, { sock, db }) {
                             text: bodyText
                         }),
                         footer: proto.Message.InteractiveMessage.Footer.fromObject({
-                            text: config.bot?.name || 'Ourin-AI'
+                            text: config.bot?.name || 'ShooNhee-AI'
                         }),
                         header: proto.Message.InteractiveMessage.Header.fromObject({
                             title: '💬 Reply Variant',
@@ -107,14 +107,14 @@ async function handler(m, { sock, db }) {
                             isForwarded: true,
                             forwardedNewsletterMessageInfo: {
                                 newsletterJid: config.saluran?.id || '120363424976130148@newsletter',
-                                newsletterName: config.saluran?.name || config.bot?.name || 'Ourin-AI',
+                                newsletterName: config.saluran?.name || config.bot?.name || 'ShooNhee-AI',
                                 serverMessageId: 127
                             }
                         }
                     })
                 }
             }
-        }, { userJid: m.sender, quoted: m });
+        }, { userJid: m.sender, quoted: m, ai: true });
 
         await sock.relayMessage(m.chat, msg.message, { messageId: msg.key.id });
     } catch {

@@ -1,9 +1,9 @@
 import axios from 'axios'
 import config from '../../config.js'
-import { downloadContentFromMessage } from 'ourin'
+import { downloadContentFromMessage } from 'ShooNhee'
 import FormData from 'form-data'
-import te from '../../src/lib/ourin-error.js'
-const NEOXR_APIKEY = config.APIkey?.neoxr || 'Milik-Bot-OurinMD'
+import te from '../../src/lib/Shon-error.js'
+const NEOXR_APIKEY = config.APIkey?.neoxr || 'Milik-Bot-ShooNheeMD'
 
 const pluginConfig = {
     name: 'animeapaini',

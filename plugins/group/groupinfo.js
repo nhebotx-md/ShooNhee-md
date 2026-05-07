@@ -1,6 +1,6 @@
-import { getParticipantJid, resolveAnyLidToJid } from '../../src/lib/ourin-lid.js'
-import * as timeHelper from '../../src/lib/ourin-time.js'
-import te from '../../src/lib/ourin-error.js'
+import { getParticipantJid, resolveAnyLidToJid } from '../../src/lib/Shon-lid.js'
+import * as timeHelper from '../../src/lib/Shon-time.js'
+import te from '../../src/lib/Shon-error.js'
 const pluginConfig = {
     name: 'groupinfo',
     alias: ['infogroup', 'gcinfo', 'infogc', 'gc'],

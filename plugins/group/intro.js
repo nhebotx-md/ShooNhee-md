@@ -1,4 +1,4 @@
-import { getDatabase } from '../../src/lib/ourin-database.js'
+import { getDatabase } from '../../src/lib/Shon-database.js'
 import config from '../../config.js'
 const pluginConfig = {
     name: 'intro',
@@ -43,7 +43,7 @@ async function parsePlaceholders(text, m, groupMeta) {
         .replace(/@date/gi, dateStr)
         .replace(/@time/gi, timeStr)
         .replace(/@desc/gi, groupMeta?.desc || 'Tidak ada deskripsi')
-        .replace(/@botname/gi, config.bot?.name || 'Ourin-AI')
+        .replace(/@botname/gi, config.bot?.name || 'ShooNhee-AI')
 }
 
 async function handler(m, { sock }) {

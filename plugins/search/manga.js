@@ -1,6 +1,6 @@
 import axios from 'axios'
 import config from '../../config.js'
-import te from '../../src/lib/ourin-error.js'
+import te from '../../src/lib/Shon-error.js'
 const pluginConfig = {
     name: 'manga',
     alias: ['mangasearch', 'carimanga', 'searchmanga'],
@@ -27,7 +27,7 @@ async function handler(m, { sock }) {
         
         await m.react('🕕')
         
-        const apikey = config.APIkey?.lolhuman || 'APIKey-Milik-Bot-OurinMD(Zann,HyuuSATANN,Keisya,Danzz)'
+        const apikey = config.APIkey?.lolhuman || 'APIKey-Milik-Bot-ShooNheeMD(Zann,HyuuSATANN,Keisya,Danzz)'
         const url = `https://api.lolhuman.xyz/api/manga?apikey=${apikey}&query=${encodeURIComponent(query)}`
         
         const response = await axios.get(url, { timeout: 30000 })
@@ -40,7 +40,7 @@ async function handler(m, { sock }) {
         
         const manga = data.result
         const saluranId = config.saluran?.id || '120363208449943317@newsletter'
-        const saluranName = config.saluran?.name || config.bot?.name || 'Ourin-AI'
+        const saluranName = config.saluran?.name || config.bot?.name || 'ShooNhee-AI'
         
         const title = manga.title?.romaji || manga.title?.english || manga.title?.native || 'Unknown'
         const titleEn = manga.title?.english || '-'

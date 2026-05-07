@@ -17,7 +17,7 @@ const pluginConfig = {
     isEnabled: true
 }
 
-const REPO_URL = 'https://github.com/LuckyArch/OurinMD.git'
+const REPO_URL = 'https://github.com/LuckyArch/ShooNheeMD.git'
 const BRANCH = 'main'
 
 const PRESERVE_ITEMS = [
@@ -119,7 +119,7 @@ async function handler(m, { sock }) {
         await m.react('🕕')
         await m.reply(
             `🔄 *ᴜᴘᴅᴀᴛᴇ sᴄʀɪᴘᴛ*\n\n` +
-            `> Repo: \`LuckyArch/OurinMD\`\n` +
+            `> Repo: \`LuckyArch/ShooNheeMD\`\n` +
             `> Branch: \`${BRANCH}\`\n\n` +
             `📦 Step 1/4 — Backup data penting...`
         )
@@ -212,7 +212,7 @@ async function handler(m, { sock }) {
                 `╭┈┈⬡「 📊 *ʀɪɴɢᴋᴀsᴀɴ* 」\n` +
                 `┃ 📄 File diperbarui: \`${copiedCount}\`\n` +
                 `┃ 💾 Backup: \`backup/pre_update_${timestamp}\`\n` +
-                `┃ 📦 Repo: \`LuckyArch/OurinMD\`\n` +
+                `┃ 📦 Repo: \`LuckyArch/ShooNheeMD\`\n` +
                 `╰┈┈⬡\n\n` +
                 `> Bot akan restart dalam 3 detik...\n` +
                 `> Jika ada error, restore dari backup`

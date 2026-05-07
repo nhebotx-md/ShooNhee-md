@@ -1,7 +1,7 @@
 import axios from "axios";
 import config from "../../config.js";
-import { uploadToTmpFiles } from "../../src/lib/ourin-tmpfiles.js";
-import te from "../../src/lib/ourin-error.js";
+import { uploadToTmpFiles } from "../../src/lib/Shon-tmpfiles.js";
+import te from "../../src/lib/Shon-error.js";
 const pluginConfig = {
   name: "fakeff",
   alias: ["fakefreefire"],

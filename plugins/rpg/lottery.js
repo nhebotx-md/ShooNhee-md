@@ -1,5 +1,5 @@
-import { getDatabase } from '../../src/lib/ourin-database.js'
-import { addExpWithLevelCheck } from '../../src/lib/ourin-level.js'
+import { getDatabase } from '../../src/lib/Shon-database.js'
+import { addExpWithLevelCheck } from '../../src/lib/Shon-level.js'
 const pluginConfig = {
     name: 'lottery',
     alias: ['gacha', 'spin', 'undian'],

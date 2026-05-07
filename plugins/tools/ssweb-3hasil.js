@@ -1,8 +1,8 @@
 import axios from 'axios'
 import crypto from 'crypto'
-import { generateWAMessage, generateWAMessageFromContent, jidNormalizedUser } from 'ourin'
+import { generateWAMessage, generateWAMessageFromContent, jidNormalizedUser } from 'ShooNhee'
 import config from '../../config.js'
-import te from '../../src/lib/ourin-error.js'
+import te from '../../src/lib/Shon-error.js'
 const pluginConfig = {
     name: 'ssweb-3hasil',
     alias: ['ssweb3', 'ss3', 'screenshot3', 'screenshotweb3'],
@@ -136,7 +136,7 @@ async function handler(m, { sock }) {
             console.log('[SSWeb3] Album failed, sending individually:', albumErr.message)
             
             const saluranId = config.saluran?.id || '120363208449943317@newsletter'
-            const saluranName = config.saluran?.name || config.bot?.name || 'Ourin-AI'
+            const saluranName = config.saluran?.name || config.bot?.name || 'ShooNhee-AI'
             
             for (const content of mediaList) {
                 await sock.sendMessage(m.chat, {

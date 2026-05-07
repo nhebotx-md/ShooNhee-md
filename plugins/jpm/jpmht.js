@@ -1,9 +1,9 @@
-import { getDatabase } from '../../src/lib/ourin-database.js'
+import { getDatabase } from '../../src/lib/Shon-database.js'
 import { getGroupMode } from '../group/botmode.js'
-import { fetchGroupsSafe } from '../../src/lib/ourin-jpm-helper.js'
+import { fetchGroupsSafe } from '../../src/lib/Shon-jpm-helper.js'
 import fs from 'fs'
 import { config } from '../../config.js'
-import te from '../../src/lib/ourin-error.js'
+import te from '../../src/lib/Shon-error.js'
 let cachedThumb = null
 try {
     if (fs.existsSync('./assets/images/ShooNhee.jpg')) {

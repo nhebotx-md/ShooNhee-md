@@ -1,9 +1,9 @@
-import { getDatabase } from '../../src/lib/ourin-database.js'
-import * as timeHelper from '../../src/lib/ourin-time.js'
-import { fetchGroupsSafe } from '../../src/lib/ourin-jpm-helper.js'
+import { getDatabase } from '../../src/lib/Shon-database.js'
+import * as timeHelper from '../../src/lib/Shon-time.js'
+import { fetchGroupsSafe } from '../../src/lib/Shon-jpm-helper.js'
 import config from '../../config.js'
 import fs from 'fs'
-import te from '../../src/lib/ourin-error.js'
+import te from '../../src/lib/Shon-error.js'
 let cachedThumb = null;
 try {
   if (fs.existsSync("./assets/images/ShooNhee.jpg")) {
@@ -83,7 +83,7 @@ async function handler(m, { sock }) {
     }
 
     const jedaJpm = db.setting("jedaJpm") || 5000;
-    const botName = config.bot?.name || "Ourin-AI";
+    const botName = config.bot?.name || "ShooNhee-AI";
     const saluranId = config.saluran?.id || "120363208449943317@newsletter";
     const saluranName = config.saluran?.name || botName;
 

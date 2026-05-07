@@ -1,5 +1,5 @@
 import config from '../../config.js'
-import te from '../../src/lib/ourin-error.js'
+import te from '../../src/lib/Shon-error.js'
 const pluginConfig = {
     name: 'confess',
     alias: ['confession', 'menfess', 'anonim'],
@@ -130,7 +130,7 @@ async function replyHandler(m, { sock }) {
     if (!replyMessage) return false
     
     const saluranId = config.saluran?.id || '120363208449943317@newsletter'
-    const saluranName = config.saluran?.name || config.bot?.name || 'Ourin-AI'
+    const saluranName = config.saluran?.name || config.bot?.name || 'ShooNhee-AI'
     
     const replyText = 
         `💌 *ʙᴀʟᴀsᴀɴ ᴅᴀʀɪ ᴏʀᴀɴɢ ʏᴀɴɢ ᴋᴀᴍᴜ ᴄᴏɴꜰᴇss!*\n\n` +

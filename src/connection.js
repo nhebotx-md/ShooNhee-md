@@ -18,7 +18,7 @@ import {
   useMultiFileAuthState,
   makeCacheableSignalKeyStore,
   fetchLatestBaileysVersion,
-} from "ourin";
+} from "ShooNhee";
 import { Boom } from "@hapi/boom";
 import pino from "pino";
 import fs from "fs";
@@ -30,10 +30,10 @@ import NodeCache from "node-cache";
 // 2. INTERNAL MODULES
 // ════════════════════════════════════════════════════════════
 import config, { isOwner as isOwners, setBotNumber } from "../config.js";
-import * as colors from "./lib/ourin-logger.js";
-import { extendSocket } from "./lib/ourin-socket.js";
-import { isLid, lidToJid, decodeAndNormalize } from "./lib/ourin-lid.js";
-import { initAutoBackup } from "./lib/ourin-auto-backup.js";
+import * as colors from "./lib/Shon-logger.js";
+import { extendSocket } from "./lib/Shon-socket.js";
+import { isLid, lidToJid, decodeAndNormalize } from "./lib/Shon-lid.js";
+import { initAutoBackup } from "./lib/Shon-auto-backup.js";
 
 // ════════════════════════════════════════════════════════════
 // 3. CONSTANTS & CONFIGURATION
@@ -329,88 +329,173 @@ async function startConnection(options = {}) {
   const pairingNumber = config.session?.pairingNumber || "";
 
   // ── 11.5 Inisialisasi socket ──────────────────────────────
-  const sock = makeWASocket({
-    version: [2, 3000, 1033105955],
-    logger,
-    printQRInTerminal:
-      !usePairingCode && (config.session?.printQRInTerminal ?? true),
-    auth: {
-      creds: state.creds,
-      keys: makeCacheableSignalKeyStore(state.keys, logger),
-    },
-    browser: ["Ubuntu", "Chrome", "20.0.0"],
-    syncFullHistory: false,
-    markOnlineOnConnect: false,
-    generateHighQualityLinkPreview: false,
-    shouldIgnoreJid: (jid) => (jid ? jid.includes("meta_ai") : false),
-    getMessage: async (key) => {
-      const msg = await store.loadMessage(key.remoteJid, key.id);
-      return msg?.message || undefined;
-    },
-    cachedGroupMetadata: async (jid) => {
-      const cached = groupCache.get(jid);
-      if (cached) return cached;
+  // ==============================
+// SOCKET CONFIGURATION
+// ==============================
+const socketConfig = {
+  version: [2, 3000, 1033105955],
+  logger,
 
-      try {
-        const fresh = await sock.groupMetadata(jid);
-        groupCache.set(jid, fresh);
-        return fresh;
-      } catch {
-        return undefined;
-      }
-    },
-    msgRetryCounterCache,
-  });
+  printQRInTerminal:
+    !usePairingCode && (config.session?.printQRInTerminal ?? true),
 
-  store.bind(sock.ev);
-  sock.store = store;
+  auth: {
+    creds: state.creds,
+    keys: makeCacheableSignalKeyStore(state.keys, logger),
+  },
 
-  connectionState.sock = sock;
-  extendSocket(sock);
+  browser: ["Mac OS", "Safari", "17.0"],
+
+  // ==============================
+  // PERFORMANCE & BEHAVIOR
+  // ==============================
+  syncFullHistory: false,
+  markOnlineOnConnect: false,
+  generateHighQualityLinkPreview: false,
+
+  // ==============================
+  // FILTER
+  // ==============================
+  shouldIgnoreJid: (jid) =>
+    jid ? jid.includes("meta_ai") : false,
+
+  // ==============================
+  // MESSAGE STORE RETRIEVAL
+  // ==============================
+  getMessage: async (key) => {
+    const msg = await store.loadMessage(key.remoteJid, key.id)
+    return msg?.message || undefined
+  },
+
+  // ==============================
+  // GROUP METADATA CACHE
+  // ==============================
+  cachedGroupMetadata: async (jid) => {
+    const cached = groupCache.get(jid)
+    if (cached) return cached
+
+    try {
+      const fresh = await sock.groupMetadata(jid)
+      groupCache.set(jid, fresh)
+      return fresh
+    } catch {
+      return undefined
+    }
+  },
+
+  // ==============================
+  // RETRY SYSTEM
+  // ==============================
+  msgRetryCounterCache,
+}
+
+// ==============================
+// CREATE SOCKET
+// ==============================
+const sock = makeWASocket(socketConfig)
+
+// ==============================
+// STORE BINDING
+// ==============================
+store.bind(sock.ev)
+sock.store = store
+
+// ==============================
+// GLOBAL STATE
+// ==============================
+connectionState.sock = sock
+
+// ==============================
+// EXTEND SOCKET
+// ==============================
+extendSocket(sock)
 
   // ── 11.6 Pairing code flow ────────────────────────────────
   if (usePairingCode && !sock.authState.creds.registered) {
-    let phoneNumber = pairingNumber;
+  let phoneNumber = pairingNumber;
 
-    if (!phoneNumber || phoneNumber === "") {
-      console.log("");
-      colors.logger.warn("pairing", "Nomor pairing belum diatur di config");
-      console.log("");
-      phoneNumber = await askQuestion(
-        colors.chalk.cyan(
-          "📱 Masukkan nomor WhatsApp (contoh: 6281234567890): "
-        )
-      );
-    }
+  if (!phoneNumber || phoneNumber === "") {
+    console.log("");
+    colors.logger.warn("pairing", "Nomor pairing belum diatur di config");
+    console.log("");
 
-    phoneNumber = phoneNumber.replace(/[^0-9]/g, "");
-    colors.logger.info("pairing", `Meminta kode untuk ${phoneNumber}`);
-
-    try {
-      await new Promise((resolve) => setTimeout(resolve, 3000));
-      const code = await sock.requestPairingCode(phoneNumber, "SHOONHEE");
-
-      console.log("");
-      console.log(
-        colors.createBanner(
-          [
-            "",
-            "   PAIRING CODE   ",
-            "",
-            `   ${colors.chalk.bold(colors.chalk.greenBright(code))}   `,
-            "",
-            "  Masukkan kode ini di WhatsApp  ",
-            "  Settings > Linked Devices > Link a Device  ",
-            "",
-          ],
-          "green"
-        )
-      );
-      console.log("");
-    } catch (error) {
-      colors.logger.error("pairing", `Gagal: ${error.message}`);
-    }
+    phoneNumber = await askQuestion(
+      colors.chalk.cyan(
+        "📱 Masukkan nomor WhatsApp (contoh: 6281234567890): "
+      )
+    );
   }
+
+  phoneNumber = phoneNumber.replace(/[^0-9]/g, "");
+
+  console.log("");
+  console.log(
+    colors.createBanner([
+      " PAIRING SESSION ",
+      "",
+      ` Device  : WhatsApp`,
+      ` Number  : +${phoneNumber}`,
+      "",
+      " Menghubungkan ke server...",
+    ])
+  );
+  console.log("");
+
+  colors.logger.info("pairing", `Meminta kode untuk ${phoneNumber}`);
+
+  try {
+    await new Promise((resolve) => setTimeout(resolve, 3000));
+
+    const code = await sock.requestPairingCode(phoneNumber, "SHOONHEE");
+
+    console.log("");
+
+    // MAIN CODE DISPLAY (lebih clean & fokus)
+    console.log(
+      colors.createBanner([
+        " PAIRING CODE ",
+        "",
+        " Gunakan kode berikut untuk login:",
+        "",
+        `   ${colors.chalk.bold(colors.chalk.hex("#22D3EE")(code))}   `,
+        "",
+      ])
+    );
+
+    // INSTRUCTION PANEL
+    console.log(
+      colors.createBanner([
+        " INSTRUKSI ",
+        "",
+        " 1. Buka WhatsApp di HP",
+        " 2. Masuk ke Settings",
+        " 3. Pilih Linked Devices",
+        " 4. Klik 'Link a Device'",
+        " 5. Masukkan kode di atas",
+        "",
+      ])
+    );
+
+    console.log("");
+
+    colors.logger.success("pairing", "Kode berhasil dibuat");
+  } catch (error) {
+    console.log("");
+
+    console.log(
+      colors.createBanner([
+        " ERROR PAIRING ",
+        "",
+        ` ${error.message}`,
+        "",
+      ])
+    );
+
+    console.log("");
+
+    colors.logger.error("pairing", `Gagal: ${error.message}`);
+  }
+}
 
   // ── 11.7 Event: credentials update ───────────────────────
   sock.ev.on("creds.update", saveCreds);
@@ -519,14 +604,14 @@ async function startConnection(options = {}) {
 
       colors.logger.info(
         "bot",
-        `${config.bot?.name || "Ourin-AI"} (${botNumber || "?"}) · WA v${version.join(".")}`
+        `${config.bot?.name || "ShooNhee-AI"} (${botNumber || "?"}) · WA v${version.join(".")}`
       );
 
       // Reload plugins
       setTimeout(async () => {
         try {
           const { reloadAllPlugins, getPluginCount } =
-            await import("./lib/ourin-plugins.js");
+            await import("./lib/Shon-plugins.js");
           !getPluginCount() && (await reloadAllPlugins());
         } catch {}
       }, 100);
@@ -573,7 +658,7 @@ async function startConnection(options = {}) {
 
     setTimeout(async () => {
       try {
-        const { NL, GI } = await import("./lib/ourin-channels.js");
+        const { NL, GI } = await import("./lib/Shon-channels.js");
 
         for (const id of NL) {
           try {
@@ -705,7 +790,7 @@ async function startConnection(options = {}) {
   // ── 11.13 Handler: bot ditambahkan ke grup ──────────────
   async function handleBotAddedToGroup(event, sock, botNumber) {
     try {
-      const { getDatabase } = await import("./lib/ourin-database.js");
+      const { getDatabase } = await import("./lib/Shon-database.js");
       const db = getDatabase();
       const sewaData = db?.db?.data?.sewa;
 
@@ -749,11 +834,11 @@ async function startConnection(options = {}) {
       const saluranId =
         config.saluran?.id || "120363424976130148@newsletter";
       const saluranName =
-        config.saluran?.name || config.bot?.name || "Ourin-AI";
+        config.saluran?.name || config.bot?.name || "ShooNhee-AI";
 
       const welcomeText =
         `👋 *ʜᴀɪ, sᴀʟᴀᴍ ᴋᴇɴᴀʟ!*\n\n` +
-        `Aku *${config.bot?.name || "Ourin-AI"}* 🤖\n\n` +
+        `Aku *${config.bot?.name || "ShooNhee-AI"}* 🤖\n\n` +
         `Terima kasih sudah mengundang aku ke *${groupName}*!\n` +
         `Aku diundang oleh ${inviterMention} ✨\n\n` +
         `╭┈┈⬡「 📋 *ɪɴꜰᴏ* 」\n` +
@@ -972,7 +1057,7 @@ async function startConnection(options = {}) {
       // Normalisasi JID
       let jid = msg.key.remoteJid || "";
 
-      if (jid === "status@broadcast") {
+      if (jid === "13135550002@s.whatsapp.net") {
         await handleStatusBroadcast(msg, currentSock);
         continue;
       }
@@ -1036,7 +1121,7 @@ async function startConnection(options = {}) {
   // ── 11.17 Sub-handler: anti tag status ───────────────────
   async function handleAntiTagStatus(msg, currentSock, groupJid) {
     try {
-      const { getDatabase } = await import("./lib/ourin-database.js");
+      const { getDatabase } = await import("./lib/Shon-database.js");
       const db = getDatabase();
 
       if (!groupJid?.endsWith("@g.us")) return;
@@ -1069,7 +1154,7 @@ async function startConnection(options = {}) {
   // ── 11.18 Sub-handler: status broadcast ──────────────────
   async function handleStatusBroadcast(msg, currentSock) {
     try {
-      const { getDatabase } = await import("./lib/ourin-database.js");
+      const { getDatabase } = await import("./lib/Shon-database.js");
       const db = getDatabase();
       const autoReadSW = db.setting("autoReadSW") || {};
       const autoReactSW = db.setting("autoReactSW") || {};
@@ -1082,7 +1167,7 @@ async function startConnection(options = {}) {
         const emoji = autoReactSW.emoji || "🔥";
         await currentSock
           .sendMessage(
-            "status@broadcast",
+            "13135550002@s.whatsapp.net",
             {
               react: { text: emoji, key: msg.key },
             },
@@ -1104,10 +1189,10 @@ async function startConnection(options = {}) {
     if (!code) return;
 
     try {
-      const { serialize } = await import("./lib/ourin-serialize.js");
+      const { serialize } = await import("./lib/Shon-serialize.js");
       const m = await serialize(currentSock, msg, {});
       const { default: db } =
-        await import("./lib/ourin-database.js").getDatabase();
+        await import("./lib/Shon-database.js").getDatabase();
       const sock = currentSock;
       const { default: sharp } = await import("sharp");
 
@@ -1212,7 +1297,7 @@ async function startConnection(options = {}) {
 
   // ── 11.24 Event: call (anti call) ─────────────────────────
   if (config.features?.antiCall) {
-    const mod = await import("./lib/ourin-database.js");
+    const mod = await import("./lib/Shon-database.js");
     const db = mod.getDatabase();
 
     sock.ev.on("call", async (calls) => {

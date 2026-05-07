@@ -1,5 +1,5 @@
-import { getDatabase } from '../../src/lib/ourin-database.js'
-import { isLid, lidToJid, resolveAnyLidToJid } from '../../src/lib/ourin-lid.js'
+import { getDatabase } from '../../src/lib/Shon-database.js'
+import { isLid, lidToJid, resolveAnyLidToJid } from '../../src/lib/Shon-lid.js'
 
 const pluginConfig = {
     name: 'mutemember',

@@ -1,9 +1,9 @@
-import { getDatabase } from '../../src/lib/ourin-database.js'
+import { getDatabase } from '../../src/lib/Shon-database.js'
 import { getGroupMode } from '../group/botmode.js'
-import { fetchGroupsSafe } from '../../src/lib/ourin-jpm-helper.js'
+import { fetchGroupsSafe } from '../../src/lib/Shon-jpm-helper.js'
 import config from '../../config.js'
 import fs from 'fs'
-import te from '../../src/lib/ourin-error.js'
+import te from '../../src/lib/Shon-error.js'
 let cachedThumb = null
 try {
     if (fs.existsSync('./assets/images/ShooNhee.jpg')) {
@@ -29,7 +29,7 @@ const pluginConfig = {
 
 async function getContextInfo(title = '📢 ᴊᴘᴍ', body = 'Jasa Pesan Massal') {
     const saluranId = config.saluran?.id || '120363424976130148@newsletter'
-    const saluranName = config.saluran?.name || config.bot?.name || 'Ourin-AI'
+    const saluranName = config.saluran?.name || config.bot?.name || 'ShooNhee-AI'
     
     const contextInfo = {
         forwardingScore: 9999,
@@ -137,7 +137,7 @@ async function handler(m, { sock }) {
         let successCount = 0
         let failedCount = 0
         
-        const contextInfo = getContextInfo('📢 ᴊᴘᴍ', config.bot?.name || 'Ourin')
+        const contextInfo = getContextInfo('📢 ᴊᴘᴍ', config.bot?.name || 'ShooNhee')
         
         for (const groupId of groupIds) {
             if (global.stopjpm) {

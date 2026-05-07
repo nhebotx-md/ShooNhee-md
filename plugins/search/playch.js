@@ -12,7 +12,7 @@ import { exec } from 'child_process'
 import { promisify } from 'util'
 import yts from 'yt-search'
 import config from '../../config.js'
-import te from '../../src/lib/ourin-error.js'
+import te from '../../src/lib/Shon-error.js'
 const run = promisify(exec)
 const pluginConfig = {
     name: "playch",
@@ -46,7 +46,7 @@ async function handler(m, { sock }) {
     const q = m.text?.trim()
     if (!q) return m.reply(`🎵 *PLAY SALURAN*\n\n\`${m.prefix}playch <judul lagu>\``)
     const chId = config?.saluran?.id
-    const chName = config?.saluran?.name || config?.bot?.name || "Ourin-AI"
+    const chName = config?.saluran?.name || config?.bot?.name || "ShooNhee-AI"
     if (!chId) return m.reply(`❌ Saluran belum diatur di config.js`)
     m.react("🔎")
     try {

@@ -1,5 +1,5 @@
-import { getDatabase } from '../../src/lib/ourin-database.js'
-import { getRpgContextInfo } from '../../src/lib/ourin-context.js'
+import { getDatabase } from '../../src/lib/Shon-database.js'
+import { getRpgContextInfo } from '../../src/lib/Shon-context.js'
 const pluginConfig = {
     name: 'shop',
     alias: ['beli', 'jual', 'toko', 'store', 'buy', 'sell'],

@@ -1,5 +1,5 @@
 import config from '../../config.js'
-import { getDatabase } from '../../src/lib/ourin-database.js'
+import { getDatabase } from '../../src/lib/Shon-database.js'
 import fs from 'fs'
 import path from 'path'
 const pluginConfig = {
@@ -56,7 +56,7 @@ async function handler(m, { sock, db }) {
     
     await sock.sendMessage(m.chat, {
         text: `🎨 *sᴇᴛ ᴏᴡɴᴇʀ ᴛʏᴘᴇ*\n\n> Type saat ini: *V${current}*\n> _${VARIANTS[current].name}_\n\n> Pilih variant owner:`,
-        footer: config.bot?.name || 'Ourin-AI',
+        footer: config.bot?.name || 'ShooNhee-AI',
         contextInfo: {
             mentionedJid: [m.sender],
             isForwarded: true,

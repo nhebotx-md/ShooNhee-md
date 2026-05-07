@@ -1,6 +1,6 @@
 import axios from 'axios'
-import { f } from '../../src/lib/ourin-http.js'
-import te from '../../src/lib/ourin-error.js'
+import { f } from '../../src/lib/Shon-http.js'
+import te from '../../src/lib/Shon-error.js'
 const pluginConfig = {
     name: 'balogo',
     alias: ['bluearchivelogo', 'ba'],

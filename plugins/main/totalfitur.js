@@ -1,6 +1,6 @@
-import { getAllPlugins } from '../../src/lib/ourin-plugins.js'
+import { getAllPlugins } from '../../src/lib/Shon-plugins.js'
 import config from '../../config.js'
-import te from '../../src/lib/ourin-error.js'
+import te from '../../src/lib/Shon-error.js'
 
 const pluginConfig = {
     name: 'totalfitur',

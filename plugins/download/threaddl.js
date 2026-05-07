@@ -2,8 +2,8 @@ import axios from 'axios'
 import * as cheerio from 'cheerio'
 import FormData from 'form-data'
 import crypto from 'crypto'
-import te from '../../src/lib/ourin-error.js'
-import { generateWAMessage, generateWAMessageFromContent, jidNormalizedUser } from 'ourin'
+import te from '../../src/lib/Shon-error.js'
+import { generateWAMessage, generateWAMessageFromContent, jidNormalizedUser } from 'ShooNhee'
 async function threadsdl(url) {
     const form = new FormData()
     form.append('search', url)

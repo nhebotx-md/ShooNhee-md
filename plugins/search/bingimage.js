@@ -1,6 +1,6 @@
 import axios from 'axios'
 import config from '../../config.js'
-import te from '../../src/lib/ourin-error.js'
+import te from '../../src/lib/Shon-error.js'
 const pluginConfig = {
     name: 'bingimage',
     alias: ['imagesearch', 'carigambar', 'bingimg'],
@@ -27,7 +27,7 @@ async function handler(m, { sock }) {
         
         await m.react('🔍')
         
-        const apikey = config.APIkey?.neoxr || 'Milik-Bot-OurinMD'
+        const apikey = config.APIkey?.neoxr || 'Milik-Bot-ShooNheeMD'
         const url = `https://api-faa.my.id/faa/google-image?query=${encodeURIComponent(query)}&apikey=${apikey}`
         
         const response = await axios.get(url, { timeout: 30000 })

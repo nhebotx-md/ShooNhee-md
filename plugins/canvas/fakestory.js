@@ -6,7 +6,7 @@ async function _getCanvas() {
 import axios from "axios";
 import fs from "fs";
 import path from "path";
-import te from "../../src/lib/ourin-error.js";
+import te from "../../src/lib/Shon-error.js";
 const pluginConfig = {
   name: "fakestory",
   alias: ["fstory", "fakeinsta", "igstory"],

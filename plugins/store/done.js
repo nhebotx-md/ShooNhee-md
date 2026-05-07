@@ -1,4 +1,4 @@
-import { getDatabase } from '../../src/lib/ourin-database.js'
+import { getDatabase } from '../../src/lib/Shon-database.js'
 import config from '../../config.js'
 const pluginConfig = {
     name: 'done',
@@ -116,7 +116,7 @@ async function handler(m, { sock }) {
     await db.save()
     
     const saluranId = config.saluran?.id || '120363208449943317@newsletter'
-    const saluranName = config.saluran?.name || config.bot?.name || 'Ourin-AI'
+    const saluranName = config.saluran?.name || config.bot?.name || 'ShooNhee-AI'
     
     const mentions = []
     if (buyerJid) mentions.push(buyerJid)
@@ -151,7 +151,7 @@ async function handleBuyerDone(m, sock, session) {
     await db.save()
     
     const saluranId = config.saluran?.id || '120363208449943317@newsletter'
-    const saluranName = config.saluran?.name || config.bot?.name || 'Ourin-AI'
+    const saluranName = config.saluran?.name || config.bot?.name || 'ShooNhee-AI'
     
     await sock.sendMessage(m.chat, {
         text: invoiceText,

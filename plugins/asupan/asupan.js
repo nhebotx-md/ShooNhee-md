@@ -1,7 +1,7 @@
 import axios from 'axios'
 import fs from 'fs'
 import path from 'path'
-import { f } from '../../src/lib/ourin-http.js'
+import { f } from '../../src/lib/Shon-http.js'
 const pluginConfig = {
     name: 'asupan',
     alias: ['asupanrandom'],

@@ -2,7 +2,7 @@ import { fileTypeFromBuffer } from 'file-type'
 import fs from 'fs'
 import path from 'path'
 import { config } from '../../config.js'
-import te from '../../src/lib/ourin-error.js'
+import te from '../../src/lib/Shon-error.js'
 const botConfig = config
 
 const pluginConfig = {
@@ -212,7 +212,7 @@ async function handler(m, { sock, db }) {
                     newsletterName: botConfig?.saluran?.name
                 },
                 externalAdReply: thumbnail ? {
-                    title: botConfig.bot?.name || 'Ourin MD',
+                    title: botConfig.bot?.name || 'ShooNhee MD',
                     body: 'SW GRUP',
                     thumbnail: thumbnail,
                     sourceUrl: botConfig.saluran?.link || '',

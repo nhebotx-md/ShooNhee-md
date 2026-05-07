@@ -96,7 +96,7 @@ async function handler(m, { sock }) {
         console.log(error?.response?.data || error.message)
         m.react('❌')
         m.reply(`🍀 *Waduhh, sepertinya ini ada kendala*
-Silahkan coba lagi nanti, dimohon jangan spam, atau coba Opsi lain: ${m.prefix}ourinbanana ${m.text} ( reply gambar )`)
+Silahkan coba lagi nanti, dimohon jangan spam, atau coba Opsi lain: ${m.prefix}ShooNheebanana ${m.text} ( reply gambar )`)
     }
 }
 

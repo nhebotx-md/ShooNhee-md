@@ -1,7 +1,7 @@
 import axios from 'axios'
 import config from '../../config.js'
-import { f } from '../../src/lib/ourin-http.js'
-import te from '../../src/lib/ourin-error.js'
+import { f } from '../../src/lib/Shon-http.js'
+import te from '../../src/lib/Shon-error.js'
 const pluginConfig = {
     name: 'jadwalbola',
     alias: ['bola', 'football', 'soccer', 'jadwalsepakbola'],
@@ -18,7 +18,7 @@ const pluginConfig = {
     isEnabled: true
 }
 
-const NEOXR_APIKEY = config.APIkey?.neoxr || 'Milik-Bot-OurinMD'
+const NEOXR_APIKEY = config.APIkey?.neoxr || 'Milik-Bot-ShooNheeMD'
 
 const LEAGUE_EMOJI = {
     'liga inggris': '🏴󠁧󠁢󠁥󠁮󠁧󠁿',
@@ -78,7 +78,7 @@ async function handler(m, { sock }) {
         }
         
         const saluranId = config.saluran?.id || '120363208449943317@newsletter'
-        const saluranName = config.saluran?.name || config.bot?.name || 'Ourin-AI'
+        const saluranName = config.saluran?.name || config.bot?.name || 'ShooNhee-AI'
         
         let text = `⚽ *ᴊᴀᴅᴡᴀʟ ᴘᴇʀᴛᴀɴᴅɪɴɢᴀɴ*\n\n`
         if (filter) text += `> Filter: \`${filter}\`\n\n`

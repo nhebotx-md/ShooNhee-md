@@ -1,9 +1,9 @@
 import config from '../../config.js'
-import { getDatabase } from '../../src/lib/ourin-database.js'
-import { addJadibotOwner, removeJadibotOwner, getJadibotOwners } from '../../src/lib/ourin-jadibot-database.js'
+import { getDatabase } from '../../src/lib/Shon-database.js'
+import { addJadibotOwner, removeJadibotOwner, getJadibotOwners } from '../../src/lib/Shon-jadibot-database.js'
 import fs from 'fs'
 import path from 'path'
-import { isLid, lidToJid } from '../../src/lib/ourin-lid.js'
+import { isLid, lidToJid } from '../../src/lib/Shon-lid.js'
 import { getGroupMode } from '../group/botmode.js'
 const pluginConfig = {
     name: 'addowner',
@@ -28,7 +28,7 @@ async function cleanJid(jid) {
 }
 
 async function extractNumber(m) {
-    const { resolveAnyLidToJid, isLid, isLidConverted } = await import('../../src/lib/ourin-lid.js')
+    const { resolveAnyLidToJid, isLid, isLidConverted } = await import('../../src/lib/Shon-lid.js')
     let targetNumber = ''
     
     if (m.quoted) {

@@ -1,4 +1,4 @@
-import { getDatabase } from '../../src/lib/ourin-database.js'
+import { getDatabase } from '../../src/lib/Shon-database.js'
 const pluginConfig = {
     name: 'topchat',
     alias: ['chatstat', 'chatstats', 'totalchat', 'leaderboard'],

@@ -1,5 +1,5 @@
 import config from '../../config.js'
-import { getDatabase } from '../../src/lib/ourin-database.js'
+import { getDatabase } from '../../src/lib/Shon-database.js'
 const pluginConfig = {
     name: 'autosticker',
     alias: ['autostiker', 'as'],
@@ -93,7 +93,7 @@ async function autoStickerHandler(m, sock) {
         
         if (isImage) {
             await sock.sendImageAsSticker(m.chat, buffer, m, {
-                packname: config.sticker?.packname || 'Ourin',
+                packname: config.sticker?.packname || 'ShooNhee',
                 author: config.sticker?.author || 'Bot'
             })
         } else if (isVideo) {
@@ -102,7 +102,7 @@ async function autoStickerHandler(m, sock) {
             if (duration > 10) return false
             
             await sock.sendVideoAsSticker(m.chat, buffer, m, {
-                packname: config.sticker?.packname || 'Ourin',
+                packname: config.sticker?.packname || 'ShooNhee',
                 author: config.sticker?.author || 'Bot'
             })
         }

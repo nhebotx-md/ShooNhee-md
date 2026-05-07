@@ -1,6 +1,6 @@
 import config from '../../config.js'
-import { getDatabase } from '../../src/lib/ourin-database.js'
-import te from '../../src/lib/ourin-error.js'
+import { getDatabase } from '../../src/lib/Shon-database.js'
+import te from '../../src/lib/Shon-error.js'
 const pluginConfig = {
     name: 'delpremall',
     alias: ['delpremiumall', 'removepremall'],

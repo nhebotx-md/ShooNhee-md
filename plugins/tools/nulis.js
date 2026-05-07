@@ -1,13 +1,13 @@
 import config from "../../config.js";
 import path from "path";
 import fs from "fs";
-import * as timeHelper from "../../src/lib/ourin-time.js";
+import * as timeHelper from "../../src/lib/Shon-time.js";
 let _canvas = null;
 async function _getCanvas() {
   if (!_canvas) _canvas = await import("@napi-rs/canvas");
   return _canvas;
 }
-import te from "../../src/lib/ourin-error.js";
+import te from "../../src/lib/Shon-error.js";
 const pluginConfig = {
   name: "nulis",
   alias: ["tulis", "write"],
@@ -40,7 +40,7 @@ let _fontRegistered = false;
 
 async function getContextInfo(title = "📝 *ɴᴜʟɪs*", body = "Tulisan tangan") {
   const saluranId = config.saluran?.id || "120363208449943317@newsletter";
-  const saluranName = config.saluran?.name || config.bot?.name || "Ourin-AI";
+  const saluranName = config.saluran?.name || config.bot?.name || "ShooNhee-AI";
 
   const contextInfo = {
     forwardingScore: 9999,

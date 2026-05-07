@@ -1,4 +1,4 @@
-import { getDatabase } from '../../src/lib/ourin-database.js'
+import { getDatabase } from '../../src/lib/Shon-database.js'
 import config from '../../config.js'
 const pluginConfig = {
     name: 'sistemdaftar',
@@ -23,7 +23,7 @@ async function handler(m, { sock }) {
     const currentStatus = db.setting('registrationRequired') ?? config.registration?.enabled ?? false
     
     const saluranId = config.saluran?.id || '120363424976130148@newsletter'
-    const saluranName = config.saluran?.name || config.bot?.name || 'Ourin-AI'
+    const saluranName = config.saluran?.name || config.bot?.name || 'ShooNhee-AI'
     
     if (!args) {
         return m.reply(

@@ -1,6 +1,6 @@
-import { getDatabase } from '../../src/lib/ourin-database.js'
+import { getDatabase } from '../../src/lib/Shon-database.js'
 import { getGroupMode } from '../group/botmode.js'
-import te from '../../src/lib/ourin-error.js'
+import te from '../../src/lib/Shon-error.js'
 const pluginConfig = {
     name: 'savenomor',
     alias: ['sv', 'save', 'simpannomor'],

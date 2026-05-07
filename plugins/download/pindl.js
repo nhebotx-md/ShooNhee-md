@@ -1,8 +1,8 @@
-import { pinterestdl } from '../../src/lib/ourin-pinterest.js'
+import { pinterestdl } from '../../src/lib/Shon-pinterest.js'
 import path from 'path'
-import { queueFFmpeg } from './../../src/lib/ourin-ffmpeg.js'
-import { f } from '../../src/lib/ourin-http.js'
-import te from '../../src/lib/ourin-error.js'
+import { queueFFmpeg } from './../../src/lib/Shon-ffmpeg.js'
+import { f } from '../../src/lib/Shon-http.js'
+import te from '../../src/lib/Shon-error.js'
 const pluginConfig = {
     name: 'pindl',
     alias: ['pinterestdl', 'pindownload', 'pintdl'],

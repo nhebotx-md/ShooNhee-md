@@ -1,13 +1,13 @@
 import fs from 'fs'
 import path from 'path'
-import te from '../../src/lib/ourin-error.js'
+import te from '../../src/lib/Shon-error.js'
 const pluginConfig = {
     name: 'ganti-namabot',
     alias: ['setnamabot', 'setnamebot', 'gantibot'],
     category: 'owner',
     description: 'Ganti nama bot di config.js',
     usage: '.ganti-namabot <nama baru>',
-    example: '.ganti-namabot Ourin MD',
+    example: '.ganti-namabot ShooNhee MD',
     isOwner: true,
     isPremium: false,
     isGroup: false,

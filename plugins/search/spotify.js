@@ -1,5 +1,5 @@
 import { default as axios } from 'axios'
-import te from '../../src/lib/ourin-error.js'
+import te from '../../src/lib/Shon-error.js'
 import config from '../../config.js'
 const pluginConfig = {
     name: 'spotify',

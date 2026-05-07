@@ -1,5 +1,5 @@
 import config from '../../config.js'
-import { getDatabase } from '../../src/lib/ourin-database.js'
+import { getDatabase } from '../../src/lib/Shon-database.js'
 const pluginConfig = {
     name: 'botmode',
     alias: ['setmode', 'mode'],
@@ -99,7 +99,7 @@ ${m.isGroup ? `┃ ㊗ ɢʀᴜᴘ: *${(groupMode || 'INHERIT').toUpperCase()}*\n
     if (mode === 'store' && m.isGroup) {
         if (isAutoorder) {
             try {
-                const { default: pakasir } = await import('../../src/lib/ourin-pakasir.js')
+                const { default: pakasir } = await import('../../src/lib/Shon-pakasir.js')
                 if (!pakasir.isEnabled()) {
                     extraInfo = `\n\n⚠️ *Pakasir belum dikonfigurasi!*\n> Set di config.js: pakasir.slug & pakasir.apiKey`
                 } else {

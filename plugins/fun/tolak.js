@@ -1,4 +1,4 @@
-import { getDatabase } from '../../src/lib/ourin-database.js'
+import { getDatabase } from '../../src/lib/Shon-database.js'
 import config from '../../config.js'
 import path from 'path'
 import fs from 'fs'
@@ -37,7 +37,7 @@ const rejectionQuotes = [
 
 async function getContextInfo(title = '💔 *ᴛᴏʟᴀᴋ*', body = 'Rejected!') {
     const saluranId = config.saluran?.id || '120363208449943317@newsletter'
-    const saluranName = config.saluran?.name || config.bot?.name || 'Ourin-AI'
+    const saluranName = config.saluran?.name || config.bot?.name || 'ShooNhee-AI'
     
     const contextInfo = {
         forwardingScore: 9999,

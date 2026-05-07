@@ -1,7 +1,7 @@
 import config from '../../config.js'
 import path from 'path'
 import fs from 'fs'
-import te from '../../src/lib/ourin-error.js'
+import te from '../../src/lib/Shon-error.js'
 const pluginConfig = {
     name: 'ipwho',
     alias: ['ip', 'iplookup', 'ipinfo'],
@@ -26,7 +26,7 @@ try {
 
 async function getContextInfo(title = '🌐 *ɪᴘ ʟᴏᴏᴋᴜᴘ*', body = 'IP Information') {
     const saluranId = config.saluran?.id || '120363208449943317@newsletter'
-    const saluranName = config.saluran?.name || config.bot?.name || 'Ourin-AI'
+    const saluranName = config.saluran?.name || config.bot?.name || 'ShooNhee-AI'
     
     const contextInfo = {
         forwardingScore: 9999,

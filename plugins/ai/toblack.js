@@ -1,7 +1,7 @@
 import axios from "axios";
-import { uploadImage } from "../../src/lib/ourin-uploader.js";
-import { f } from "../../src/lib/ourin-http.js";
-import te from "../../src/lib/ourin-error.js";
+import { uploadImage } from "../../src/lib/Shon-uploader.js";
+import { f } from "../../src/lib/Shon-http.js";
+import te from "../../src/lib/Shon-error.js";
 import { live3d } from "../../src/scraper/seaart.js";
 const pluginConfig = {
   name: "toblack",

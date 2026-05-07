@@ -1,5 +1,5 @@
 import generateCustomTTS from '../../src/scraper/topmedia.js'
-import { getDatabase } from '../../src/lib/ourin-database.js'
+import { getDatabase } from '../../src/lib/Shon-database.js'
 import config from '../../config.js'
 import axios from 'axios'
 import { exec } from 'child_process'
@@ -13,8 +13,8 @@ const pluginConfig = {
     alias: ['aai'],
     category: 'group',
     description: 'Toggle auto AI response untuk grup dengan pilihan text atau voice',
-    usage: '.autoai on/off --ourinmode=<character> --type=<text|voice>',
-    example: '.autoai on --ourinmode=furina --type=voice',
+    usage: '.autoai on/off --ShooNheemode=<character> --type=<text|voice>',
+    example: '.autoai on --ShooNheemode=furina --type=voice',
     isOwner: false,
     isPremium: false,
     isGroup: true,
@@ -77,7 +77,7 @@ async function handler(m) {
     if (!db.db.data.autoai) db.db.data.autoai = {}
     
     const mode = args[0]?.toLowerCase()
-    const modeMatch = fullArgs.match(/--ourinmode=(\w+)/i)
+    const modeMatch = fullArgs.match(/--ShooNheemode=(\w+)/i)
     const typeMatch = fullArgs.match(/--type=(text|voice)/i)
     const charKey = modeMatch ? modeMatch[1].toLowerCase() : null
     const responseType = typeMatch ? typeMatch[1].toLowerCase() : 'text'
@@ -87,15 +87,15 @@ async function handler(m) {
         let txt = `🤖 *ᴀᴜᴛᴏ ᴀɪ*\n\n`
         txt += `> Mengaktifkan/menonaktifkan auto AI response\n\n`
         txt += `*Penggunaan:*\n`
-        txt += `> .autoai on --ourinmode=<karakter> --type=<text|voice>\n`
+        txt += `> .autoai on --ShooNheemode=<karakter> --type=<text|voice>\n`
         txt += `> .autoai off\n\n`
         txt += `*Karakter tersedia:*\n${charList}\n\n`
         txt += `*Response Type:*\n`
         txt += `> text - Reply dengan text biasa\n`
         txt += `> voice - Reply dengan voice note (TTS)\n\n`
         txt += `*Contoh:*\n`
-        txt += `> .autoai on --ourinmode=furina --type=text\n`
-        txt += `> .autoai on --ourinmode=kobo --type=voice`
+        txt += `> .autoai on --ShooNheemode=furina --type=text\n`
+        txt += `> .autoai on --ShooNheemode=kobo --type=voice`
         return m.reply(txt)
     }
     
@@ -107,7 +107,7 @@ async function handler(m) {
     
     if (!charKey || !characters[charKey]) {
         const charList = Object.keys(characters).join(', ')
-        return m.reply(`❌ Karakter tidak valid!\n\n> Karakter tersedia: ${charList}\n\n> Contoh: .autoai on --ourinmode=furina --type=voice`)
+        return m.reply(`❌ Karakter tidak valid!\n\n> Karakter tersedia: ${charList}\n\n> Contoh: .autoai on --ShooNheemode=furina --type=voice`)
     }
     
     db.db.data.autoai[m.chat] = {

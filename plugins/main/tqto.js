@@ -18,16 +18,16 @@ const pluginConfig = {
 }
 
 async function handler(m, { sock }) {
-    const botName = config.bot?.name || 'Ourin-AI'
+    const botName = config.bot?.name || 'ShooNhee-AI'
     const version = config.bot?.version || '1.0.0'
     const developer = config.bot?.developer || 'Lucky Archz'
     
     const credits = [
         { name: 'hyuuOkkotsuX', role: 'Lead Staff', icon: '👨‍💻' },
-        { name: 'Zann', role: 'Creator Ourin MD dan APK Stardem Ourin', icon: '👨‍💻' },
+        { name: 'Zann', role: 'Creator ShooNhee MD dan APK Stardem ShooNhee', icon: '👨‍💻' },
         { name: 'SenzOkkotsu', role: 'Asisstant Developer', icon: '👨‍💻' },
         { name: 'Ell', role: 'Asisstant Developer', icon: '👨‍💻' },
-        { name: 'Aqell', role: 'Developer SC BUG Ourin Glitch', icon: '👨‍💻' },
+        { name: 'Aqell', role: 'Developer SC BUG ShooNhee Glitch', icon: '👨‍💻' },
         { name: 'Mobbc', role: 'Staff', icon: '👨‍💻' },
         { name: 'Sanxz', role: 'Tangan Kanan', icon: '👨‍💻' },
         { name: 'Dinz', role: 'Tangan Kanan', icon: '👨‍💻' },

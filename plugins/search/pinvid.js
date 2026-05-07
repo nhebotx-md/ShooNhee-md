@@ -4,11 +4,11 @@ import { promisify } from 'util'
 import fs from 'fs'
 import path from 'path'
 import crypto from 'crypto'
-import { generateWAMessage, generateWAMessageFromContent, jidNormalizedUser } from 'ourin'
+import { generateWAMessage, generateWAMessageFromContent, jidNormalizedUser } from 'ShooNhee'
 import config from '../../config.js'
-import te from '../../src/lib/ourin-error.js'
+import te from '../../src/lib/Shon-error.js'
 const execAsync = promisify(exec)
-const NEOXR_APIKEY = config.APIkey?.neoxr || 'Milik-Bot-OurinMD'
+const NEOXR_APIKEY = config.APIkey?.neoxr || 'Milik-Bot-ShooNheeMD'
 
 const pluginConfig = {
     name: 'pinvid',
@@ -162,7 +162,7 @@ async function handler(m, { sock }) {
             console.log('[PinVid] Album message failed, sending individually:', albumErr.message)
             
             const saluranId = config.saluran?.id || '120363208449943317@newsletter'
-            const saluranName = config.saluran?.name || config.bot?.name || 'Ourin-AI'
+            const saluranName = config.saluran?.name || config.bot?.name || 'ShooNhee-AI'
             
             for (const content of mediaList) {
                 await sock.sendMessage(m.chat, {

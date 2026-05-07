@@ -1,15 +1,15 @@
-import { getDatabase } from '../../src/lib/ourin-database.js'
+import { getDatabase } from '../../src/lib/Shon-database.js'
 /**
  * 🐺 WEREWOLF GAME
  * Social deduction game for WhatsApp
  * 
  * Based on reference: RTXZY-MD-pro/lib/werewolf.js
- * Enhanced for OurinAI
+ * Enhanced for ShooNheeAI
  */
 import config from '../../config.js'
 import fs from 'fs'
 import path from 'path'
-import te from '../../src/lib/ourin-error.js'
+import te from '../../src/lib/Shon-error.js'
 const pluginConfig = {
     name: 'werewolf',
     alias: ['ww', 'wwgc'],
@@ -68,7 +68,7 @@ const PHASE_DURATION = {
 
 async function getWWContextInfo(title = '🐺 WEREWOLF', body = 'Social deduction game!', thumbBuffer = thumbWW, mentions) {
     const saluranId = config.saluran?.id || '120363208449943317@newsletter'
-    const saluranName = config.saluran?.name || config.bot?.name || 'Ourin-AI'
+    const saluranName = config.saluran?.name || config.bot?.name || 'ShooNhee-AI'
     
     const contextInfo = {
         forwardingScore: 9999,

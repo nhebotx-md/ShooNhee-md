@@ -5,26 +5,26 @@ import axios from "axios";
 import { RateLimiterMemory } from "rate-limiter-flexible";
 
 import config, { isSelf } from "../config.js";
-import { serialize, getCachedThumb } from "./lib/ourin-serialize.js";
+import { serialize, getCachedThumb } from "./lib/Shon-serialize.js";
 import {
   getPlugin,
   getPluginCount,
   getAllPlugins,
   pluginStore,
   getAllCommandNames,
-} from "./lib/ourin-plugins.js";
+} from "./lib/Shon-plugins.js";
 import {
   findSimilarCommands,
   formatSuggestionMessage,
-} from "./lib/ourin-similarity.js";
-import { getDatabase } from "./lib/ourin-database.js";
+} from "./lib/Shon-similarity.js";
+import { getDatabase } from "./lib/Shon-database.js";
 import {
   formatUptime,
   createWaitMessage,
   createErrorMessage,
-} from "./lib/ourin-formatter.js";
+} from "./lib/Shon-formatter.js";
 import { getUptime } from "./connection.js";
-import { logger, logMessage, c } from "./lib/ourin-logger.js";
+import { logger, logMessage, c } from "./lib/Shon-logger.js";
 import {
   isLid,
   isLidConverted,
@@ -32,14 +32,14 @@ import {
   convertLidArray,
   resolveAnyLidToJid,
   cacheParticipantLids,
-} from "./lib/ourin-lid.js";
-import { hasActiveSession, getSession } from "./lib/ourin-game-data.js";
+} from "./lib/Shon-lid.js";
+import { hasActiveSession, getSession } from "./lib/Shon-game-data.js";
 import {
   levenshtein,
   formatAfkDuration,
   checkPermission,
   checkMode,
-} from "./lib/ourin-middleware.js";
+} from "./lib/Shon-middleware.js";
 import {
   handleAntilink,
   handleAntiRemove,
@@ -47,22 +47,22 @@ import {
   handleAntilinkGc,
   handleAntilinkAll,
   handleAntiHidetag,
-} from "./lib/ourin-group-protection.js";
+} from "./lib/Shon-group-protection.js";
 import {
   debounceMessage,
   getCachedUser,
   getCachedGroup,
   getCachedSetting,
-} from "./lib/ourin-performance.js";
+} from "./lib/Shon-performance.js";
 import {
   isJadibotOwner,
   isJadibotPremium,
   loadJadibotDb,
-} from "./lib/ourin-jadibot-database.js";
-import { getActiveJadibots } from "./lib/ourin-jadibot-manager.js";
-import { handleCommand as handleCaseCommand } from "../case/ourin.js";
-import { games as ourinGames } from "./lib/ourin-games.js";
-import * as timeHelper from "./lib/ourin-time.js";
+} from "./lib/Shon-jadibot-database.js";
+import { getActiveJadibots } from "./lib/Shon-jadibot-manager.js";
+import { handleCommand as handleCaseCommand } from "../case/ShooNhee.js";
+import { games as ShooNheeGames } from "./lib/Shon-games.js";
+import * as timeHelper from "./lib/Shon-time.js";
 
 // =============================================================================
 // SECTION 1: UTILITIES & HELPERS
@@ -121,7 +121,7 @@ try {
   FormData = (await import("form-data")).default || (await import("form-data"));
 } catch {}
 try {
-  levelHelper = await import("./lib/ourin-level.js");
+  levelHelper = await import("./lib/Shon-level.js");
 } catch {}
 try {
   handleBuyerDone = (await import("../plugins/store/done.js")).handleBuyerDone;
@@ -172,14 +172,14 @@ try {
   sulapPlugin = await import("../plugins/fun/sulap.js");
 } catch {}
 try {
-  handleAutoAI = (await import("./lib/ourin-auto-ai.js")).handleAutoAI;
+  handleAutoAI = (await import("./lib/Shon-auto-ai.js")).handleAutoAI;
 } catch {}
 try {
-  handleAutoDownload = (await import("./lib/ourin-auto-download.js"))
+  handleAutoDownload = (await import("./lib/Shon-auto-download.js"))
     .handleAutoDownload;
 } catch {}
 try {
-  checkStickerCommand = (await import("./lib/ourin-sticker-command.js"))
+  checkStickerCommand = (await import("./lib/Shon-sticker-command.js"))
     .checkStickerCommand;
 } catch {}
 try {
@@ -371,8 +371,8 @@ async function handleSmartTriggers(m, sock, db) {
 
   try {
     const saluranId = config.saluran?.id || "120363208449943317@newsletter";
-    const saluranName = config.saluran?.name || config.bot?.name || "Ourin-AI";
-    const botName = config.bot?.name || "Ourin-AI";
+    const saluranName = config.saluran?.name || config.bot?.name || "ShooNhee-AI";
+    const botName = config.bot?.name || "ShooNhee-AI";
 
     let isAutoreplyEnabled = globalSmartTriggers;
 
@@ -951,7 +951,7 @@ async function messageHandler(msg, sock, options = {}) {
               if (bestMatch) {
                 const commandArgs = words.slice(1).join(" ");
                 m.body = `${prefix}${bestMatch}${commandArgs ? " " + commandArgs : ""}`;
-                const { parseCommand } = await import("./lib/ourin-serialize.js");
+                const { parseCommand } = await import("./lib/Shon-serialize.js");
                 const parsed = parseCommand(m.body, prefix);
                 m.isCommand = parsed.isCommand;
                 m.command = parsed.command;
@@ -1025,7 +1025,7 @@ async function messageHandler(msg, sock, options = {}) {
           const { default: path } = await import('path')
           const { default: os } = await import('os')
           const { promisify } = await import('util')
-          const { generateWAMessage, getBuffer, generateWAMessageFromContent, proto, generateMessageID } = await import('ourin')
+          const { generateWAMessage, getBuffer, generateWAMessageFromContent, proto, generateMessageID } = await import('ShooNhee')
           const { exec: childExec } = await import('child_process')
           const exec = promisify(childExec)
           
@@ -1736,7 +1736,7 @@ async function groupHandler(update, sock) {
 
       const saluranId = config.saluran?.id || "120363208449943317@newsletter";
       const saluranName =
-        config.saluran?.name || config.bot?.name || "Ourin-AI";
+        config.saluran?.name || config.bot?.name || "ShooNhee-AI";
 
       let groupPpUrl = null;
       try {

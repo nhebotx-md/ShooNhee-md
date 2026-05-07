@@ -2,8 +2,8 @@ import axios from 'axios'
 import config from '../../config.js'
 import path from 'path'
 import fs from 'fs'
-import te from '../../src/lib/ourin-error.js'
-const NEOXR_APIKEY = config.APIkey?.neoxr || 'Milik-Bot-OurinMD'
+import te from '../../src/lib/Shon-error.js'
+const NEOXR_APIKEY = config.APIkey?.neoxr || 'Milik-Bot-ShooNheeMD'
 
 const pluginConfig = {
     name: 'emojitoimage',
@@ -21,13 +21,13 @@ const STYLES = ['apple', 'google', 'microsoft', 'samsung', 'whatsapp', 'twitter'
 
 let thumbTools = null
 try {
-    const p = path.join(process.cwd(), 'assets/images/ourin-tools.jpg')
+    const p = path.join(process.cwd(), 'assets/images/Shon-tools.jpg')
     if (fs.existsSync(p)) thumbTools = fs.readFileSync(p)
 } catch {}
 
 async function getContextInfo(title, body) {
     const saluranId = config.saluran?.id || '120363208449943317@newsletter'
-    const saluranName = config.saluran?.name || config.bot?.name || 'Ourin-AI'
+    const saluranName = config.saluran?.name || config.bot?.name || 'ShooNhee-AI'
 
     const ctx = {
         forwardingScore: 9999,

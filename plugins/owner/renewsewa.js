@@ -1,7 +1,7 @@
-import { getDatabase } from '../../src/lib/ourin-database.js'
-import * as timeHelper from '../../src/lib/ourin-time.js'
+import { getDatabase } from '../../src/lib/Shon-database.js'
+import * as timeHelper from '../../src/lib/Shon-time.js'
 import fs from 'fs'
-import te from '../../src/lib/ourin-error.js'
+import te from '../../src/lib/Shon-error.js'
 const pluginConfig = {
     name: 'renewsewa',
     alias: ['perpanjangsewa', 'extendsewa'],

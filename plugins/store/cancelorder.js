@@ -1,7 +1,7 @@
-import { getDatabase } from '../../src/lib/ourin-database.js'
-import * as orderPoller from '../../src/lib/ourin-order-poller.js'
-import * as pakasir from '../../src/lib/ourin-pakasir.js'
-import te from '../../src/lib/ourin-error.js'
+import { getDatabase } from '../../src/lib/Shon-database.js'
+import * as orderPoller from '../../src/lib/Shon-order-poller.js'
+import * as pakasir from '../../src/lib/Shon-pakasir.js'
+import te from '../../src/lib/Shon-error.js'
 const pluginConfig = {
     name: 'cancelorder',
     alias: ['batalorder', 'batalkanorder'],

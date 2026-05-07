@@ -7,7 +7,7 @@ async function getSharp() {
 import fs from "fs";
 import path from "path";
 import { config } from "../../config.js";
-import te from "../../src/lib/ourin-error.js";
+import te from "../../src/lib/Shon-error.js";
 const pluginConfig = {
   name: "smeme",
   alias: ["memesticker", "memes"],
@@ -146,7 +146,7 @@ async function handler(m, { sock }) {
     });
     const buffer = Buffer.from(response.data);
     await sock.sendImageAsSticker(m.chat, buffer, m, {
-      packname: config.sticker?.packname || "Ourin-AI",
+      packname: config.sticker?.packname || "ShooNhee-AI",
       author: config.sticker?.author || "Bot",
     });
     m.react("✅");

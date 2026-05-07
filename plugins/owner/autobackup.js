@@ -1,7 +1,7 @@
-import { enableAutoBackup, disableAutoBackup, getBackupStatus, triggerManualBackup, formatInterval } from '../../src/lib/ourin-auto-backup.js'
-import * as timeHelper from '../../src/lib/ourin-time.js'
+import { enableAutoBackup, disableAutoBackup, getBackupStatus, triggerManualBackup, formatInterval } from '../../src/lib/Shon-auto-backup.js'
+import * as timeHelper from '../../src/lib/Shon-time.js'
 import config from '../../config.js'
-import te from '../../src/lib/ourin-error.js'
+import te from '../../src/lib/Shon-error.js'
 const pluginConfig = {
   name: "autobackup",
   alias: ["backup", "ab"],

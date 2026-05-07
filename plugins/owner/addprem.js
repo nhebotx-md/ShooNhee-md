@@ -1,6 +1,6 @@
 import config from '../../config.js'
-import { getDatabase } from '../../src/lib/ourin-database.js'
-import { addJadibotPremium, removeJadibotPremium, getJadibotPremiums } from '../../src/lib/ourin-jadibot-database.js'
+import { getDatabase } from '../../src/lib/Shon-database.js'
+import { addJadibotPremium, removeJadibotPremium, getJadibotPremiums } from '../../src/lib/Shon-jadibot-database.js'
 const pluginConfig = {
     name: 'addprem',
     alias: ['addpremium', 'setprem', 'delprem', 'delpremium', 'listprem', 'premlist'],

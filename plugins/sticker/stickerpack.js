@@ -5,8 +5,8 @@ async function getSharp() {
   if (!_sharp) _sharp = (await import("sharp")).default;
   return _sharp;
 }
-import te from "../../src/lib/ourin-error.js";
-import { addExifToWebp } from "../../src/lib/ourin-exif.js";
+import te from "../../src/lib/Shon-error.js";
+import { addExifToWebp } from "../../src/lib/Shon-exif.js";
 
 const pluginConfig = {
   name: "stickerpack",
@@ -149,7 +149,7 @@ async function handler(m, { sock }) {
       return m.reply(`── .✦ ──\n\n> Gagal mendownload sticker .☘︎ ݁˖`);
     }
 
-    const packname = randPick.name || config.sticker?.packname || "Ourin-AI";
+    const packname = randPick.name || config.sticker?.packname || "ShooNhee-AI";
     const author = config.bot?.developer || config.sticker?.author || "Bot";
 
     try {

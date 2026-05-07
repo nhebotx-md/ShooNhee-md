@@ -1,7 +1,7 @@
 import config from '../../config.js'
 import { default as axios } from 'axios'
 import FormData from 'form-data'
-import te from '../../src/lib/ourin-error.js'
+import te from '../../src/lib/Shon-error.js'
 
 const pluginConfig = {
     name: 'remini',

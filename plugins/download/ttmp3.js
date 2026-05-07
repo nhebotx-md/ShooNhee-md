@@ -54,7 +54,7 @@ async function handler(m, { sock }) {
     const saluranName =
       config.saluran?.name ||
       config.bot?.name ||
-      'Ourin-AI'
+      'ShooNhee-AI'
 
     const carivideotanpawm = result.downloads.find(d => d.type == 'mp3')
     if (!carivideotanpawm) return m.reply('❌ Video HD tidak ditemukan.')

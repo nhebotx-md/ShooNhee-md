@@ -1,6 +1,6 @@
 import axios from 'axios'
 import config from '../../config.js'
-import { f } from '../../src/lib/ourin-http.js'
+import { f } from '../../src/lib/Shon-http.js'
 const pluginConfig = {
     name: 'asupantiktok',
     alias: ['tiktokasupan', 'ttasupan'],

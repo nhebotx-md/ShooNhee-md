@@ -1,8 +1,8 @@
 import {
   renderLatexToPng,
   createMediaUploadFn,
-} from "../../src/lib/ourin-latex.js";
-import te from "../../src/lib/ourin-error.js";
+} from "../../src/lib/Shon-latex.js";
+import te from "../../src/lib/Shon-error.js";
 
 const pluginConfig = {
   name: "math",
@@ -54,7 +54,7 @@ async function handler(m, { sock }) {
         text: "📐 " + input,
         expressions,
         headerText: "Rumus Matematika",
-        footer: "Powered by Ourin",
+        footer: "Powered by ShooNhee",
       },
       renderLatexToPng,
       uploadFn,

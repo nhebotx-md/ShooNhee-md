@@ -1,4 +1,4 @@
-import { getDatabase } from '../../src/lib/ourin-database.js'
+import { getDatabase } from '../../src/lib/Shon-database.js'
 const pluginConfig = {
     name: 'addexp',
     alias: ['tambahexp', 'giveexp', 'addxp'],
@@ -62,7 +62,7 @@ async function handler(m, { sock }) {
     }
     
     const user = db.getUser(targetJid) || db.setUser(targetJid)
-    const { default: levelHelper } = await import('../../src/lib/ourin-level.js')
+    const { default: levelHelper } = await import('../../src/lib/Shon-level.js')
     await levelHelper.addExpWithLevelCheck(sock, m, db, user, amount)
     
     m.react('✅')

@@ -1,6 +1,6 @@
 import { spawn } from 'child_process'
 import path from 'path'
-import te from '../../src/lib/ourin-error.js'
+import te from '../../src/lib/Shon-error.js'
 const pluginConfig = {
     name: 'restart',
     alias: ['reset', 'reboot', 'restartbot'],

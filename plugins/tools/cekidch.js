@@ -1,5 +1,5 @@
 import config from '../../config.js'
-import te from '../../src/lib/ourin-error.js'
+import te from '../../src/lib/Shon-error.js'
 
 const pluginConfig = {
     name: 'cekidch',
@@ -96,7 +96,7 @@ async function handler(m, { sock }) {
 
         await sock.sendButton(m.chat, chPicUrl, infoText, m, {
             buttons: buttons,
-            footer: `© ${config.bot?.name || 'Ourin-AI'}`,
+            footer: `© ${config.bot?.name || 'ShooNhee-AI'}`,
         })
 
         m.react('✅')

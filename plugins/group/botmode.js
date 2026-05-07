@@ -1,4 +1,4 @@
-import { getDatabase } from '../../src/lib/ourin-database.js'
+import { getDatabase } from '../../src/lib/Shon-database.js'
 const pluginConfig = {
     name: 'botmode',
     alias: ['setmode', 'mode'],
@@ -102,7 +102,7 @@ async function handler(m, { sock }) {
     if (mode === 'store') {
         let pakasirEnabled = false
         try {
-            const { default: pakasir } = await import('../../src/lib/ourin-pakasir.js')
+            const { default: pakasir } = await import('../../src/lib/Shon-pakasir.js')
             pakasirEnabled = pakasir.isEnabled()
         } catch (e) {}
         

@@ -1,11 +1,11 @@
 import config from "../../config.js";
-import { getDatabase } from "../../src/lib/ourin-database.js";
-import { createWideDiscordCard } from "../../src/lib/ourin-welcome-card.js";
-import { resolveAnyLidToJid } from "../../src/lib/ourin-lid.js";
+import { getDatabase } from "../../src/lib/Shon-database.js";
+import { createWideDiscordCard } from "../../src/lib/Shon-welcome-card.js";
+import { resolveAnyLidToJid } from "../../src/lib/Shon-lid.js";
 import path from "path";
 import fs from "fs";
 import axios from "axios";
-import te from "../../src/lib/ourin-error.js";
+import te from "../../src/lib/Shon-error.js";
 const pluginConfig = {
   name: "welcome",
   alias: ["wc"],
@@ -100,7 +100,7 @@ Tanoshii jikan o issho ni sugoso ne~`,
       .replace(/{date}/gi, now.format("DD/MM/YYYY"))
       .replace(/{time}/gi, now.format("HH:mm"))
       .replace(/{day}/gi, dayId)
-      .replace(/{bot}/gi, config.bot?.name || "Ourin")
+      .replace(/{bot}/gi, config.bot?.name || "ShooNhee")
       .replace(/{prefix}/gi, prefix);
   }
 
@@ -165,7 +165,7 @@ async function sendWelcomeMessage(sock, groupJid, participant, groupMeta) {
     );
 
     const saluranId = config.saluran?.id || "120363208449943317@newsletter";
-    const saluranName = config.saluran?.name || config.bot?.name || "Ourin-AI";
+    const saluranName = config.saluran?.name || config.bot?.name || "ShooNhee-AI";
 
     if (welcomeType === 2) {
       await sock.sendMessage(groupJid, {

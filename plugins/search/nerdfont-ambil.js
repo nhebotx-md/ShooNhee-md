@@ -5,7 +5,7 @@ async function getSharp() {
   if (!_sharp) _sharp = (await import("sharp")).default;
   return _sharp;
 }
-import te from "../../src/lib/ourin-error.js";
+import te from "../../src/lib/Shon-error.js";
 async function nerdfonts() {
   try {
     const { data } = await axios.get(

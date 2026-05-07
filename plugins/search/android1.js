@@ -1,7 +1,7 @@
 import axios from 'axios'
 import config from '../../config.js'
-import { getDatabase } from '../../src/lib/ourin-database.js'
-import te from '../../src/lib/ourin-error.js'
+import { getDatabase } from '../../src/lib/Shon-database.js'
+import te from '../../src/lib/Shon-error.js'
 const pluginConfig = {
     name: 'android1',
     alias: ['an1'],
@@ -18,7 +18,7 @@ const pluginConfig = {
     isEnabled: true
 }
 
-const NEOXR_APIKEY = config.APIkey?.neoxr || 'Milik-Bot-OurinMD'
+const NEOXR_APIKEY = config.APIkey?.neoxr || 'Milik-Bot-ShooNheeMD'
 
 async function handler(m, { sock }) {
     const db = getDatabase()
@@ -60,7 +60,7 @@ async function handler(m, { sock }) {
         db.save()
         
         const saluranId = config.saluran?.id || '120363208449943317@newsletter'
-        const saluranName = config.saluran?.name || config.bot?.name || 'Ourin-AI'
+        const saluranName = config.saluran?.name || config.bot?.name || 'ShooNhee-AI'
         
         let caption = `📱 Hasil dari pencarian apk mod *${text}*\n`
         caption += `*${apps.length}* aplikasi ditemukan\n\n`

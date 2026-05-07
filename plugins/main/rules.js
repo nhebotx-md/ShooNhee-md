@@ -1,5 +1,5 @@
 import config from '../../config.js'
-import { getDatabase } from '../../src/lib/ourin-database.js'
+import { getDatabase } from '../../src/lib/Shon-database.js'
 
 const pluginConfig = {
     name: 'rules',
@@ -53,7 +53,7 @@ async function handler(m, { sock, config: botConfig }) {
             tableData,
             m,
             {
-                headerText: `${botConfig.bot?.name || 'Ourin-AI'} *RULES*`,
+                headerText: `${botConfig.bot?.name || 'ShooNhee-AI'} *RULES*`,
                 footer: 'Pelanggaran dapat mengakibatkan banned / kick!'
             }
         )

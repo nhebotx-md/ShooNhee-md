@@ -1,5 +1,5 @@
 import config from '../../config.js'
-import te from '../../src/lib/ourin-error.js'
+import te from '../../src/lib/Shon-error.js'
 import { fileURLToPath } from 'url'
 import path from 'path'
 

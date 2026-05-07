@@ -1,6 +1,6 @@
 import axios from 'axios'
 import config from '../../config.js'
-import te from '../../src/lib/ourin-error.js'
+import te from '../../src/lib/Shon-error.js'
 const pluginConfig = {
     name: 'apkmod',
     alias: ['modapk2', 'apkpremium'],
@@ -17,7 +17,7 @@ const pluginConfig = {
     isEnabled: true
 }
 
-const NEOXR_APIKEY = config.APIkey?.neoxr || 'Milik-Bot-OurinMD'
+const NEOXR_APIKEY = config.APIkey?.neoxr || 'Milik-Bot-ShooNheeMD'
 
 async function handler(m, { sock }) {
     const text = m.text?.trim()
@@ -46,7 +46,7 @@ async function handler(m, { sock }) {
         const apps = data.data.slice(0, 15)
         
         const saluranId = config.saluran?.id || '120363208449943317@newsletter'
-        const saluranName = config.saluran?.name || config.bot?.name || 'Ourin-AI'
+        const saluranName = config.saluran?.name || config.bot?.name || 'ShooNhee-AI'
         
         let caption = `📱 *Hasil pencarian dari ${text}*\n\n`
         

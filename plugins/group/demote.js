@@ -1,5 +1,5 @@
-import { getParticipantJid } from '../../src/lib/ourin-lid.js'
-import te from '../../src/lib/ourin-error.js'
+import { getParticipantJid } from '../../src/lib/Shon-lid.js'
+import te from '../../src/lib/Shon-error.js'
 const pluginConfig = {
     name: 'demote',
     alias: ['unadmin', 'turunkan'],

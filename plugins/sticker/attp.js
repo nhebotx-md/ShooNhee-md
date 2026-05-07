@@ -1,8 +1,8 @@
 import axios from 'axios'
 import config from '../../config.js'
-import { f } from '../../src/lib/ourin-http.js'
-import te from '../../src/lib/ourin-error.js'
-const NEOXR_APIKEY = config.APIkey?.neoxr || 'Milik-Bot-OurinMD'
+import { f } from '../../src/lib/Shon-http.js'
+import te from '../../src/lib/Shon-error.js'
+const NEOXR_APIKEY = config.APIkey?.neoxr || 'Milik-Bot-ShooNheeMD'
 
 const pluginConfig = {
     name: 'attp',
@@ -61,7 +61,7 @@ async function handler(m, { sock }) {
         const stickerRes = await f(stickerUrl, 'buffer')
         if (!stickerRes) throw new Error('Gagal mengunduh sticker dari server')
             
-        const { addExifToWebp } = await import('../../src/lib/ourin-exif.js')
+        const { addExifToWebp } = await import('../../src/lib/Shon-exif.js')
         let finalSticker = stickerRes
         try {
             finalSticker = await addExifToWebp(stickerRes, {

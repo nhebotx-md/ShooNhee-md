@@ -2,8 +2,8 @@ import config from "../../config.js";
 import {
   getCommandsByCategory,
   getCategories,
-} from "../../src/lib/ourin-plugins.js";
-import { getDatabase } from "../../src/lib/ourin-database.js";
+} from "../../src/lib/Shon-plugins.js";
+import { getDatabase } from "../../src/lib/Shon-database.js";
 import fs from "fs";
 import path from "path";
 const pluginConfig = {
@@ -61,8 +61,8 @@ try {
 
 function getContextInfo() {
   const saluranId = config.saluran?.id || "120363208449943317@newsletter";
-  const saluranName = config.saluran?.name || config.bot?.name || "Ourin-AI";
-  const botName = config.bot?.name || "Ourin-AI";
+  const saluranName = config.saluran?.name || config.bot?.name || "ShooNhee-AI";
+  const botName = config.bot?.name || "ShooNhee-AI";
 
   return {
     forwardingScore: 9999,
@@ -91,16 +91,16 @@ async function handler(m, { sock, db }) {
   const categories = getCategories();
   const commandsByCategory = getCommandsByCategory();
 
-  const { getCasesByCategory } = await import("../../case/ourin.js");
+  const { getCasesByCategory } = await import("../../case/ShooNhee.js");
   const casesByCategory = getCasesByCategory();
 
   const savedVariant = db.setting("menucatVariant");
   const menucatVariant = savedVariant || config.ui?.menucatVariant || 2;
 
   const saluranId = config.saluran?.id || "120363208449943317@newsletter";
-  const saluranName = config.saluran?.name || config.bot?.name || "Ourin-AI";
+  const saluranName = config.saluran?.name || config.bot?.name || "ShooNhee-AI";
   const saluranLink = config.saluran?.link || "";
-  const botName = config.bot?.name || "Ourin-AI";
+  const botName = config.bot?.name || "ShooNhee-AI";
 
   const imagePath = path.join(process.cwd(), "assets", "images", "ShooNhee.jpg");
   const thumbPath = path.join(process.cwd(), "assets", "images", "ShooNhee2.jpg");
@@ -263,7 +263,7 @@ async function handler(m, { sock, db }) {
           );
 
         case 4: {
-          const { generateWAMessageFromContent, proto } = await import("ourin");
+          const { generateWAMessageFromContent, proto } = await import("ShooNhee");
           const catRows = visibleCats.map((cat) => {
             const total =
               (commandsByCategory[cat] || []).length +
@@ -449,7 +449,7 @@ async function handler(m, { sock, db }) {
         break;
 
       case 4: {
-        const { generateWAMessageFromContent, proto } = await import("ourin");
+        const { generateWAMessageFromContent, proto } = await import("ShooNhee");
         const cmdRows = allCommands.map((cmd) => ({
           title: `${prefix}${toSmallCaps(cmd)}`,
           description: `Command ${matchedCat}`,

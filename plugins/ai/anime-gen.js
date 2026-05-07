@@ -1,6 +1,6 @@
-import { f } from '../../src/lib/ourin-http.js'
+import { f } from '../../src/lib/Shon-http.js'
 import config from '../../config.js'
-import te from '../../src/lib/ourin-error.js'
+import te from '../../src/lib/Shon-error.js'
 const pluginConfig = {
     name: 'anime-gen',
     alias: ['animegen', 'aianimegen', 'genai-anime'],
@@ -39,7 +39,7 @@ async function handler(m, { sock }) {
     m.react('🕕')
 
     try {
-        const NEOXR_APIKEY = config.APIkey?.neoxr || 'Milik-Bot-OurinMD'
+        const NEOXR_APIKEY = config.APIkey?.neoxr || 'Milik-Bot-ShooNheeMD'
         const apiUrl = `https://api.neoxr.eu/api/ai-anime?q=${encodeURIComponent(prompt)}&apikey=${NEOXR_APIKEY}`
         
         const data = await f(apiUrl)

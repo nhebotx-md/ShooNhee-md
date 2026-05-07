@@ -1,5 +1,5 @@
 import axios from 'axios'
-import te from '../../src/lib/ourin-error.js'
+import te from '../../src/lib/Shon-error.js'
 const BASE_URL = 'https://raw.githubusercontent.com/Leoo7z/Image-Source/main/image'
 
 const SOURCES = {

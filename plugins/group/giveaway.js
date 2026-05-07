@@ -1,9 +1,9 @@
 import config from '../../config.js'
-import * as timeHelper from '../../src/lib/ourin-time.js'
+import * as timeHelper from '../../src/lib/Shon-time.js'
 import cron from 'node-cron'
 import path from 'path'
 import fs from 'fs'
-import { getDatabase } from '../../src/lib/ourin-database.js'
+import { getDatabase } from '../../src/lib/Shon-database.js'
 
 
 
@@ -302,7 +302,7 @@ async function handler(m, { sock, args: rawArgs }) {
             const imageBuffer = getGiveawayImage()
             
             const saluranId = botConfig.saluran?.id || '120363208449943317@newsletter'
-            const saluranName = botConfig.saluran?.name || botConfig.bot?.name || 'Ourin-AI'
+            const saluranName = botConfig.saluran?.name || botConfig.bot?.name || 'ShooNhee-AI'
             
             const contextInfo = {
                 mentionedJid: [m.sender, giveaway.adminJid],
@@ -543,7 +543,7 @@ async function handler(m, { sock, args: rawArgs }) {
                         newsletterName: botConfig.saluran?.name
                     },
                     externalAdReply: thumbnail ? {
-                        title: botConfig.bot?.name || 'Ourin MD',
+                        title: botConfig.bot?.name || 'ShooNhee MD',
                         body: 'GIVEAWAY SYSTEM',
                         thumbnail: thumbnail,
                         sourceUrl: botConfig.saluran?.link || '',

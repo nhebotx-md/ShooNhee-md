@@ -1,6 +1,6 @@
 import axios from 'axios'
 import config from '../../config.js'
-import te from '../../src/lib/ourin-error.js'
+import te from '../../src/lib/Shon-error.js'
 const pluginConfig = {
     name: 'bratvermeil',
     alias: ['bratv', 'bratnime'],
@@ -34,7 +34,7 @@ async function handler(m, { sock }) {
         const apikey = 'cuki-x'
         const baseUrl = `https://api.cuki.biz.id/api/canvas/brat/bratnime-vermeil?text=${encodeURIComponent(text)}&apikey=${apikey}`
         await sock.sendImageAsSticker(m.chat, baseUrl, m, {
-            packname: config.sticker?.packname || 'Ourin-AI',
+            packname: config.sticker?.packname || 'ShooNhee-AI',
             author: config.sticker?.author || 'Brat Vermeil'
         })
         

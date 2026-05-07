@@ -1,4 +1,4 @@
-import { getDatabase } from '../../src/lib/ourin-database.js'
+import { getDatabase } from '../../src/lib/Shon-database.js'
 import config from '../../config.js'
 import fs from 'fs'
 import path from 'path'
@@ -362,7 +362,7 @@ async function handler(m, { sock }) {
         const defaultTriggers = [
             { trigger: '@mention', reply: '👋 Hai! Ada yang manggil bot?' },
             { trigger: 'p', reply: '💬 Budayakan salam sebelum percakapan!' },
-            { trigger: 'bot / ourin', reply: '🤖 Bot aktif dan siap!' },
+            { trigger: 'bot / ShooNhee', reply: '🤖 Bot aktif dan siap!' },
             { trigger: 'assalamualaikum', reply: 'Waalaikumsalam saudaraku' }
         ]
         

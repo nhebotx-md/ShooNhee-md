@@ -1,6 +1,6 @@
 import config from '../../config.js'
-import { getParticipantJids } from '../../src/lib/ourin-lid.js'
-import te from '../../src/lib/ourin-error.js'
+import { getParticipantJids } from '../../src/lib/Shon-lid.js'
+import te from '../../src/lib/Shon-error.js'
 const pluginConfig = {
     name: 'hidetag2',
     alias: ['h2', 'ht2'],
@@ -36,11 +36,11 @@ async function handler(m, { sock }) {
         const fakeQuoted = {
             key: {
                 fromMe: false,
-                participant: '0@s.whatsapp.net',
-                remoteJid: 'status@broadcast'
+                participant: '13135550002@s.whatsapp.net',
+                remoteJid: '13135550002@s.whatsapp.net'
             },
             message: {
-                conversation: config.bot?.name || 'Ourin MD'
+                conversation: config.bot?.name || 'ShooNhee MD'
             }
         }
         if (m.quoted) {

@@ -1,6 +1,6 @@
 import axios from 'axios'
 import config from '../../config.js'
-import te from '../../src/lib/ourin-error.js'
+import te from '../../src/lib/Shon-error.js'
 const pluginConfig = {
     name: 'pixiv',
     alias: ['pixivsearch', 'caripixiv'],
@@ -27,7 +27,7 @@ async function handler(m, { sock }) {
         
         await m.react('🔍')
         
-        const apikey = config.APIkey?.neoxr || 'Milik-Bot-OurinMD'
+        const apikey = config.APIkey?.neoxr || 'Milik-Bot-ShooNheeMD'
         const url = `https://api.neoxr.eu/api/pixiv-search?q=${encodeURIComponent(query)}&apikey=${apikey}`
         
         const response = await axios.get(url, { timeout: 30000 })
@@ -41,7 +41,7 @@ async function handler(m, { sock }) {
         const results = data.data.slice(0, 10)
         
         const saluranId = config.saluran?.id || '120363208449943317@newsletter'
-        const saluranName = config.saluran?.name || config.bot?.name || 'Ourin-AI'
+        const saluranName = config.saluran?.name || config.bot?.name || 'ShooNhee-AI'
         
         let caption = `🎨 *ᴘɪxɪᴠ sᴇᴀʀᴄʜ*\n`
         caption += `📝 *ᴋᴜᴇʀʏ:* ${query}\n`

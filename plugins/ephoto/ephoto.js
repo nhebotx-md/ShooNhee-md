@@ -2,7 +2,7 @@ import axios from 'axios'
 import FormData from 'form-data'
 import * as cheerio from 'cheerio'
 import config from '../../config.js'
-import te from '../../src/lib/ourin-error.js'
+import te from '../../src/lib/Shon-error.js'
 const EFFECT_URLS = {
     glitchtext: 'https://en.ephoto360.com/create-digital-glitch-text-effects-online-767.html',
     writetext: 'https://en.ephoto360.com/write-text-on-wet-glass-online-589.html',
@@ -52,7 +52,7 @@ const pluginConfig = {
     category: 'ephoto',
     description: 'Buat efek text keren dengan berbagai style',
     usage: '.<effect> <text>',
-    example: '.glitchtext Ourin-AI',
+    example: '.glitchtext ShooNhee-AI',
     isOwner: false,
     isPremium: false,
     isGroup: false,
@@ -120,12 +120,12 @@ async function handler(m, { sock }) {
             `🎨 *ᴇᴘʜᴏᴛᴏ ᴇꜰꜰᴇᴄᴛs*\n\n` +
             `> Buat efek text keren!\n\n` +
             `╭┈┈⬡「 📋 *ᴅᴀꜰᴛᴀʀ ᴇꜰᴇᴋ* 」\n${effectList}\n╰┈┈┈┈┈┈┈┈⬡\n\n` +
-            `> *Contoh:* ${m.prefix}glitchtext Ourin-AI`
+            `> *Contoh:* ${m.prefix}glitchtext ShooNhee-AI`
         )
     }
     
     if (!text) {
-        return m.reply(`❌ *ᴇʀʀᴏʀ*\n\n> Masukkan text!\n> *Contoh:* ${m.prefix}${command} Ourin-AI`)
+        return m.reply(`❌ *ᴇʀʀᴏʀ*\n\n> Masukkan text!\n> *Contoh:* ${m.prefix}${command} ShooNhee-AI`)
     }
     
     const effectUrl = EFFECT_URLS[command]

@@ -40,7 +40,7 @@ async function handler(m, { sock }) {
     }
     
     const saluranId = config.saluran?.id || '120363208449943317@newsletter'
-    const saluranName = config.saluran?.name || config.bot?.name || 'Ourin-AI'
+    const saluranName = config.saluran?.name || config.bot?.name || 'ShooNhee-AI'
     
     await m.reply(`📋 *ABSEN UDAH JALAN NIHH*\n\n` +
             `「 📋 *ɪɴғᴏ* 」\n` +

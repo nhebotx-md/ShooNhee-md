@@ -1,7 +1,7 @@
 import config from '../../config.js'
 import axios from 'axios'
-import { generateWAMessageFromContent, proto } from 'ourin'
-import te from '../../src/lib/ourin-error.js'
+import { generateWAMessageFromContent, proto } from 'ShooNhee'
+import te from '../../src/lib/Shon-error.js'
 
 const pluginConfig = {
     name: 'cekidgc',
@@ -98,7 +98,7 @@ async function handler(m, { sock }) {
         } catch {}
 
         const saluranId = config.saluran?.id || '120363208449943317@newsletter'
-        const saluranName = config.saluran?.name || config.bot?.name || 'Ourin-AI'
+        const saluranName = config.saluran?.name || config.bot?.name || 'ShooNhee-AI'
 
         const infoText =
             `── .✦ 𝗚𝗥𝗢𝗨𝗣 𝗜𝗡𝗙𝗢 ✦. ── 𝜗ৎ\n\n` +
@@ -115,7 +115,7 @@ async function handler(m, { sock }) {
             `│  ✦ ᴊᴏɪɴ ᴍᴏᴅᴇ  : *${joinMode}*\n` +
             `│  ✦ ᴅᴇsᴋʀɪᴘsɪ  : ${descPreview}\n` +
             `╰──────────────⬣\n\n` +
-            `.☘︎ ݁˖ © ${config.bot?.name || 'Ourin-AI'}`
+            `.☘︎ ݁˖ © ${config.bot?.name || 'ShooNhee-AI'}`
 
         const buttons = [
             {
@@ -128,7 +128,7 @@ async function handler(m, { sock }) {
         ]
 
         if (ppBuffer) {
-            const { prepareWAMessageMedia } = await import('ourin')
+            const { prepareWAMessageMedia } = await import('ShooNhee')
             let headerMedia = null
             try {
                 const sharp = (await import('sharp')).default
@@ -142,7 +142,7 @@ async function handler(m, { sock }) {
                         messageContextInfo: { deviceListMetadata: {}, deviceListMetadataVersion: 2 },
                         interactiveMessage: proto.Message.InteractiveMessage.fromObject({
                             body: proto.Message.InteractiveMessage.Body.fromObject({ text: infoText }),
-                            footer: proto.Message.InteractiveMessage.Footer.fromObject({ text: `© ${config.bot?.name || 'Ourin-AI'}` }),
+                            footer: proto.Message.InteractiveMessage.Footer.fromObject({ text: `© ${config.bot?.name || 'ShooNhee-AI'}` }),
                             header: proto.Message.InteractiveMessage.Header.fromObject({
                                 hasMediaAttachment: !!headerMedia,
                                 ...(headerMedia || {})
@@ -167,7 +167,7 @@ async function handler(m, { sock }) {
                         messageContextInfo: { deviceListMetadata: {}, deviceListMetadataVersion: 2 },
                         interactiveMessage: proto.Message.InteractiveMessage.fromObject({
                             body: proto.Message.InteractiveMessage.Body.fromObject({ text: infoText }),
-                            footer: proto.Message.InteractiveMessage.Footer.fromObject({ text: `© ${config.bot?.name || 'Ourin-AI'}` }),
+                            footer: proto.Message.InteractiveMessage.Footer.fromObject({ text: `© ${config.bot?.name || 'ShooNhee-AI'}` }),
                             nativeFlowMessage: proto.Message.InteractiveMessage.NativeFlowMessage.fromObject({ buttons }),
                             contextInfo: {
                                 mentionedJid: [m.sender, groupOwner],

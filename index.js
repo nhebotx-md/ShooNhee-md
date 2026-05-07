@@ -3,25 +3,25 @@ import fs from 'fs'
 import config from './config.js'
 import { startConnection } from './src/connection.js'
 import { messageHandler, groupHandler, messageUpdateHandler, groupSettingsHandler } from './src/handler.js'
-import { loadPlugins, pluginStore } from './src/lib/ourin-plugins.js'
-import { initDatabase, getDatabase } from './src/lib/ourin-database.js'
-import { initScheduler, loadScheduledMessages, startGroupScheduleChecker, startSewaChecker } from './src/lib/ourin-scheduler.js'
-import { startAutoBackup } from './src/lib/ourin-backup.js'
-import { handleAntiTagSW } from './src/lib/ourin-group-protection.js'
-import { initSholatScheduler } from './src/lib/ourin-sholat-scheduler.js'
-import { initNotifScheduler } from './src/lib/ourin-notif-scheduler.js'
-import { initAutoJpmScheduler } from './src/lib/ourin-auto-jpm.js'
-import { startMemoryMonitor } from './src/lib/ourin-memory-monitor.js'
-import { startTempCleaner } from './src/lib/ourin-temp-cleaner.js'
-import { startDailyPruner } from './src/lib/ourin-data-pruner.js'
-import { logger, c, printBanner, printStartup, logConnection, logErrorBox, logPlugin, divider } from './src/lib/ourin-logger.js'
+import { loadPlugins, pluginStore } from './src/lib/Shon-plugins.js'
+import { initDatabase, getDatabase } from './src/lib/Shon-database.js'
+import { initScheduler, loadScheduledMessages, startGroupScheduleChecker, startSewaChecker } from './src/lib/Shon-scheduler.js'
+import { startAutoBackup } from './src/lib/Shon-backup.js'
+import { handleAntiTagSW } from './src/lib/Shon-group-protection.js'
+import { initSholatScheduler } from './src/lib/Shon-sholat-scheduler.js'
+import { initNotifScheduler } from './src/lib/Shon-notif-scheduler.js'
+import { initAutoJpmScheduler } from './src/lib/Shon-auto-jpm.js'
+import { startMemoryMonitor } from './src/lib/Shon-memory-monitor.js'
+import { startTempCleaner } from './src/lib/Shon-temp-cleaner.js'
+import { startDailyPruner } from './src/lib/Shon-data-pruner.js'
+import { logger, c, printBanner, printStartup, logConnection, logErrorBox, logPlugin, divider } from './src/lib/Shon-logger.js'
 
-await import('./src/lib/ourin-agent.js').then(m => m.initializeAgent()).catch(() => {})
+await import('./src/lib/Shon-agent.js').then(m => m.initializeAgent()).catch(() => {})
 
 let startOrderPoller
-try { const _mod = await import('./src/lib/ourin-order-poller.js'); startOrderPoller = _mod.startOrderPoller } catch {}
+try { const _mod = await import('./src/lib/Shon-order-poller.js'); startOrderPoller = _mod.startOrderPoller } catch {}
 let startOtpPoller
-try { const _mod = await import('./src/lib/ourin-otp-poller.js'); startOtpPoller = _mod.startOtpPoller } catch {}
+try { const _mod = await import('./src/lib/Shon-otp-poller.js'); startOtpPoller = _mod.startOtpPoller } catch {}
 
 const LOG_NOISE = new Set([
   'Closing', 'prekey', '_chains', 'registrationId',
@@ -64,7 +64,7 @@ function startDevWatcher(pluginsPath) {
         if (!fs.existsSync(fullPath)) {
           fileStatCache.delete(fullPath)
           const pluginName = path.basename(filename, ".js")
-          const { unloadPlugin } = await import('./src/lib/ourin-plugins.js')
+          const { unloadPlugin } = await import('./src/lib/Shon-plugins.js')
           const result = unloadPlugin(pluginName)
           if (result.success) logger.warn("plugin", `removed ${filename}`)
           return
@@ -78,7 +78,7 @@ function startDevWatcher(pluginsPath) {
 
           fileStatCache.set(fullPath, { mtimeMs: stats.mtimeMs, size: stats.size })
 
-          const { hotReloadPlugin } = await import('./src/lib/ourin-plugins.js')
+          const { hotReloadPlugin } = await import('./src/lib/Shon-plugins.js')
           const result = await hotReloadPlugin(fullPath)
           if (!result.success) {
             logger.error("plugin", `reload failed: ${filename}: ${result.error}`)
@@ -177,7 +177,7 @@ function setupAntiCrash() {
 async function main() {
   printBanner()
   printStartup({
-    name: config.bot?.name || "Ourin-AI",
+    name: config.bot?.name || "ShooNhee-AI",
     version: config.bot?.version || "1.0.0",
     developer: config.bot?.developer || "Developer",
     mode: config.mode || "public",
@@ -269,12 +269,12 @@ async function main() {
         } catch {}
         try { startOrderPoller(sock) } catch {}
         try {
-          const { startOtpPoller: _startOtp } = await import('./src/lib/ourin-otp-poller.js')
+          const { startOtpPoller: _startOtp } = await import('./src/lib/Shon-otp-poller.js')
           _startOtp(sock)
         } catch {}
 
         try {
-          const { getAllJadibotSessions, restartJadibotSession } = await import('./src/lib/ourin-jadibot-manager.js')
+          const { getAllJadibotSessions, restartJadibotSession } = await import('./src/lib/Shon-jadibot-manager.js')
           const sessions = getAllJadibotSessions()
           if (sessions.length > 0) {
             logger.info('JADIBOT', `Restoring ${sessions.length} session(s)`)

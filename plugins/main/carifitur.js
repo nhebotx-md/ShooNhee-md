@@ -1,7 +1,7 @@
 import fs from "fs";
 import path from "path";
 import config from "../../config.js";
-import te from "../../src/lib/ourin-error.js";
+import te from "../../src/lib/Shon-error.js";
 import { fileURLToPath } from "url";
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -116,7 +116,7 @@ async function loadAllPlugins() {
   } catch {}
 
   try {
-    const { getCaseCommands } = await import("../../case/ourin.js");
+    const { getCaseCommands } = await import("../../case/ShooNhee.js");
     const caseCommands = getCaseCommands();
 
     const caseAliases = {
@@ -236,7 +236,7 @@ async function handler(m, { sock }) {
     }
 
     const saluranId = config.saluran?.id || "120363208449943317@newsletter";
-    const saluranName = config.saluran?.name || config.bot?.name || "Ourin-AI";
+    const saluranName = config.saluran?.name || config.bot?.name || "ShooNhee-AI";
 
     let text = `🔍 *ʜᴀsɪʟ ᴘᴇɴᴄᴀʀɪᴀɴ: "${keyword}"*\n`;
     text += `> Ditemukan *${matches.length}* fitur\n`;

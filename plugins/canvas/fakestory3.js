@@ -4,7 +4,7 @@ async function _getCanvas() {
   return _canvas;
 }
 import axios from "axios";
-import te from "../../src/lib/ourin-error.js";
+import te from "../../src/lib/Shon-error.js";
 const pluginConfig = {
   name: "fakestory3",
   alias: ["fstory3", "igstory3", "quotestory"],

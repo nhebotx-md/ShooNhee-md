@@ -1,4 +1,4 @@
-import { getDatabase } from '../../src/lib/ourin-database.js'
+import { getDatabase } from '../../src/lib/Shon-database.js'
 import { DEFAULT_INTRO } from './intro.js'
 const pluginConfig = {
     name: 'resetintro',

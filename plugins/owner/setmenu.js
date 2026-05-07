@@ -1,6 +1,6 @@
 import config from "../../config.js";
-import { getDatabase } from "../../src/lib/ourin-database.js";
-import pkg from "ourin";
+import { getDatabase } from "../../src/lib/Shon-database.js";
+import pkg from "ShooNhee";
 const { generateWAMessageFromContent, proto } = pkg;
 const pluginConfig = {
   name: "setmenu",
@@ -134,7 +134,7 @@ async function handler(m, { sock, db }) {
                 text: bodyText,
               }),
               footer: proto.Message.InteractiveMessage.Footer.fromObject({
-                text: config.bot?.name || "Ourin-AI",
+                text: config.bot?.name || "ShooNhee-AI",
               }),
               header: proto.Message.InteractiveMessage.Header.fromObject({
                 title: "🎨 Menu Variant",
@@ -153,7 +153,7 @@ async function handler(m, { sock, db }) {
                   newsletterJid:
                     config.saluran?.id || "120363424976130148@newsletter",
                   newsletterName:
-                    config.saluran?.name || config.bot?.name || "Ourin-AI",
+                    config.saluran?.name || config.bot?.name || "ShooNhee-AI",
                   serverMessageId: 127,
                 },
               },

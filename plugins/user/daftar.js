@@ -1,4 +1,4 @@
-import { getDatabase } from '../../src/lib/ourin-database.js'
+import { getDatabase } from '../../src/lib/Shon-database.js'
 import config from '../../config.js'
 const pluginConfig = {
     name: 'daftar',
@@ -71,7 +71,7 @@ async function handler(m, { sock }) {
     }
     
     const saluranId = config.saluran?.id || '120363208449943317@newsletter'
-    const saluranName = config.saluran?.name || config.bot?.name || 'Ourin-AI'
+    const saluranName = config.saluran?.name || config.bot?.name || 'ShooNhee-AI'
     
     await sock.sendMessage(m.chat, {
         text: `📝 *ᴘᴇɴᴅᴀꜰᴛᴀʀᴀɴ - sᴛᴇᴘ 1/2*\n\n` +
@@ -104,7 +104,7 @@ async function registrationAnswerHandler(m, sock) {
     const db = getDatabase()
     
     const saluranId = config.saluran?.id || '120363208449943317@newsletter'
-    const saluranName = config.saluran?.name || config.bot?.name || 'Ourin-AI'
+    const saluranName = config.saluran?.name || config.bot?.name || 'ShooNhee-AI'
     
     if (session.step === 'age') {
         const age = parseInt(text)

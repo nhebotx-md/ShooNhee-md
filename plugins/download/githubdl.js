@@ -1,7 +1,7 @@
 import config from '../../config.js'
 import path from 'path'
 import fs from 'fs'
-import te from '../../src/lib/ourin-error.js'
+import te from '../../src/lib/Shon-error.js'
 const pluginConfig = {
     name: 'githubdl',
     alias: ['gitdl', 'gitclone', 'repodownload'],
