@@ -998,5 +998,5 @@ ISC License
 ---
 
 <p align="center">
-  <sub>ShooNhee Bot v2.4.0 · Built with modular architecture</sub>
+  <sub>ShooNhee Bot v1.0.1 · Built with modular architecture</sub>
 </p>

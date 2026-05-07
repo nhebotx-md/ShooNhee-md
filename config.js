@@ -24,7 +24,7 @@ const config = {
 
   bot: {
     name: 'S͟h͟o͟N͟h͟e͟',           // Nama bot
-    version: '2.4.0',                 // Versi bot
+    version: '1.0.1',                 // Versi bot
     developer: 'ᴹᴿ᭄𝖙ŋɢχོ ×፝֟͜×'          // Nama developer
   },
 
