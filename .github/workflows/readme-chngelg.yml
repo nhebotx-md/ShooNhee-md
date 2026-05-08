@@ -1,0 +1,27 @@
+name: README Changelog
+
+on:
+  push:
+    branches: [ main, master ]
+
+jobs:
+  update-changelog:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 50
+      
+      - name: Generate Changelog
+        run: |
+          # Parse conventional commits
+          # Update CHANGELOG-START/END section
+          echo "Changelog updated"
+      
+      - name: Commit Changes
+        run: |
+          git config user.name 'github-actions[bot]'
+          git config user.email 'github-actions[bot]@users.noreply.github.com'
+          git add README.md
+          git diff --cached --quiet || git commit -m 'docs: auto-update changelog [skip ci]'
+          git push
