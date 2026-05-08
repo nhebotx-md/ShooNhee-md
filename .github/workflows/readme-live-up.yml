@@ -1,10 +1,13 @@
 name: README Live Updates
 
+permissions:
+  contents: write
+
 on:
   push:
     branches: [ main, master ]
   schedule:
-    - cron: '0 */6 * * *'  # Setiap 6 jam
+    - cron: '0 */6 * * *'
 
 jobs:
   update-readme:
@@ -13,13 +16,12 @@ jobs:
       - uses: actions/checkout@v4
         with:
           fetch-depth: 0
-      
+          token: ${{ secrets.PAT }}
+
       - name: Generate Live Updates
         run: |
-          # Script untuk generate live updates section
-          # Implementasi custom sesuai kebutuhan
           echo "Live updates generated"
-      
+
       - name: Commit Changes
         run: |
           git config user.name 'github-actions[bot]'
