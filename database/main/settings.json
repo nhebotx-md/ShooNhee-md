@@ -58,7 +58,7 @@
   "publicAdmin": false,
   "_lastEnergiDefault": 99999,
   "_lastEnergiPremium": 99999999,
-  "lastLimitReset": "2026-05-06T18:06:18.501Z",
+  "lastLimitReset": "2026-05-08T17:00:00.031Z",
   "onlyThisGroup": null,
   "autoJpm": {
     "enabled": false,
@@ -81,6 +81,16 @@
   "autoJoinGc": false,
   "autoSholat": false,
   "errorLog": [
+    {
+      "cmd": "unknown",
+      "err": "sock.sendTable is not a function",
+      "at": 1778261743504
+    },
+    {
+      "cmd": "unknown",
+      "err": "Cannot access 'pickRandom' before initialization",
+      "at": 1778255245315
+    },
     {
       "cmd": "unknown",
       "err": "Connection Closed",

@@ -8,16 +8,26 @@ import {
   getCategories,
 } from "../../src/lib/Shon-plugins.js";
 import { getDatabase } from "../../src/lib/Shon-database.js";
+
 import fs from "fs";
 import path from "path";
+import axios from "axios";
+import { generateWAMessageFromContent, proto } from "ShooNhee";
+
+/* ─────────────────────────────────────────────────────────────────────────────
+ *  LAZY MODULE LOADER
+ *  Sharp is loaded on‑demand to keep startup time minimal.
+ * ───────────────────────────────────────────────────────────────────────────── */
 let _sharp = null;
+
 async function getSharp() {
   if (!_sharp) _sharp = (await import("sharp")).default;
   return _sharp;
 }
-import { generateWAMessageFromContent, proto } from "ShooNhee";
-import axios from "axios";
 
+/* ═══════════════════════════════════════════════════════════════════════════════
+ *  SECTION 1 — PLUGIN CONFIGURATION
+ * ═══════════════════════════════════════════════════════════════════════════════ */
 const pluginConfig = {
   name: "menu",
   alias: ["help", "bantuan", "commands", "m"],
@@ -34,6 +44,10 @@ const pluginConfig = {
   isEnabled: true,
 };
 
+/* ═══════════════════════════════════════════════════════════════════════════════
+ *  SECTION 2 — CATEGORY VISUAL ASSETS
+ *  Premium emoji mapping for every command category.
+ * ═══════════════════════════════════════════════════════════════════════════════ */
 const CATEGORY_EMOJIS = {
   owner: "👑",
   main: "🏠",
@@ -57,152 +71,185 @@ const CATEGORY_EMOJIS = {
   vps: "🌊",
 };
 
+/* ═══════════════════════════════════════════════════════════════════════════════
+ *  SECTION 3 — UNICODE TYPOGRAPHY ENGINE
+ *  Convert plain text into premium Unicode variants for WhatsApp rendering.
+ * ═══════════════════════════════════════════════════════════════════════════════ */
+
+/**
+ * Convert text to small‑caps Unicode glyphs.
+ * @param {string} text
+ * @returns {string}
+ */
 function toSmallCaps(text) {
-  const smallCaps = {
-    a: "ᴀ",
-    b: "ʙ",
-    c: "ᴄ",
-    d: "ᴅ",
-    e: "ᴇ",
-    f: "ꜰ",
-    g: "ɢ",
-    h: "ʜ",
-    i: "ɪ",
-    j: "ᴊ",
-    k: "ᴋ",
-    l: "ʟ",
-    m: "ᴍ",
-    n: "ɴ",
-    o: "ᴏ",
-    p: "ᴘ",
-    q: "ǫ",
-    r: "ʀ",
-    s: "s",
-    t: "ᴛ",
-    u: "ᴜ",
-    v: "ᴠ",
-    w: "ᴡ",
-    x: "x",
-    y: "ʏ",
+  const smallCapsMap = {
+    a: "ᴀ", b: "ʙ", c: "ᴄ", d: "ᴅ", e: "ᴇ",
+    f: "ꜰ", g: "ɢ", h: "ʜ", i: "ɪ", j: "ᴊ",
+    k: "ᴋ", l: "ʟ", m: "ᴍ", n: "ɴ", o: "ᴏ",
+    p: "ᴘ", q: "ǫ", r: "ʀ", s: "s", t: "ᴛ",
+    u: "ᴜ", v: "ᴠ", w: "ᴡ", x: "x", y: "ʏ",
     z: "ᴢ",
   };
   return text
     .toLowerCase()
     .split("")
-    .map((c) => smallCaps[c] || c)
+    .map((char) => smallCapsMap[char] || char)
     .join("");
 }
 
+/**
+ * Convert text to bold‑uppercase sans‑serif Unicode glyphs.
+ * @param {string} text
+ * @returns {string}
+ */
 const toMonoUpperBold = (text) => {
-  const chars = {
-    A: "𝗔",
-    B: "𝗕",
-    C: "𝗖",
-    D: "𝗗",
-    E: "𝗘",
-    F: "𝗙",
-    G: "𝗚",
-    H: "𝗛",
-    I: "𝗜",
-    J: "𝗝",
-    K: "𝗞",
-    L: "𝗟",
-    M: "𝗠",
-    N: "𝗡",
-    O: "𝗢",
-    P: "𝗣",
-    Q: "𝗤",
-    R: "𝗥",
-    S: "𝗦",
-    T: "𝗧",
-    U: "𝗨",
-    V: "𝗩",
-    W: "𝗪",
-    X: "𝗫",
-    Y: "𝗬",
+  const boldUpperMap = {
+    A: "𝗔", B: "𝗕", C: "𝗖", D: "𝗗", E: "𝗘",
+    F: "𝗙", G: "𝗚", H: "𝗛", I: "𝗜", J: "𝗝",
+    K: "𝗞", L: "𝗟", M: "𝗠", N: "𝗡", O: "𝗢",
+    P: "𝗣", Q: "𝗤", R: "𝗥", S: "𝗦", T: "𝗧",
+    U: "𝗨", V: "𝗩", W: "𝗪", X: "𝗫", Y: "𝗬",
     Z: "𝗭",
   };
   return text
     .toUpperCase()
     .split("")
-    .map((c) => chars[c] || c)
+    .map((char) => boldUpperMap[char] || char)
     .join("");
 };
 
+/* ═══════════════════════════════════════════════════════════════════════════════
+ *  SECTION 4 — VISUAL STYLE SYSTEM
+ *  Consistent premium separators, symbols & whitespace for menu rendering.
+ * ═══════════════════════════════════════════════════════════════════════════════ */
+
+/** Premium border characters for WhatsApp box‑drawing. */
+const STYLE = Object.freeze({
+  CORNER_TL: "╭",
+  CORNER_TR: "╮",
+  CORNER_BL: "╰",
+  CORNER_BR: "╯",
+  EDGE_H: "─",
+  EDGE_V: "│",
+  BRANCH_R: "├",
+  BRANCH_L: "┤",
+  END_H: "┈",
+  END_V: "┊",
+  BULLET: "◦",
+  DIAMOND: "◈",
+  DIAMOND_O: "◇",
+  STAR: "✦",
+  STAR_O: "✧",
+  ARROW_R: "➤",
+  ARROW_L: "◄",
+  PIPE: "┃",
+  DASH: "━",
+  DOT: "•",
+  CROSS: "✛",
+  SPARKLE: "✶",
+  HEXAGON: "⬡",
+  HEXAGON_F: "⬢",
+  CIRCLE: "◉",
+  CIRCLE_O: "◎",
+  ARROW_S: "➔",
+  ARROW_D: "➣",
+  TRI_R: "▸",
+  TRI_L: "◂",
+  CHEVRON_R: "›",
+  CHEVRON_L: "‹",
+  BAR: "▕",
+  BAR_L: "▏",
+  BLOCK: "█",
+  BLOCK_S: "▓",
+  BLOCK_F: "░",
+});
+
+/** Pick a random element from an array (seeded once per render). */
+const pickRandom = (arr) => arr[Math.floor(Math.random() * arr.length)];
+
+/** Whatsapp‑safe premium symbol pool.  */
+const PREMIUM_SYMBOLS = [
+  "⭔", "⌬", "〆", "»", "✧", "✪", "✹", "✦", "♢", "✯",
+  "❖", "◆", "★", "⊗", "⊕", "⊙", "⌖", "⌕", "⌘", "⌙",
+  "⌝", "⌞", "⎈", "⎯", "⎱", "⟊", "⟐", "⟫", "⟁", "⬣",
+];
+
+/* ═══════════════════════════════════════════════════════════════════════════════
+ *  SECTION 5 — CATEGORY SORTING ENGINE
+ *  Returns categories filtered by bot mode, ordered by priority list.
+ * ═══════════════════════════════════════════════════════════════════════════════ */
+
+/** Canonical display order for menu categories. */
+const CATEGORY_PRIORITY = [
+  "owner", "main", "utility", "tools", "fun",
+  "game", "download", "search", "sticker", "media",
+  "ai", "group", "religi", "info", "cek",
+  "economy", "user", "canvas", "random", "premium",
+  "ephoto", "jpm", "pushkontak", "panel", "store",
+];
+
+/** Default mode filters when botmode.js plugin is absent. */
+const DEFAULT_MODE_ALLOWED = {
+  md: null,
+  cpanel: ["main", "group", "sticker", "owner", "tools", "panel"],
+  store: ["main", "group", "sticker", "owner", "store"],
+  pushkontak: ["main", "group", "sticker", "owner", "pushkontak"],
+};
+
+const DEFAULT_MODE_EXCLUDED = {
+  md: ["panel", "pushkontak", "store"],
+  cpanel: null,
+  store: null,
+  pushkontak: null,
+};
+
+/**
+ * Build a sorted, filtered category list for the current user & bot mode.
+ * @param {Object} m            — message context
+ * @param {string} botMode      — current mode (md | cpanel | store | pushkontak | …)
+ * @returns {{sorted: Array, totalCmds: number, commandsByCategory: Object}}
+ */
 function getSortedCategories(m, botMode) {
   const categories = getCategories();
   const commandsByCategory = getCommandsByCategory();
-  const categoryOrder = [
-    "owner",
-    "main",
-    "utility",
-    "tools",
-    "fun",
-    "game",
-    "download",
-    "search",
-    "sticker",
-    "media",
-    "ai",
-    "group",
-    "religi",
-    "info",
-    "cek",
-    "economy",
-    "user",
-    "canvas",
-    "random",
-    "premium",
-    "ephoto",
-    "jpm",
-    "pushkontak",
-    "panel",
-    "store",
-  ];
 
-  let modeAllowedMap = {
-    md: null,
-    cpanel: ["main", "group", "sticker", "owner", "tools", "panel"],
-    store: ["main", "group", "sticker", "owner", "store"],
-    pushkontak: ["main", "group", "sticker", "owner", "pushkontak"],
-  };
-  let modeExcludeMap = {
-    md: ["panel", "pushkontak", "store"],
-    cpanel: null,
-    store: null,
-    pushkontak: null,
-  };
+  let modeAllowedMap = { ...DEFAULT_MODE_ALLOWED };
+  let modeExcludeMap = { ...DEFAULT_MODE_EXCLUDED };
 
-  const allowedCats = modeAllowedMap[botMode];
-  const excludeCats = modeExcludeMap[botMode] || [];
+  const allowedCategories = modeAllowedMap[botMode];
+  const excludedCategories = modeExcludeMap[botMode] || [];
 
   const sortedCats = [...categories].sort((a, b) => {
-    const indexA = categoryOrder.indexOf(a);
-    const indexB = categoryOrder.indexOf(b);
+    const indexA = CATEGORY_PRIORITY.indexOf(a);
+    const indexB = CATEGORY_PRIORITY.indexOf(b);
     return (indexA === -1 ? 999 : indexA) - (indexB === -1 ? 999 : indexB);
   });
 
   const result = [];
   let totalCmds = 0;
 
-  for (const cat of sortedCats) {
-    if (cat === "owner" && !m.isOwner) continue;
-    if (allowedCats && !allowedCats.includes(cat.toLowerCase())) continue;
-    if (excludeCats && excludeCats.includes(cat.toLowerCase())) continue;
+  for (const category of sortedCats) {
+    if (category === "owner" && !m.isOwner) continue;
+    if (allowedCategories && !allowedCategories.includes(category.toLowerCase())) continue;
+    if (excludedCategories && excludedCategories.includes(category.toLowerCase())) continue;
 
-    const cmds = commandsByCategory[cat] || [];
+    const cmds = commandsByCategory[category] || [];
     if (cmds.length === 0) continue;
 
-    const emoji = CATEGORY_EMOJIS[cat] || "📁";
-    result.push({ cat, cmds, emoji });
+    const emoji = CATEGORY_EMOJIS[category] || "📁";
+    result.push({ cat: category, cmds, emoji });
   }
 
-  for (const cat of categories) {
-    totalCmds += (commandsByCategory[cat] || []).length;
+  for (const category of categories) {
+    totalCmds += (commandsByCategory[category] || []).length;
   }
 
   return { sorted: result, totalCmds, commandsByCategory };
 }
+
+/* ═══════════════════════════════════════════════════════════════════════════════
+ *  SECTION 6 — TIME FORMATTER HELPERS
+ * ═══════════════════════════════════════════════════════════════════════════════ */
 
 async function formatTime(date) {
   const timeHelper = await import("../../src/lib/Shon-time.js");
@@ -214,9 +261,24 @@ async function formatDateShort(date) {
   return timeHelper.formatFull("dddd, DD MMMM YYYY");
 }
 
+/* ═══════════════════════════════════════════════════════════════════════════════
+ *  SECTION 7 — MENU TEXT BUILDER
+ *  Constructs the premium text block used by every menu variant.
+ * ═══════════════════════════════════════════════════════════════════════════════ */
+
+/**
+ * Compose the complete menu text payload.
+ * @param {Object}   m
+ * @param {Object}   botConfig
+ * @param {Object}   db
+ * @param {number}   uptime
+ * @param {string}   botMode
+ * @returns {Promise<string>}
+ */
 async function buildMenuText(m, botConfig, db, uptime, botMode = "md") {
   const prefix = botConfig.command?.prefix || ".";
   const user = db.getUser(m.sender);
+
   const timeHelper = await import("../../src/lib/Shon-time.js");
   const timeStr = timeHelper.formatTime("HH:mm");
   const dateStr = timeHelper.formatFull("dddd, DD MMMM YYYY");
@@ -233,11 +295,11 @@ async function buildMenuText(m, botConfig, db, uptime, botMode = "md") {
     await import("../../case/ShooNhee.js");
   const totalCases = getCaseCount();
   const casesByCategory = getCasesByCategory();
-
   const totalFeatures = totalCommands + totalCases;
 
-  let userRole = "User",
-    roleEmoji = "👤";
+  /* ── user role resolution ── */
+  let userRole = "User";
+  let roleEmoji = "👤";
   if (m.isOwner) {
     userRole = "Owner";
     roleEmoji = "👑";
@@ -249,6 +311,7 @@ async function buildMenuText(m, botConfig, db, uptime, botMode = "md") {
   const greeting = getTimeGreeting();
   const uptimeFormatted = formatUptime(uptime);
   const totalUsers = db.getUserCount();
+
   const greetEmoji = greeting.includes("pagi")
     ? "🌅"
     : greeting.includes("siang")
@@ -257,117 +320,113 @@ async function buildMenuText(m, botConfig, db, uptime, botMode = "md") {
         ? "🌇"
         : "🌙";
 
-  let txt = `Hai *@${m.pushName || "User"}* 🪸
+  const selectedSymbol = pickRandom(PREMIUM_SYMBOLS);
 
-Aku ${botConfig.bot?.name || "ShooNhee-AI"}, bot WhatsApp yang siap bantu kamu.  
+  /* ═══════════════════════════════════════════════════════════════════════════
+   *  HEADER — Greeting & Introduction
+   * ═══════════════════════════════════════════════════════════════════════════ */
+  let menuText =
+    `Hai *@${m.pushName || "User"}* 🪸\n\n` +
+    `Aku ${botConfig.bot?.name || "ShooNhee-AI"}, bot WhatsApp yang siap bantu kamu.\n\n` +
+    `Kamu bisa pakai aku buat cari info, ambil data, atau bantu hal-hal ` +
+    `sederhana langsung lewat WhatsApp — praktis tanpa ribet.`;
 
-Kamu bisa pakai aku buat cari info, ambil data, atau bantu hal-hal sederhana langsung lewat WhatsApp — praktis tanpa ribet.`;
+  /* ═══════════════════════════════════════════════════════════════════════════
+   *  PANEL — Bot Information
+   * ═══════════════════════════════════════════════════════════════════════════ */
+  menuText +=
+    `\n\n${STYLE.CORNER_TL}${STYLE.EDGE_H}〔 🤖 *ʙᴏᴛ ɪɴꜰᴏ* 〕\n` +
+    `*${STYLE.EDGE_V}* ${greetEmoji} ɴᴀᴍᴀ      : *${botConfig.bot?.name || "ShooNhee-AI"}*\n` +
+    `*${STYLE.EDGE_V}* 🔑 ᴠᴇʀsɪ    : *v${botConfig.bot?.version || "1.2.0"}*\n` +
+    `*${STYLE.EDGE_V}* ⚙️ ᴍᴏᴅᴇ     : *${(botConfig.mode || "public").toUpperCase()}*\n` +
+    `*${STYLE.EDGE_V}* 🧶 ᴘʀᴇꜰɪx   : *[ ${prefix} ]*\n` +
+    `*${STYLE.EDGE_V}* ⏱ ᴜᴘᴛɪᴍᴇ  : *${uptimeFormatted}*\n` +
+    `*${STYLE.EDGE_V}* 👥 ᴛᴏᴛᴀʟ   : *${totalUsers} Users*\n` +
+    `*${STYLE.EDGE_V}* 🏷 ɢʀᴏᴜᴘ    : *${botMode.toUpperCase()}*\n` +
+    `*${STYLE.EDGE_V}* 👑 ᴏᴡɴᴇʀ   : *${botConfig.owner?.name || "ShooNhee-AI"}*\n` +
+    `${STYLE.CORNER_BL}${STYLE.EDGE_H}${STYLE.EDGE_H}${STYLE.EDGE_H}${STYLE.EDGE_H}` +
+    `${STYLE.EDGE_H}${STYLE.EDGE_H}${STYLE.EDGE_H}${STYLE.EDGE_H}${STYLE.EDGE_H}` +
+    `${STYLE.EDGE_H}${STYLE.EDGE_H}${STYLE.EDGE_H}${STYLE.EDGE_H}${STYLE.EDGE_H}` +
+    `${STYLE.EDGE_H}${STYLE.EDGE_H}${selectedSymbol}\n\n`;
 
-  txt += `\n\n╭─〔 🤖 *ʙᴏᴛ ɪɴꜰᴏ* 〕\n`;
-  txt += `*│* 🖐 ɴᴀᴍᴀ     : *${botConfig.bot?.name || "ShooNhee-AI"}*\n`;
-  txt += `*│* 🔑 ᴠᴇʀsɪ    : *v${botConfig.bot?.version || "1.2.0"}*\n`;
-  txt += `*│* ⚙️ ᴍᴏᴅᴇ     : *${(botConfig.mode || "public").toUpperCase()}*\n`;
-  txt += `*│* 🧶 ᴘʀᴇꜰɪx    : *[ ${prefix} ]*\n`;
-  txt += `*│* ⏱ ᴜᴘᴛɪᴍᴇ   : *${uptimeFormatted}*\n`;
-  txt += `*│* 👥 ᴛᴏᴛᴀʟ    : *${totalUsers} Users*\n`;
-  txt += `*│* 🏷 ɢʀᴏᴜᴘ     : *${botMode.toUpperCase()}*\n`;
-  txt += `*│* 👑 ᴏᴡɴᴇʀ    : *${botConfig.owner?.name || "ShooNhee-AI"}*\n`;
-  txt += `╰────────────────⬣\n\n`;
+  /* ═══════════════════════════════════════════════════════════════════════════
+   *  PANEL — User Information
+   * ═══════════════════════════════════════════════════════════════════════════ */
+  menuText +=
+    `${STYLE.CORNER_TL}${STYLE.EDGE_H}〔 👤 *ᴜsᴇʀ ɪɴꜰᴏ* 〕\n` +
+    `*${STYLE.EDGE_V}* 🙋 ɴᴀᴍᴀ     : *${m.pushName}*\n` +
+    `*${STYLE.EDGE_V}* 🎭 ʀᴏʟᴇ     : *${roleEmoji} ${userRole}*\n` +
+    `*${STYLE.EDGE_V}* 🎟 ᴇɴᴇʀɢɪ  : *${m.isOwner || m.isPremium ? "∞ Unlimited" : (user?.energi ?? 25)}*\n` +
+    `*${STYLE.EDGE_V}* ⚡ ʟᴇᴠᴇʟ   : *${user?.rpg?.level || user?.level || 1}*\n` +
+    `*${STYLE.EDGE_V}* ✨ ᴇxᴘ      : *${(user?.exp ?? 0).toLocaleString()}*\n` +
+    `*${STYLE.EDGE_V}* 💰 ᴋᴏɪɴ    : *${(user?.koin ?? 0).toLocaleString()}*\n`;
 
-  txt += `╭─〔 👤 *ᴜsᴇʀ ɪɴꜰᴏ* 〕\n`;
-  txt += `*│* 🙋 ɴᴀᴍᴀ     : *${m.pushName}*\n`;
-  txt += `*│* 🎭 ʀᴏʟᴇ     : *${roleEmoji} ${userRole}*\n`;
-  txt += `*│* 🎟 ᴇɴᴇʀɢɪ   : *${m.isOwner || m.isPremium ? "∞ Unlimited" : (user?.energi ?? 25)}*\n`;
-  txt += `*│* ⚡ ʟᴇᴠᴇʟ    : *${user?.rpg?.level || user?.level || 1}*\n`;
-  txt += `*│* ✨ ᴇxᴘ       : *${(user?.exp ?? 0).toLocaleString()}*\n`;
-  txt += `*│* 💰 ᴋᴏɪɴ      : *${(user?.koin ?? 0).toLocaleString()}*\n`;
   const rpg = user?.rpg || {};
   if (rpg.health !== undefined) {
-    txt += `*│* ❤️ ʜᴘ        : *${rpg.health}/${rpg.maxHealth || rpg.health}*\n`;
-    txt += `*│* 🔮 ᴍᴀɴᴀ      : *${rpg.mana}/${rpg.maxMana || rpg.mana}*\n`;
-    txt += `*│* 🏃 sᴛᴀᴍɪɴᴀ   : *${rpg.stamina}/${rpg.maxStamina || rpg.stamina}*\n`;
+    menuText +=
+      `*${STYLE.EDGE_V}* ❤️ ʜᴘ       : *${rpg.health}/${rpg.maxHealth || rpg.health}*\n` +
+      `*${STYLE.EDGE_V}* 🔮 ᴍᴀɴᴀ    : *${rpg.mana}/${rpg.maxMana || rpg.mana}*\n` +
+      `*${STYLE.EDGE_V}* 🏃 sᴛᴀᴍɪɴᴀ : *${rpg.stamina}/${rpg.maxStamina || rpg.stamina}*\n`;
   }
-  const inv = user?.inventory || {};
-  const invCount = Object.values(inv).reduce(
-    (a, b) => a + (typeof b === "number" ? b : 0),
+
+  const inventory = user?.inventory || {};
+  const inventoryCount = Object.values(inventory).reduce(
+    (sum, val) => sum + (typeof val === "number" ? val : 0),
     0,
   );
-  if (invCount > 0) txt += `*│* 🎒 ɪɴᴠᴇɴᴛᴏʀʏ : *${invCount} items*\n`;
-  txt += `*│* 🕒 ᴡᴀᴋᴛᴜ    : *${timeStr} WIB*\n`;
-  txt += `*│* 📅 ᴛᴀɴɢɢᴀʟ  : *${dateStr}*\n`;
-  txt += `╰────────────────⬣\n\n`;
+  if (inventoryCount > 0) {
+    menuText += `*${STYLE.EDGE_V}* 🎒 ɪɴᴠᴇɴᴛᴏʀʏ : *${inventoryCount} items*\n`;
+  }
 
-  const categoryOrder = [
-    "owner",
-    "main",
-    "utility",
-    "tools",
-    "fun",
-    "game",
-    "download",
-    "search",
-    "sticker",
-    "media",
-    "ai",
-    "group",
-    "religi",
-    "info",
-    "cek",
-    "economy",
-    "user",
-    "canvas",
-    "random",
-    "premium",
-    "ephoto",
-    "jpm",
-    "pushkontak",
-    "panel",
-    "store",
-  ];
+  menuText +=
+    `*${STYLE.EDGE_V}* 🕒 ᴡᴀᴋᴛᴜ   : *${timeStr} WIB*\n` +
+    `*${STYLE.EDGE_V}* 📅 ᴛᴀɴɢɢᴀʟ : *${dateStr}*\n` +
+    `${STYLE.CORNER_BL}${STYLE.EDGE_H}${STYLE.EDGE_H}${STYLE.EDGE_H}${STYLE.EDGE_H}` +
+    `${STYLE.EDGE_H}${STYLE.EDGE_H}${STYLE.EDGE_H}${STYLE.EDGE_H}${STYLE.EDGE_H}` +
+    `${STYLE.EDGE_H}${STYLE.EDGE_H}${STYLE.EDGE_H}${STYLE.EDGE_H}${STYLE.EDGE_H}` +
+    `${STYLE.EDGE_H}${STYLE.EDGE_H}${selectedSymbol}\n\n`;
+
+  /* ═══════════════════════════════════════════════════════════════════════════
+   *  CATEGORY LIST — Filtered & Sorted
+   * ═══════════════════════════════════════════════════════════════════════════ */
   const sortedCategories = [...categories].sort((a, b) => {
-    const indexA = categoryOrder.indexOf(a);
-    const indexB = categoryOrder.indexOf(b);
+    const indexA = CATEGORY_PRIORITY.indexOf(a);
+    const indexB = CATEGORY_PRIORITY.indexOf(b);
     return (indexA === -1 ? 999 : indexA) - (indexB === -1 ? 999 : indexB);
   });
 
-  let modeAllowedMap = {
-    md: null,
-    store: ["main", "group", "sticker", "owner", "store"],
-    pushkontak: ["main", "group", "sticker", "owner", "pushkontak"],
-  };
-  let modeExcludeMap = {
-    md: ["panel", "pushkontak", "store"],
-    store: null,
-    pushkontak: null,
-  };
+  /* ── dynamic mode maps (overridden if botmode.js exists) ── */
+  let modeAllowedMap = { ...DEFAULT_MODE_ALLOWED };
+  let modeExcludeMap = { ...DEFAULT_MODE_EXCLUDED };
 
   try {
     const botmodePlugin = await import("../group/botmode.js");
-    if (botmodePlugin && botmodePlugin.MODES) {
-      const modes = botmodePlugin.MODES;
+    if (botmodePlugin?.MODES) {
       modeAllowedMap = {};
       modeExcludeMap = {};
-      for (const [key, val] of Object.entries(modes)) {
-        modeAllowedMap[key] = val.allowedCategories;
-        modeExcludeMap[key] = val.excludeCategories;
+      for (const [key, value] of Object.entries(botmodePlugin.MODES)) {
+        modeAllowedMap[key] = value.allowedCategories;
+        modeExcludeMap[key] = value.excludeCategories;
       }
     }
-  } catch (e) {}
+  } catch (_e) { /* plugin not installed — safe to ignore */ }
 
   const allowedCategories = modeAllowedMap[botMode];
-  const excludeCategories = modeExcludeMap[botMode] || [];
+  const excludedCategories = modeExcludeMap[botMode] || [];
 
-  txt += `📂 *ᴅᴀꜰᴛᴀʀ ᴍᴇɴᴜ*\n`;
+  menuText += `📂 *ᴅᴀꜰᴛᴀʀ ᴍᴇɴᴜ*\n`;
 
   for (const category of sortedCategories) {
     if (category === "owner" && !m.isOwner) continue;
-
     if (
       allowedCategories &&
       !allowedCategories.includes(category.toLowerCase())
     )
       continue;
-    if (excludeCategories && excludeCategories.includes(category.toLowerCase()))
+    if (
+      excludedCategories &&
+      excludedCategories.includes(category.toLowerCase())
+    )
       continue;
 
     const pluginCmds = commandsByCategory[category] || [];
@@ -376,13 +435,28 @@ Kamu bisa pakai aku buat cari info, ambil data, atau bantu hal-hal sederhana lan
     if (totalCmds === 0) continue;
 
     const emoji = CATEGORY_EMOJIS[category] || "📁";
-    const categoryName = toSmallCaps(category);
 
-    txt += `- \`◦\` ${prefix}${toSmallCaps(`menucat ${category}`)} ${emoji}\n`;
+    menuText +=
+      `- \`${selectedSymbol}\` ${prefix}${toSmallCaps(`menucat ${category}`)} ${emoji}\n`;
   }
-  return txt;
+
+  return menuText;
 }
 
+
+/* ═══════════════════════════════════════════════════════════════════════════════
+ *  SECTION 8 — MESSAGE CONTEXT BUILDERS
+ *  Reusable context-info & quoted-message factories for every variant.
+ * ═══════════════════════════════════════════════════════════════════════════════ */
+
+/**
+ * Build the contextInfo object attached to outgoing messages.
+ * @param {Object}  botConfig
+ * @param {Object}  m
+ * @param {Buffer}  thumbBuffer
+ * @param {boolean} renderLargerThumbnail
+ * @returns {Object}
+ */
 function getContextInfo(
   botConfig,
   m,
@@ -412,6 +486,11 @@ function getContextInfo(
   return ctx;
 }
 
+/**
+ * Build a verified quoted message skeleton.
+ * @param {Object} botConfig
+ * @returns {Object}
+ */
 function getVerifiedQuoted(botConfig) {
   return {
     key: {
@@ -421,13 +500,35 @@ function getVerifiedQuoted(botConfig) {
     message: {
       contactMessage: {
         displayName: `🪸 ${botConfig.bot?.name}`,
-        vcard: `BEGIN:VCARD\nVERSION:3.0\nN:XL;ttname,;;;\nFN:ttname\nitem1.TEL;waid=13135550002:+1 (313) 555-0002\nitem1.X-ABLabel:Ponsel\nEND:VCARD`,
+        vcard:
+          `BEGIN:VCARD\n` +
+          `VERSION:3.0\n` +
+          `N:XL;ttname,;;;\n` +
+          `FN:ttname\n` +
+          `item1.TEL;waid=13135550002:+1 (313) 555-0002\n` +
+          `item1.X-ABLabel:Ponsel\n` +
+          `END:VCARD`,
         sendEphemeral: true,
       },
     },
   };
 }
 
+/* ═══════════════════════════════════════════════════════════════════════════════
+ *  SECTION 9 — FALLBACK SENDER
+ *  Graceful degradation when a variant fails to render.
+ * ═══════════════════════════════════════════════════════════════════════════════ */
+
+/**
+ * Send a fallback message when the primary variant errors out.
+ * @param {Object}   m
+ * @param {Object}   sock
+ * @param {string}   text
+ * @param {Buffer}   imageBuffer
+ * @param {Buffer}   thumbBuffer
+ * @param {Object}   botConfig
+ * @param {string}   errorName   — variant identifier for logging
+ */
 async function sendFallback(
   m,
   sock,
@@ -438,18 +539,23 @@ async function sendFallback(
   errorName,
 ) {
   if (errorName) console.error(`[Menu Error] ${errorName}`);
+
   const fallbackMsg = {
     contextInfo: getContextInfo(botConfig, m, thumbBuffer),
   };
+
   let fallbackText = text;
 
   if (errorName === "V5") {
     const { sorted } = getSortedCategories(m, "md");
-    let catText = `📋 *ᴋᴀᴛᴇɢᴏʀɪ ᴍᴇɴᴜ*\n\n`;
-    for (const { cat, cmds, emoji } of sorted)
-      catText += `> ${emoji} \`${botConfig.command?.prefix || "."}menucat ${cat}\` - ${toMonoUpperBold(cat)} (${cmds.length})\n`;
-    catText += `\n_Ketik perintah kategori untuk melihat command_`;
-    fallbackText = text + "\n\n" + catText;
+    let categoryText = `📋 *ᴋᴀᴛᴇɢᴏʀɪ ᴍᴇɴᴜ*\n\n`;
+    for (const { cat, cmds, emoji } of sorted) {
+      categoryText +=
+        `> ${emoji} \`${botConfig.command?.prefix || "."}menucat ${cat}\` ` +
+        `- ${toMonoUpperBold(cat)} (${cmds.length})\n`;
+    }
+    categoryText += `\n_Ketik perintah kategori untuk melihat command_`;
+    fallbackText = text + "\n\n" + categoryText;
   }
 
   if (imageBuffer) {
@@ -458,31 +564,57 @@ async function sendFallback(
   } else {
     fallbackMsg.text = fallbackText;
   }
+
   await sock.sendMessage(m.chat, fallbackMsg, {
     quoted: getVerifiedQuoted(botConfig),
   });
 }
 
+/* ═══════════════════════════════════════════════════════════════════════════════
+ *  SECTION 10 — ASSET LOADER
+ *  Centralised disk I/O for menu media assets.
+ * ═══════════════════════════════════════════════════════════════════════════════ */
+
+/**
+ * Resolve and read an asset file from disk.
+ * @param {string} basePath
+ * @param {string} assetDir
+ * @param {string} fileName
+ * @returns {Buffer|null}
+ */
+function loadAsset(basePath, assetDir, fileName) {
+  const fullPath = path.join(basePath, assetDir, fileName);
+  return fs.existsSync(fullPath) ? fs.readFileSync(fullPath) : null;
+}
+
+/**
+ * Read menu media buffers in one shot.
+ * @returns {{imageBuffer: Buffer|null, thumbBuffer: Buffer|null, videoBuffer: Buffer|null}}
+ */
+function loadMenuAssets() {
+  const cwd = process.cwd();
+  return {
+    imageBuffer: loadAsset(cwd, "assets/images", "ShooNhee.jpg"),
+    thumbBuffer: loadAsset(cwd, "assets/images", "ShooNhee2.jpg"),
+    videoBuffer: loadAsset(cwd, "assets/video", "ShooNhee.mp3"),
+  };
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════════
+ *  SECTION 11 — MAIN HANDLER
+ *  Orchestrates 15 menu display variants + audio appendix.
+ * ═══════════════════════════════════════════════════════════════════════════════ */
+
 async function handler(m, { sock, config: botConfig, db, uptime }) {
+  /* ── configuration lookup ── */
   const savedVariant = db.setting("menuVariant");
   const menuVariant = savedVariant || botConfig.ui?.menuVariant || 2;
   const groupData = m.isGroup ? db.getGroup(m.chat) || {} : {};
   const botMode = groupData.botMode || "md";
+
+  /* ── shared text & data ── */
   const text = await buildMenuText(m, botConfig, db, uptime, botMode);
-
-  const imagePath = path.join(process.cwd(), "assets", "images", "ShooNhee.jpg");
-  const thumbPath = path.join(process.cwd(), "assets", "images", "ShooNhee2.jpg");
-  const videoPath = path.join(process.cwd(), "assets", "video", "ShooNhee.mp4");
-
-  let imageBuffer = fs.existsSync(imagePath)
-    ? fs.readFileSync(imagePath)
-    : null;
-  let thumbBuffer = fs.existsSync(thumbPath)
-    ? fs.readFileSync(thumbPath)
-    : null;
-  let videoBuffer = fs.existsSync(videoPath)
-    ? fs.readFileSync(videoPath)
-    : null;
+  const { imageBuffer, thumbBuffer, videoBuffer } = loadMenuAssets();
 
   const prefix = botConfig.command?.prefix || ".";
   const saluranId = botConfig.saluran?.id || "120363208449943317@newsletter";
@@ -491,16 +623,22 @@ async function handler(m, { sock, config: botConfig, db, uptime }) {
   const saluranLink =
     botConfig.saluran?.link ||
     "https://whatsapp.com/channel/0029VbB37bgBfxoAmAlsgE0t";
+
   const {
     sorted: menuSorted,
     totalCmds,
     commandsByCategory,
   } = getSortedCategories(m, botMode);
+
   const greeting = getTimeGreeting();
   const uptimeFormatted = formatUptime(uptime);
 
+  /* ═══════════════════════════════════════════════════════════════════════════
+   *  VARIANT ROUTER
+   * ═══════════════════════════════════════════════════════════════════════════ */
   try {
     switch (menuVariant) {
+      /* ─────────────────────────── VARIANT 1 — Plain Image ─────────────────────────── */
       case 1:
         if (imageBuffer) {
           await sock.sendMessage(m.chat, { image: imageBuffer, caption: text });
@@ -509,7 +647,8 @@ async function handler(m, { sock, config: botConfig, db, uptime }) {
         }
         break;
 
-      case 2:
+      /* ─────────────────────────── VARIANT 2 — Context Image ─────────────────────────── */
+      case 2: {
         const msgV2 = {
           contextInfo: getContextInfo(botConfig, m, thumbBuffer),
         };
@@ -523,8 +662,10 @@ async function handler(m, { sock, config: botConfig, db, uptime }) {
           quoted: getVerifiedQuoted(botConfig),
         });
         break;
+      }
 
-      case 3:
+      /* ─────────────────────────── VARIANT 3 — Document Mode ─────────────────────────── */
+      case 3: {
         let resizedThumb = thumbBuffer;
         if (thumbBuffer) {
           try {
@@ -532,23 +673,25 @@ async function handler(m, { sock, config: botConfig, db, uptime }) {
               .resize(300, 300, { fit: "cover" })
               .jpeg({ quality: 80 })
               .toBuffer();
-          } catch (e) {
+          } catch (_e) {
             resizedThumb = thumbBuffer;
           }
         }
 
         let contextThumb = thumbBuffer;
         try {
-          const ShooNheePath = path.join(
+          const shooNheePath = path.join(
             process.cwd(),
             "assets",
             "images",
             "ShooNhee.jpg",
           );
-          if (fs.existsSync(ShooNheePath)) {
-            contextThumb = fs.readFileSync(ShooNheePath);
+          if (fs.existsSync(shooNheePath)) {
+            contextThumb = fs.readFileSync(shooNheePath);
           }
-        } catch (e) {}
+        } catch (_e) {
+          /* keep default */
+        }
 
         await sock.sendMessage(
           m.chat,
@@ -565,7 +708,9 @@ async function handler(m, { sock, config: botConfig, db, uptime }) {
           { quoted: getVerifiedQuoted(botConfig) },
         );
         break;
+      }
 
+      /* ─────────────────────────── VARIANT 4 — GIF Video ─────────────────────────── */
       case 4:
         if (videoBuffer) {
           await sock.sendMessage(
@@ -594,6 +739,7 @@ async function handler(m, { sock, config: botConfig, db, uptime }) {
         }
         break;
 
+      /* ─────────────────────────── VARIANT 5 — Interactive Single Select ─────────────────────────── */
       case 5: {
         const categoryRows = menuSorted.map(({ cat, cmds, emoji }) => ({
           title: `${emoji} ${toMonoUpperBold(cat)}`,
@@ -601,22 +747,28 @@ async function handler(m, { sock, config: botConfig, db, uptime }) {
           description: `${cmds.length} commands`,
         }));
 
-        let headerText = `*@${m.pushName || "User"}* 🪸
+        let headerText =
+          `*@${m.pushName || "User"}* 🪸\n\n` +
+          `Aku ${botConfig.bot?.name || "ShooNhee-AI"}, bot WhatsApp yang siap bantu kamu.\n\n` +
+          `Kamu bisa pakai aku buat cari info, ambil data, atau bantu hal-hal ` +
+          `sederhana langsung lewat WhatsApp — praktis tanpa ribet.\n\n`;
 
-Aku ${botConfig.bot?.name || "ShooNhee-AI"}, bot WhatsApp yang siap bantu kamu.  
+        headerText +=
+          `${STYLE.CORNER_TL}${STYLE.EDGE_H}〔 🤖 *ʙᴏᴛ ɪɴꜰᴏ* 〕\n` +
+          `*${STYLE.EDGE_V}* \`${STYLE.BULLET}\` ɴᴀᴍᴀ: *${botConfig.bot?.name || "ShooNhee-AI"}*\n` +
+          `*${STYLE.EDGE_V}* \`${STYLE.BULLET}\` ᴠᴇʀsɪ: *v${botConfig.bot?.version || "1.2.0"}*\n` +
+          `*${STYLE.EDGE_V}* \`${STYLE.BULLET}\` ᴍᴏᴅᴇ: *${(botConfig.mode || "public").toUpperCase()}*\n` +
+          `*${STYLE.EDGE_V}* \`${STYLE.BULLET}\` ᴜᴘᴛɪᴍᴇ: *${uptimeFormatted}*\n` +
+          `*${STYLE.EDGE_V}* \`${STYLE.BULLET}\` ᴛᴏᴛᴀʟ ᴄᴍᴅ: *${totalCmds}*\n` +
+          `${STYLE.CORNER_BL}${STYLE.EDGE_H}${STYLE.EDGE_H}${STYLE.EDGE_H}` +
+          `${STYLE.EDGE_H}${STYLE.EDGE_H}${STYLE.EDGE_H}${STYLE.EDGE_H}${STYLE.EDGE_H}` +
+          `${STYLE.EDGE_H}${STYLE.EDGE_H}${STYLE.EDGE_H}${STYLE.EDGE_H}${STYLE.EDGE_H}${STYLE.SPARKLE}\n\n`;
 
-Kamu bisa pakai aku buat cari info, ambil data, atau bantu hal-hal sederhana langsung lewat WhatsApp — praktis tanpa ribet.\n\n`;
-        headerText += `╭┈┈⬡「 🤖 *ʙᴏᴛ ɪɴꜰᴏ* 」\n`;
-        headerText += `┃ \`◦\` ɴᴀᴍᴀ: *${botConfig.bot?.name || "ShooNhee-AI"}*\n`;
-        headerText += `┃ \`◦\` ᴠᴇʀsɪ: *v${botConfig.bot?.version || "1.2.0"}*\n`;
-        headerText += `┃ \`◦\` ᴍᴏᴅᴇ: *${(botConfig.mode || "public").toUpperCase()}*\n`;
-        headerText += `┃ \`◦\` ᴜᴘᴛɪᴍᴇ: *${uptimeFormatted}*\n`;
-        headerText += `┃ \`◦\` ᴛᴏᴛᴀʟ ᴄᴍᴅ: *${totalCmds}*\n`;
-        headerText += `╰┈┈┈┈┈┈┈┈⬡\n\n`;
         headerText += `📋 *Pilih kategori di bawah untuk melihat daftar command*`;
 
         try {
-          const { generateWAMessageFromContent, proto } = await import("ShooNhee");
+          const { generateWAMessageFromContent, proto } =
+            await import("ShooNhee");
 
           const buttons = [
             {
@@ -652,14 +804,10 @@ Kamu bisa pakai aku buat cari info, ambil data, atau bantu hal-hal sederhana lan
             try {
               const { prepareWAMessageMedia } = await import("ShooNhee");
               headerMedia = await prepareWAMessageMedia(
-                {
-                  image: imageBuffer,
-                },
-                {
-                  upload: sock.waUploadToServer,
-                },
+                { image: imageBuffer },
+                { upload: sock.waUploadToServer },
               );
-            } catch (e) {}
+            } catch (_e) { /* media prep failed */ }
           }
 
           const msg = generateWAMessageFromContent(
@@ -678,7 +826,9 @@ Kamu bisa pakai aku buat cari info, ambil data, atau bantu hal-hal sederhana lan
                       }),
                       footer:
                         proto.Message.InteractiveMessage.Footer.fromObject({
-                          text: `© ${botConfig.bot?.name || "ShooNhee-AI"} | ${menuSorted.length} Categories`,
+                          text:
+                            `© ${botConfig.bot?.name || "ShooNhee-AI"} | ` +
+                            `${menuSorted.length} Categories`,
                         }),
                       header:
                         proto.Message.InteractiveMessage.Header.fromObject({
@@ -688,9 +838,7 @@ Kamu bisa pakai aku buat cari info, ambil data, atau bantu hal-hal sederhana lan
                         }),
                       nativeFlowMessage:
                         proto.Message.InteractiveMessage.NativeFlowMessage.fromObject(
-                          {
-                            buttons: buttons,
-                          },
+                          { buttons },
                         ),
                       contextInfo: {
                         mentionedJid: [m.sender],
@@ -712,7 +860,7 @@ Kamu bisa pakai aku buat cari info, ambil data, atau bantu hal-hal sederhana lan
           await sock.relayMessage(m.chat, msg.message, {
             messageId: msg.key.id,
           });
-        } catch (btnError) {
+        } catch (_btnError) {
           await sendFallback(
             m,
             sock,
@@ -726,13 +874,15 @@ Kamu bisa pakai aku buat cari info, ambil data, atau bantu hal-hal sederhana lan
         break;
       }
 
-      case 6:
+      /* ─────────────────────────── VARIANT 6 — PDF Document ─────────────────────────── */
+      case 6: {
         const thumbPathV6 = path.join(
           process.cwd(),
           "assets",
           "images",
           "ShooNhee3.jpg",
         );
+
         const saluranIdV6 =
           botConfig.saluran?.id || "120363208449943317@newsletter";
         const saluranNameV6 =
@@ -809,23 +959,32 @@ Kamu bisa pakai aku buat cari info, ambil data, atau bantu hal-hal sederhana lan
           });
         }
         break;
+      }
 
+      /* ─────────────────────────── VARIANT 7 — Carousel Cards ─────────────────────────── */
       case 7: {
         try {
           const { prepareWAMessageMedia, generateWAMessageFromContent, proto } =
             await import("ShooNhee");
+
           const carouselCards = [];
 
           for (const { cat, cmds, emoji } of menuSorted) {
             const categoryName = toSmallCaps(cat);
+            const starSymbol = pickRandom(PREMIUM_SYMBOLS);
 
-            let cardBody = `━━━━━━━━━━━━━━━\n`;
+            let cardBody =
+              `${STYLE.DASH}${STYLE.DASH}${STYLE.DASH}${STYLE.DASH}` +
+              `${STYLE.DASH}${STYLE.DASH}${STYLE.DASH}${STYLE.DASH}` +
+              `${STYLE.DASH}${STYLE.DASH}${STYLE.DASH}${STYLE.DASH}\n`;
 
             for (const cmd of cmds.slice(0, 15)) {
               cardBody += `◦ \`${prefix}${toSmallCaps(cmd)}\`\n`;
             }
+
             if (cmds.length > 15) {
-              cardBody += `\n_...dan ${cmds.length - 15} command lainnya_`;
+              cardBody +=
+                `\n_...dan ${cmds.length - 15} command lainnya_`;
             }
 
             cardBody += `\n\n> Total: ${cmds.length} commands`;
@@ -844,6 +1003,7 @@ Kamu bisa pakai aku buat cari info, ambil data, atau bantu hal-hal sederhana lan
                 "images",
                 "ShoNhe-v7.jpg",
               );
+
               let sourceImage = fs.existsSync(defaultV7Path)
                 ? fs.readFileSync(defaultV7Path)
                 : thumbBuffer;
@@ -859,9 +1019,7 @@ Kamu bisa pakai aku buat cari info, ambil data, atau bantu hal-hal sederhana lan
                   .toBuffer();
 
                 cardMedia = await prepareWAMessageMedia(
-                  {
-                    image: resizedImage,
-                  },
+                  { image: resizedImage },
                   { upload: sock.waUploadToServer },
                 );
               }
@@ -879,7 +1037,8 @@ Kamu bisa pakai aku buat cari info, ambil data, atau bantu hal-hal sederhana lan
                 text: cardBody,
               }),
               footer: proto.Message.InteractiveMessage.Footer.create({
-                text: `${botConfig.bot?.name || "ShooNhee-AI"} • ${cat}`,
+                text:
+                  `${botConfig.bot?.name || "ShooNhee-AI"} • ${cat}`,
               }),
               nativeFlowMessage:
                 proto.Message.InteractiveMessage.NativeFlowMessage.fromObject({
@@ -915,17 +1074,20 @@ Kamu bisa pakai aku buat cari info, ambil data, atau bantu hal-hal sederhana lan
                   interactiveMessage:
                     proto.Message.InteractiveMessage.fromObject({
                       body: proto.Message.InteractiveMessage.Body.fromObject({
-                        text: `${greeting} *${m.pushName}!*\n\n> Geser untuk melihat kategori menu\n> Ketuk tombol untuk melihat detail`,
+                        text:
+                          `${greeting} *${m.pushName}!*\n\n` +
+                          `> Geser untuk melihat kategori menu\n` +
+                          `> Ketuk tombol untuk melihat detail`,
                       }),
                       footer:
                         proto.Message.InteractiveMessage.Footer.fromObject({
-                          text: `${botConfig.bot?.name || "ShooNhee-AI"} v${botConfig.bot?.version || "1.0"}`,
+                          text:
+                            `${botConfig.bot?.name || "ShooNhee-AI"} ` +
+                            `v${botConfig.bot?.version || "1.0"}`,
                         }),
                       carouselMessage:
                         proto.Message.InteractiveMessage.CarouselMessage.fromObject(
-                          {
-                            cards: carouselCards,
-                          },
+                          { cards: carouselCards },
                         ),
                     }),
                 },
@@ -951,14 +1113,15 @@ Kamu bisa pakai aku buat cari info, ambil data, atau bantu hal-hal sederhana lan
         break;
       }
 
+      /* ─────────────────────────── VARIANT 8 — RPG Profile Menu ─────────────────────────── */
       case 8: {
         const timeHelper = await import("../../src/lib/Shon-time.js");
         const time = timeHelper.formatTime("HH:mm");
         const date = timeHelper.formatFull("DD/MM/YYYY");
         const user = db.getUser(m.sender);
 
-        let role = "𝙐𝙨𝙚𝙧",
-          emojiRole = "◈";
+        let role = "𝙐𝙨𝙚𝙧";
+        let emojiRole = "◈";
         if (m.isOwner) {
           role = "𝙊𝙬𝙣𝙚𝙧";
           emojiRole = "♚";
@@ -967,58 +1130,78 @@ Kamu bisa pakai aku buat cari info, ambil data, atau bantu hal-hal sederhana lan
           emojiRole = "✦";
         }
 
-        let menuText = ``;
+        let menuText = "";
         const sparkles = ["✦", "✧", "⋆", "˚", "✵", "⊹"];
         const randomSparkle = () =>
           sparkles[Math.floor(Math.random() * sparkles.length)];
 
-        menuText += `${randomSparkle()}━━━━━━━━━━━━━━━━━━━━━${randomSparkle()}\n`;
-        menuText += `*${botConfig.bot?.name || "𝗢𝗨𝗥𝗜𝗡-𝗔𝗜"}*\n`;
-        menuText += `${randomSparkle()}━━━━━━━━━━━━━━━━━━━━━${randomSparkle()}\n\n`;
+        const spk1 = randomSparkle();
+        const spk2 = randomSparkle();
+        const spk3 = randomSparkle();
+        const spk4 = randomSparkle();
 
-        menuText += `┏━━━〔 ${emojiRole} *𝗣𝗥𝗢𝗙𝗜𝗟𝗘* 〕━━━┓\n`;
-        menuText += `┃ 👤 *${m.pushName}*\n`;
-        menuText += `┃ 🏷️ ${role}\n`;
-        menuText += `┃ 🎫 Energi  ➤ ${m.isOwner || m.isPremium ? "∞ Unlimited" : (user?.energi ?? 25)}\n`;
-        menuText += `┃ ⚡ Level   ➤ ${user?.rpg?.level || user?.level || 1}\n`;
-        menuText += `┃ ✨ Exp     ➤ ${(user?.exp ?? 0).toLocaleString()}\n`;
-        menuText += `┃ 💰 Koin    ➤ ${(user?.koin ?? 0).toLocaleString()}\n`;
+        menuText +=
+          `${spk1}━━━━━━━━━━━━━━━━━━━━━${spk2}\n` +
+          `*${botConfig.bot?.name || "𝗢𝗨𝗥𝗜𝗡-𝗔𝗜"}*\n` +
+          `${spk3}━━━━━━━━━━━━━━━━━━━━━${spk4}\n\n`;
+
+        menuText +=
+          `┏━━━〔 ${emojiRole} *𝗣𝗥𝗢𝗙𝗜𝗟𝗘* 〕━━━┓\n` +
+          `┃ 👤 *${m.pushName}*\n` +
+          `┃ 🏷️ ${role}\n` +
+          `┃ 🎫 Energi  ${STYLE.ARROW_R} ` +
+          `${m.isOwner || m.isPremium ? "∞ Unlimited" : (user?.energi ?? 25)}\n` +
+          `┃ ⚡ Level   ${STYLE.ARROW_R} ${user?.rpg?.level || user?.level || 1}\n` +
+          `┃ ✨ Exp     ${STYLE.ARROW_R} ${(user?.exp ?? 0).toLocaleString()}\n` +
+          `┃ 💰 Koin    ${STYLE.ARROW_R} ${(user?.koin ?? 0).toLocaleString()}\n`;
+
         const v8rpg = user?.rpg || {};
         if (v8rpg.health !== undefined) {
-          menuText += `┃ ❤️ HP      ➤ ${v8rpg.health}/${v8rpg.maxHealth}\n`;
-          menuText += `┃ 🔮 Mana    ➤ ${v8rpg.mana}/${v8rpg.maxMana}\n`;
-          menuText += `┃ 🏃 Stamina ➤ ${v8rpg.stamina}/${v8rpg.maxStamina}\n`;
+          menuText +=
+            `┃ ❤️ HP      ${STYLE.ARROW_R} ${v8rpg.health}/${v8rpg.maxHealth}\n` +
+            `┃ 🔮 Mana    ${STYLE.ARROW_R} ${v8rpg.mana}/${v8rpg.maxMana}\n` +
+            `┃ 🏃 Stamina ${STYLE.ARROW_R} ${v8rpg.stamina}/${v8rpg.maxStamina}\n`;
         }
-        menuText += `┃ ⏰ ${time} WIB\n`;
-        menuText += `┃ 📅 ${date}\n`;
-        menuText += `┗━━━━━━━━━━━━━━━┛\n\n`;
 
-        menuText += `┏━━〔 ⚡ *𝗦𝗬𝗦𝗧𝗘𝗠 𝗦𝗧𝗔𝗧𝗦* 〕━━┓\n`;
-        menuText += `┃ ⏱️ Uptime  ➤ ${uptimeFormatted}\n`;
-        menuText += `┃ 🔧 Mode    ➤ ${botMode.toUpperCase()}\n`;
-        menuText += `┃ 📊 Total   ➤ ${totalCmds} Commands\n`;
-        menuText += `┃ 👥 Users   ➤ ${db.getUserCount()} Aktif\n`;
-        menuText += `┗━━━━━━━━━━━━━━━━━━━━━━┛\n\n`;
+        menuText +=
+          `┃ ⏰ ${time} WIB\n` +
+          `┃ 📅 ${date}\n` +
+          `┗━━━━━━━━━━━━━━━┛\n\n`;
 
-        menuText += `╭══════════════════════╮\n`;
-        menuText += `║  📋 *𝗖𝗢𝗠𝗠𝗔𝗡𝗗 𝗟𝗜𝗦𝗧*    ║\n`;
-        menuText += `╰══════════════════════╯\n\n`;
+        menuText +=
+          `┏━━〔 ${STYLE.STAR} *𝗦𝗬𝗦𝗧𝗘𝗠 𝗦𝗧𝗔𝗧𝗦* 〕━━┓\n` +
+          `┃ ⏱️ Uptime  ${STYLE.ARROW_R} ${uptimeFormatted}\n` +
+          `┃ 🔧 Mode    ${STYLE.ARROW_R} ${botMode.toUpperCase()}\n` +
+          `┃ 📊 Total   ${STYLE.ARROW_R} ${totalCmds} Commands\n` +
+          `┃ 👥 Users   ${STYLE.ARROW_R} ${db.getUserCount()} Aktif\n` +
+          `┗━━━━━━━━━━━━━━━━━━━━━━┛\n\n`;
+
+        menuText +=
+          `╭══════════════════════╮\n` +
+          `║  📋 *𝗖𝗢𝗠𝗠𝗔𝗡𝗗 𝗟𝗜𝗦𝗧*    ║\n` +
+          `╰══════════════════════╯\n\n`;
 
         for (const { cat, cmds, emoji } of menuSorted) {
-          menuText += `┌─────「 ${emoji} *${cat.toUpperCase()}* 」\n`;
-          menuText += `│ ✦ Total: ${cmds.length} commands\n`;
-          menuText += `│\n`;
+          menuText +=
+            `┌─────「 ${emoji} *${cat.toUpperCase()}* 」\n` +
+            `│ ${STYLE.STAR} Total: ${cmds.length} commands\n` +
+            `│\n`;
+
           for (const cmd of cmds) {
-            menuText += `│ ├➤ ${prefix}${cmd}\n`;
+            menuText += `│ ${STYLE.BRANCH_R}${STYLE.ARROW_R} ${prefix}${cmd}\n`;
           }
-          menuText += `│\n`;
-          menuText += `└───────────────────\n\n`;
+
+          menuText += `│\n└───────────────────\n\n`;
         }
 
-        menuText += `╭━━〔 💡 *𝗧𝗜𝗣𝗦* 〕━━╮\n`;
-        menuText += `│ ❸ Follow channel ${saluranLink}\n`;
-        menuText += `╰━━━━━━━━━━━━━━━━━━╯\n\n`;
-        menuText += `> ${randomSparkle()} *${botConfig.bot?.name || "ShooNhee"}* v${botConfig.bot?.version || "1.7.1"} ${randomSparkle()}`;
+        menuText +=
+          `╭━━〔 💡 *𝗧𝗜𝗣𝗦* 〕━━╮\n` +
+          `│ ❸ Follow channel ${saluranLink}\n` +
+          `╰━━━━━━━━━━━━━━━━━━╯\n\n`;
+
+        menuText +=
+          `> ${spk1} *${botConfig.bot?.name || "ShooNhee"}* ` +
+          `v${botConfig.bot?.version || "1.7.1"} ${spk2}`;
 
         let thumbV8 = thumbBuffer;
         if (thumbBuffer) {
@@ -1027,7 +1210,7 @@ Kamu bisa pakai aku buat cari info, ambil data, atau bantu hal-hal sederhana lan
               .resize(300, 300, { fit: "cover" })
               .jpeg({ quality: 80 })
               .toBuffer();
-          } catch (e) {
+          } catch (_e) {
             thumbV8 = thumbBuffer;
           }
         }
@@ -1080,19 +1263,24 @@ Kamu bisa pakai aku buat cari info, ambil data, atau bantu hal-hal sederhana lan
         break;
       }
 
+      /* ─────────────────────────── VARIANT 9 — Product Card ─────────────────────────── */
       case 9: {
         try {
           const { prepareWAMessageMedia, generateWAMessageFromContent, proto } =
             await import("ShooNhee");
+
           let headerMedia = null;
           if (imageBuffer) {
             try {
               const resized = await (
                 await getSharp()
-              )(fs.readFileSync("./assets/images/ShoNhe-v9.jpg"))
+              )(
+                fs.readFileSync("./assets/images/ShoNhe-v9.jpg"),
+              )
                 .resize(300, 300, { fit: "cover" })
                 .jpeg({ quality: 80 })
                 .toBuffer();
+
               headerMedia = await prepareWAMessageMedia(
                 { image: resized },
                 { upload: sock.waUploadToServer },
@@ -1103,12 +1291,15 @@ Kamu bisa pakai aku buat cari info, ambil data, atau bantu hal-hal sederhana lan
           }
 
           const zannerz =
-            "https://wa.me/" + (botConfig.owner?.number?.[0] || "6281234567890");
+            "https://wa.me/" +
+            (botConfig.owner?.number?.[0] || "6281234567890");
 
           const buttons = [
             {
               name: "single_select",
-              buttonParamsJson: JSON.stringify({ has_multiple_buttons: true }),
+              buttonParamsJson: JSON.stringify({
+                has_multiple_buttons: true,
+              }),
             },
             {
               name: "cta_url",
@@ -1139,11 +1330,13 @@ Kamu bisa pakai aku buat cari info, ambil data, atau bantu hal-hal sederhana lan
                   interactiveMessage:
                     proto.Message.InteractiveMessage.fromObject({
                       body: proto.Message.InteractiveMessage.Body.fromObject({
-                        text: text,
+                        text,
                       }),
                       footer:
                         proto.Message.InteractiveMessage.Footer.fromObject({
-                          text: `© ${botConfig.bot?.name || "ShooNhee-AI"} v${botConfig.bot?.version || "1.9.0"}`,
+                          text:
+                            `© ${botConfig.bot?.name || "ShooNhee-AI"} ` +
+                            `v${botConfig.bot?.version || "1.9.0"}`,
                         }),
                       header:
                         proto.Message.InteractiveMessage.Header.fromObject({
@@ -1157,17 +1350,19 @@ Kamu bisa pakai aku buat cari info, ambil data, atau bantu hal-hal sederhana lan
                               limited_time_offer: {
                                 text: botConfig.bot?.name || "ShooNhee-AI",
                                 url: saluranLink,
-                                copy_code: botConfig.owner?.name || "ShooNhee-AI",
+                                copy_code:
+                                  botConfig.owner?.name || "ShooNhee-AI",
                                 expiration_time: Date.now() * 999,
                               },
                               bottom_sheet: {
                                 in_thread_buttons_energi: 2,
                                 divider_indices: [1, 2, 3, 4, 5, 999],
-                                list_title: botConfig.bot?.name || "ShooNhee-AI",
+                                list_title:
+                                  botConfig.bot?.name || "ShooNhee-AI",
                                 button_title: "🍀 ριℓιн кαтєgσяι",
                               },
                             }),
-                            buttons: buttons,
+                            buttons,
                           },
                         ),
                       contextInfo: {
@@ -1204,6 +1399,7 @@ Kamu bisa pakai aku buat cari info, ambil data, atau bantu hal-hal sederhana lan
         break;
       }
 
+      /* ─────────────────────────── VARIANT 10 — Product Message ─────────────────────────── */
       case 10: {
         try {
           const { prepareWAMessageMedia, generateWAMessageFromContent, proto } =
@@ -1226,6 +1422,7 @@ Kamu bisa pakai aku buat cari info, ambil data, atau bantu hal-hal sederhana lan
                 .resize(736, 890, { fit: "cover" })
                 .jpeg({ quality: 85 })
                 .toBuffer();
+
               productImage = await prepareWAMessageMedia(
                 { image: resized },
                 { upload: sock.waUploadToServer },
@@ -1235,22 +1432,20 @@ Kamu bisa pakai aku buat cari info, ambil data, atau bantu hal-hal sederhana lan
             console.error("[Menu V10] Media prep error:", e.message);
           }
 
-          const footerText = `
-Hai *@${m.pushName || "User"}* 🪸
-
-Aku ${botConfig.bot?.name || "ShooNhee-AI"}, bot WhatsApp yang siap bantu kamu.  
-
-Kamu bisa pakai aku buat cari info, ambil data, atau bantu hal-hal sederhana langsung lewat WhatsApp — praktis tanpa ribet.
-
-─────────────────────────
-Nama    : ${botConfig.bot?.name || "ShooNhee-AI"}
-Versi : v${botConfig.bot?.version || "1.9.0"}
-Runtime : Node.js ${process.version}
-Bot Up  : ${uptimeFormatted}
-
-Owner ku kak   : ${botConfig.owner?.name || "Lucky Archz"}
-─────────────────────────
-Klik tombol di bawah untuk menampilkan menu`;
+          const footerText =
+            `Hai *@${m.pushName || "User"}* 🪸\n\n` +
+            `Aku ${botConfig.bot?.name || "ShooNhee-AI"}, bot WhatsApp ` +
+            `yang siap bantu kamu.\n\n` +
+            `Kamu bisa pakai aku buat cari info, ambil data, atau bantu ` +
+            `hal-hal sederhana langsung lewat WhatsApp — praktis tanpa ribet.\n\n` +
+            `─────────────────────────\n` +
+            `Nama    : ${botConfig.bot?.name || "ShooNhee-AI"}\n` +
+            `Versi   : v${botConfig.bot?.version || "1.9.0"}\n` +
+            `Runtime : Node.js ${process.version}\n` +
+            `Bot Up  : ${uptimeFormatted}\n\n` +
+            `Owner ku kak : ${botConfig.owner?.name || "Lucky Archz"}\n` +
+            `─────────────────────────\n` +
+            `Klik tombol di bawah untuk menampilkan menu`;
 
           const buttons = [
             {
@@ -1280,17 +1475,21 @@ Klik tombol di bawah untuk menampilkan menu`;
                     proto.Message.InteractiveMessage.fromObject({
                       header:
                         proto.Message.InteractiveMessage.Header.fromObject({
-                          title: `${botConfig.bot?.name || "ShooNhee-AI"} Menu`,
+                          title:
+                            `${botConfig.bot?.name || "ShooNhee-AI"} Menu`,
                           hasMediaAttachment: !!productImage,
                           productMessage: {
                             product: {
-                              productImage: productImage?.imageMessage || null,
-                              productId: productId,
-                              title: `${botConfig.bot?.name || "ShooNhee-AI"} Menu`,
+                              productImage:
+                                productImage?.imageMessage || null,
+                              productId,
+                              title:
+                                `${botConfig.bot?.name || "ShooNhee-AI"} Menu`,
                               description: "Menu",
                               currencyCode: "USD",
                               priceAmount1000: "1000000000000000",
-                              retailerId: botConfig.bot?.name || "ShooNhee",
+                              retailerId:
+                                botConfig.bot?.name || "ShooNhee",
                               productImageCount: 1,
                             },
                             businessOwnerJid: businessJid,
@@ -1305,7 +1504,7 @@ Klik tombol di bawah untuk menampilkan menu`;
                         }),
                       nativeFlowMessage:
                         proto.Message.InteractiveMessage.NativeFlowMessage.fromObject(
-                          { buttons: buttons },
+                          { buttons },
                         ),
                       contextInfo: {
                         mentionedJid: [m.sender],
@@ -1341,13 +1540,19 @@ Klik tombol di bawah untuk menampilkan menu`;
         break;
       }
 
+      /* ─────────────────────────── VARIANT 11 — Document Interactive ─────────────────────────── */
       case 11: {
         try {
           const docuThumb =
             thumbBuffer ||
             imageBuffer ||
             fs.readFileSync(
-              path.join(process.cwd(), "assets", "images", "ShoNhe-allmenu.jpg"),
+              path.join(
+                process.cwd(),
+                "assets",
+                "images",
+                "ShoNhe-allmenu.jpg",
+              ),
             );
 
           const catRows = menuSorted.map(({ cat, cmds }) => ({
@@ -1357,7 +1562,18 @@ Klik tombol di bawah untuk menampilkan menu`;
             description: `Berisi ${cmds.length} Perintah`,
           }));
 
-          const titleText = `Hallo Kak *@${m.pushName}*\n\nSebelumnya, terima kasih yak sudah menggunakan bot kami\n\n╭─ \`INFORMASI BOT\` 𝜗ৎ\n┆ ᵎᵎ Nama Bot : *${botConfig.bot?.name || "ShooNhee-AI"}*\n┆ ᵎᵎ Owner Bot : *${botConfig.owner?.name || "ShooNhee-AI"}*\n┆ ᵎᵎ Prefix : *${prefix}*\n┆ ᵎᵎ Total Perintah : *${totalCmds}*\n┆ ᵎᵎ Role Kamu : ${m.isOwner ? "Owner" : m.isPremium ? "Premium" : "User Biasa"}\n╰─────\n\nsilahkan tekan tombol dibawah untuk memilih menu`;
+          const titleText =
+            `Hallo Kak *@${m.pushName}*\n\n` +
+            `Sebelumnya, terima kasih yak sudah menggunakan bot kami\n\n` +
+            `${STYLE.CORNER_TL} \`INFORMASI BOT\` 𝜗ৎ\n` +
+            `┆ ᵎᵎ Nama Bot : *${botConfig.bot?.name || "ShooNhee-AI"}*\n` +
+            `┆ ᵎᵎ Owner Bot : *${botConfig.owner?.name || "ShooNhee-AI"}*\n` +
+            `┆ ᵎᵎ Prefix : *${prefix}*\n` +
+            `┆ ᵎᵎ Total Perintah : *${totalCmds}*\n` +
+            `┆ ᵎᵎ Role Kamu : ` +
+            `${m.isOwner ? "Owner" : m.isPremium ? "Premium" : "User Biasa"}\n` +
+            `${STYLE.CORNER_BL}─────\n\n` +
+            `silahkan tekan tombol dibawah untuk memilih menu`;
 
           await sock.sendMessage(
             m.chat,
@@ -1436,7 +1652,8 @@ Klik tombol di bawah untuk menampilkan menu`;
                         sections: [
                           {
                             title: "🍀 Silahkan pilih menu yang kamu inginkan",
-                            highlight_label: botConfig.bot?.name || "ShooNhee-AI",
+                            highlight_label:
+                              botConfig.bot?.name || "ShooNhee-AI",
                             rows: catRows,
                           },
                         ],
@@ -1484,13 +1701,20 @@ Klik tombol di bawah untuk menampilkan menu`;
         }
         break;
       }
-      case 12:
+
+      /* ─────────────────────────── VARIANT 12 — Profile + Native Flow ─────────────────────────── */
+      case 12: {
         try {
           const docuThumb =
             thumbBuffer ||
             imageBuffer ||
             fs.readFileSync(
-              path.join(process.cwd(), "assets", "images", "ShoNhe-allmenu.jpg"),
+              path.join(
+                process.cwd(),
+                "assets",
+                "images",
+                "ShoNhe-allmenu.jpg",
+              ),
             );
 
           const catButtons = menuSorted.map(({ cat }) => ({
@@ -1500,28 +1724,41 @@ Klik tombol di bawah untuk menampilkan menu`;
               id: `${prefix}menucat ${cat}`,
             }),
           }));
+
+          /**
+           * Format byte count into human-readable units.
+           * @param {number} bytes
+           * @param {number} [decimals=2]
+           * @returns {string}
+           */
           function formatBytes(bytes, decimals = 2) {
             if (!Number.isFinite(bytes) || bytes < 0) return "0 B";
             if (bytes === 0) return "0 B";
             const k = 1024;
             const units = ["B", "KB", "MB", "GB", "TB"];
-            const i = Math.min(
+            const idx = Math.min(
               Math.floor(Math.log(bytes) / Math.log(k)),
               units.length - 1,
             );
-            const value = bytes / Math.pow(k, i);
+            const value = bytes / Math.pow(k, idx);
             const fixed = value.toFixed(decimals);
             const pretty = fixed
               .replace(/\.0+$/, "")
               .replace(/(\.\d*[1-9])0+$/, "$1");
-            return `${pretty} ${units[i]}`;
+            return `${pretty} ${units[idx]}`;
           }
-          const obj = JSON.parse(fs.readFileSync("./database/main/users.json"));
-          const jsonStr = JSON.stringify(obj);
-          const bytes = Buffer.byteLength(jsonStr, "utf8");
-          let pp;
+
+          const userDb = JSON.parse(
+            fs.readFileSync("./database/main/users.json"),
+          );
+          const userDbBytes = Buffer.byteLength(
+            JSON.stringify(userDb),
+            "utf8",
+          );
+
+          let profilePic;
           try {
-            pp = Buffer.from(
+            profilePic = Buffer.from(
               (
                 await axios.get(
                   await sock.profilePictureUrl(m.sender, "image"),
@@ -1529,9 +1766,10 @@ Klik tombol di bawah untuk menampilkan menu`;
                 )
               ).data,
             );
-          } catch (error) {
-            pp = fs.readFileSync("./assets/images/pp-kosong.jpg");
+          } catch (_error) {
+            profilePic = fs.readFileSync("./assets/images/pp-kosong.jpg");
           }
+
           const zanton = [
             {
               name: "single_select",
@@ -1554,18 +1792,27 @@ Klik tombol di bawah untuk menampilkan menu`;
             },
           ];
           zanton.push(...catButtons);
+
           await sock.sendMessage(
             m.chat,
             {
               interactiveMessage: {
-                title: `🌾 *𝘏𝘪! ${m.pushName}*\n\n𝘛𝘩𝘢𝘯𝘬𝘴 𝘧𝘰𝘳 𝘮𝘦𝘴𝘴𝘢𝘨𝘪𝘯𝘨 𝘶𝘴. 𝘠𝘰𝘶’𝘳𝘦 𝘯𝘰𝘸 𝘤𝘩𝘢𝘵𝘵𝘪𝘯𝘨 𝘸𝘪𝘵𝘩 𝘰𝘶𝘳 𝘈𝘶𝘵𝘰𝘮𝘢𝘵𝘪𝘤 𝘞𝘩𝘢𝘵𝘴𝘈𝘱𝘱 𝘉𝘰𝘵. \n\n╭─「 *${m.pushName}* 」\n│ • Bot Version     : *${botConfig.bot?.version || "2.1.0"}*\n│ • Database        : ${formatBytes(bytes)}\n╰──`,
+                title:
+                  `🌾 *𝘏𝘪! ${m.pushName}*\n\n` +
+                  `𝘛𝘩𝘢𝘯𝘬𝘴 𝘧𝘰𝘳 𝘮𝘦𝘴𝘴𝘢𝘨𝘪𝘯𝘨 𝘶𝘴. 𝘠𝘰𝘶’𝘳𝘦 𝘯𝘰𝘸 ` +
+                  `𝘤𝘩𝘢𝘵𝘵𝘪𝘯𝘨 𝘸𝘪𝘵𝘩 𝘰𝘶𝘳 𝘈𝘶𝘵𝘰𝘮𝘢𝘵𝘪𝘤 ` +
+                  `𝘞𝘩𝘢𝘵𝘴𝘈𝘱𝘱 𝘉𝘰𝘵. \n\n` +
+                  `${STYLE.CORNER_TL}「 *${m.pushName}* 」\n` +
+                  `│ • Bot Version : *${botConfig.bot?.version || "2.1.0"}*\n` +
+                  `│ • Database    : ${formatBytes(userDbBytes)}\n` +
+                  `${STYLE.CORNER_BL}──`,
                 footer:
                   botConfig.settings?.footer ||
                   `© ${botConfig.bot?.name || "ShooNhee-AI"} 2026`,
                 document: fs.readFileSync("./package.json"),
                 mimetype: "image/png",
                 fileName: `${getTimeGreeting()}`,
-                jpegThumbnail: await (await getSharp())(pp)
+                jpegThumbnail: await (await getSharp())(profilePic)
                   .resize({ width: 300, height: 300 })
                   .toBuffer(),
                 contextInfo: {
@@ -1580,7 +1827,9 @@ Klik tombol di bawah untuk menampilkan menu`;
                 },
                 externalAdReply: {
                   title: botConfig.bot?.name || "ShooNhee-AI",
-                  body: `🍃 OWNER BOT: ${botConfig.owner?.name || "ShooNhee-AI"}`,
+                  body:
+                    `🍃 OWNER BOT: ` +
+                    `${botConfig.owner?.name || "ShooNhee-AI"}`,
                   mediaType: 1,
                   thumbnail: fs.existsSync("./assets/images/ShoNhe-v11.jpg")
                     ? fs.readFileSync("./assets/images/ShoNhe-v11.jpg")
@@ -1594,7 +1843,8 @@ Klik tombol di bawah untuk menampilkan menu`;
                     bottom_sheet: {
                       in_thread_buttons_limit: 2,
                       divider_indices: [1, 2, 3, 4, 5, 999],
-                      list_title: "SIlahkan pilih category yang ingin dilihat",
+                      list_title:
+                        "Silahkan pilih category yang ingin dilihat",
                       button_title: "🧾 Tap Here!",
                     },
                     tap_target_configuration: {
@@ -1623,7 +1873,9 @@ Klik tombol di bawah untuk menampilkan menu`;
                     amount1000: 999999999,
                     requestFrom: "13135550002@s.whatsapp.net",
                     noteMessage: {
-                      extendedTextMessage: { text: `${botConfig?.bot?.name}` },
+                      extendedTextMessage: {
+                        text: `${botConfig?.bot?.name}`,
+                      },
                     },
                     expiryTimestamp: 999999999,
                     amount: {
@@ -1648,7 +1900,9 @@ Klik tombol di bawah untuk menampilkan menu`;
           );
         }
         break;
+      }
 
+      /* ─────────────────────────── VARIANT 13 — Canvas Profile Card ─────────────────────────── */
       case 13: {
         const thumbPathV13 = path.join(
           process.cwd(),
@@ -1663,31 +1917,35 @@ Klik tombol di bawah untuk menampilkan menu`;
         const saluranLinkV13 =
           botConfig.saluran?.link ||
           "https://whatsapp.com/channel/0029VbB37bgBfxoAmAlsgE0t";
+
         let totalCmdsV13 = totalCmds;
         let bannerThumbV13 = null;
+        const userV13 = db.getUser(m.sender);
 
-        const user = db.getUser(m.sender);
+        /* ── embedded canvas profile-card generator ── */
         try {
-          const { createCanvas, loadImage, GlobalFonts } =
+          const { createCanvas, loadImage } =
             await import("@napi-rs/canvas");
 
           /**
-           * Fungsi untuk membuat gambar profil menggunakan @napi-rs/canvas
-           * @param {Object} data Data user
-           * @returns {Promise<Buffer>} Buffer gambar PNG
+           * Render a premium HUD-style profile card.
+           * @param {Object} data  — user profile payload
+           * @returns {Promise<Buffer>} JPEG buffer
            */
           async function createProfileCard(data) {
-            // Ukuran kanvas
+            /* ── canvas setup ── */
             const canvas = createCanvas(800, 250);
             const ctx = canvas.getContext("2d");
 
-            // Tema Warna "Edgy Graphic Design"
-            const accentColor = "#CCFF00"; // Volt Green (Hijau stabilo/kuning)
+            /* ── colour theme ── */
+            const accentColor = "#CCFF00";
             const fgColor = "#FFFFFF";
 
-            // 1. Background Image dengan Kontras Tinggi (Object-fit Cover)
-            ctx.fillStyle = "#09090B"; // Mencegah background putih transparan WA
+            /* ── base background ── */
+            ctx.fillStyle = "#09090B";
             ctx.fillRect(0, 0, 800, 250);
+
+            /* ── background image with cover-fit ── */
             try {
               const bgImage = await loadImage(data.backgroundUrl);
               const canvasRatio = 800 / 250;
@@ -1706,17 +1964,16 @@ Klik tombol di bawah untuk menampilkan menu`;
                 drawY = (250 - drawH) / 2;
               }
               ctx.drawImage(bgImage, drawX, drawY, drawW, drawH);
-            } catch (error) {
+            } catch (_error) {
               ctx.fillStyle = "#09090B";
               ctx.fillRect(0, 0, 800, 250);
             }
 
-            // Overlay gelap pekat agar terkesan misterius & solid
+            /* ── dark overlay ── */
             ctx.fillStyle = "rgba(9, 9, 11, 0.85)";
             ctx.fillRect(0, 0, 800, 250);
 
-            // 2. Bentuk Asimetris (Sentuhan "Human Design")
-            // Alih-alih kotak rapi, kita buat bidang miring di latar belakang
+            /* ── decorative slanted shape ── */
             ctx.fillStyle = "rgba(255, 255, 255, 0.03)";
             ctx.beginPath();
             ctx.moveTo(0, 0);
@@ -1725,7 +1982,7 @@ Klik tombol di bawah untuk menampilkan menu`;
             ctx.lineTo(0, 250);
             ctx.fill();
 
-            // Garis miring aksen
+            /* ── accent stroke line ── */
             ctx.strokeStyle = "rgba(255, 255, 255, 0.1)";
             ctx.lineWidth = 1;
             ctx.beginPath();
@@ -1733,30 +1990,32 @@ Klik tombol di bawah untuk menampilkan menu`;
             ctx.lineTo(330, 250);
             ctx.stroke();
 
-            // 3. Tipografi "Watermark" Super Besar di Background
+            /* ── large watermark text ── */
             ctx.fillStyle = "rgba(204, 255, 0, 0.05)";
             ctx.font = "900 150px sans-serif";
             ctx.fillText(`LV${data.level}`, 300, 220);
 
-            // 4. Elemen Dekoratif Mikro (Khas Desain Grafis)
-            // Teks sistem kecil di pojok kiri atas
+            /* ── system labels (top-left) ── */
             ctx.fillStyle = "#666666";
             ctx.font = "10px monospace";
             ctx.fillText("// SYS_ONLINE : USER_PROFILE", 30, 25);
             ctx.fillText(
               "ID_HASH: " +
-                Math.random().toString(36).substring(2, 10).toUpperCase(),
+                Math.random()
+                  .toString(36)
+                  .substring(2, 10)
+                  .toUpperCase(),
               30,
               40,
             );
 
-            // Garis "Barcode" di pojok kanan atas
+            /* ── barcode accent (top-right) ── */
             ctx.fillStyle = accentColor;
             ctx.fillRect(770, 20, 6, 40);
             ctx.fillRect(760, 20, 2, 40);
             ctx.fillRect(752, 20, 3, 40);
 
-            // 5. Konfigurasi Avatar (Bentuk Lingkaran Rapi)
+            /* ── avatar (circular clip) ── */
             const avatarSize = 130;
             const avatarX = 50;
             const avatarY = 60;
@@ -1764,35 +2023,29 @@ Klik tombol di bawah untuk menampilkan menu`;
             const centerY = avatarY + avatarSize / 2;
             const radius = avatarSize / 2;
 
-            // Memotong area avatar menjadi lingkaran
             ctx.save();
             ctx.beginPath();
             ctx.arc(centerX, centerY, radius, 0, Math.PI * 2, true);
             ctx.closePath();
             ctx.clip();
 
-            // Memuat gambar avatar
             try {
               const avatar = await loadImage(data.avatarUrl);
               ctx.drawImage(avatar, avatarX, avatarY, avatarSize, avatarSize);
-            } catch (error) {
+            } catch (_error) {
               ctx.fillStyle = "#333333";
               ctx.fillRect(avatarX, avatarY, avatarSize, avatarSize);
             }
             ctx.restore();
 
-            // Bingkai Lingkaran yang Rapi
+            /* ── avatar ring ── */
             ctx.beginPath();
             ctx.arc(centerX, centerY, radius, 0, Math.PI * 2, true);
-            ctx.lineWidth = 4; // Ketebalan border
+            ctx.lineWidth = 4;
             ctx.strokeStyle = accentColor;
             ctx.stroke();
 
-            // ==========================================
-            // AREA TEKS DAN BADGE
-            // ==========================================
-
-            // 6. Nama Pengguna (Besar & Tegas, Jangan di toUpperCase() agar Emoji aman)
+            /* ── user name ── */
             ctx.fillStyle = fgColor;
             ctx.font = "900 42px sans-serif";
             let displayName = data.name || "User";
@@ -1800,36 +2053,34 @@ Klik tombol di bawah untuk menampilkan menu`;
               displayName = displayName.substring(0, 15) + "...";
             ctx.fillText(displayName, 230, 100);
 
-            // 7. Badge Rank Miring (Slanted Badge)
+            /* ── rank badge ── */
             ctx.save();
             ctx.translate(230, 115);
             ctx.fillStyle = accentColor;
             ctx.beginPath();
             ctx.moveTo(0, 0);
-            ctx.lineTo(120, 0); // Lebar atas
-            ctx.lineTo(110, 24); // Miring ke kiri bawah
-            ctx.lineTo(-10, 24); // Miring ke kiri bawah
+            ctx.lineTo(120, 0);
+            ctx.lineTo(110, 24);
+            ctx.lineTo(-10, 24);
             ctx.fill();
 
-            ctx.fillStyle = "#000000"; // Teks hitam di dalam badge Volt Green
+            ctx.fillStyle = "#000000";
             ctx.font = "bold 14px sans-serif";
             ctx.fillText(data.rank.toUpperCase(), 10, 17);
             ctx.restore();
 
-            // ==========================================
-            // AREA PROGRESS BAR (Gaya Segmented/Terputus-putus)
-            // ==========================================
+            /* ── segmented XP progress bar ── */
             const barX = 230;
-            const barY = 172; // Posisi bar disesuaikan agar panel teks di bawah lega
+            const barY = 172;
             const barWidth = 500;
-            const segments = 25; // Dibagi 25 kotak kecil
+            const segments = 25;
             const gap = 3;
             const segmentWidth = (barWidth - gap * (segments - 1)) / segments;
 
             const xpRatio = Math.min(data.currentXp / data.requiredXp, 1);
             const activeSegments = Math.floor(xpRatio * segments);
 
-            // Background Bar (Kotak-kotak kosong)
+            /* background segments */
             ctx.fillStyle = "rgba(255, 255, 255, 0.1)";
             for (let i = 0; i < segments; i++) {
               ctx.fillRect(
@@ -1840,7 +2091,7 @@ Klik tombol di bawah untuk menampilkan menu`;
               );
             }
 
-            // Foreground Bar (Kotak-kotak terisi)
+            /* active segments */
             ctx.fillStyle = accentColor;
             for (let i = 0; i < activeSegments; i++) {
               ctx.fillRect(
@@ -1851,36 +2102,34 @@ Klik tombol di bawah untuk menampilkan menu`;
               );
             }
 
-            // ==========================================
-            // AREA DETAIL EXP & LEVEL (HUD STYLE)
-            // ==========================================
-            const dataY = barY + 18; // Jarak turun dari progress bar
+            /* ── XP detail panel ── */
+            const dataY = barY + 18;
 
-            // 1. PANEL EXP (Kiri)
-            ctx.fillStyle = "rgba(255, 255, 255, 0.05)"; // Background transparan putih
+            /* panel background */
+            ctx.fillStyle = "rgba(255, 255, 255, 0.05)";
             ctx.beginPath();
             ctx.moveTo(barX, dataY);
-            ctx.lineTo(barX + 210, dataY); // Ujung atas kanan
-            ctx.lineTo(barX + 198, dataY + 26); // Ujung bawah kanan (miring ke dalam)
-            ctx.lineTo(barX, dataY + 26); // Ujung bawah kiri
+            ctx.lineTo(barX + 210, dataY);
+            ctx.lineTo(barX + 198, dataY + 26);
+            ctx.lineTo(barX, dataY + 26);
             ctx.fill();
 
-            // Aksen Garis Volt Green di kiri Panel EXP
+            /* accent strip */
             ctx.fillStyle = accentColor;
             ctx.fillRect(barX, dataY, 4, 26);
 
-            // Teks Label "EXP"
+            /* label */
             ctx.fillStyle = "#FFFFFF";
             ctx.font = "bold 13px sans-serif";
             ctx.textAlign = "left";
             ctx.fillText("EXP", barX + 15, dataY + 18);
 
-            // Teks Angka EXP Current (Warna Volt Green agar menyala)
+            /* current XP */
             ctx.fillStyle = accentColor;
             ctx.font = "bold 14px monospace";
             ctx.fillText(data.currentXp.toString(), barX + 50, dataY + 18);
 
-            // Pemisah & Angka EXP Max (Warna Abu-abu netral)
+            /* separator + max XP */
             const currentXpWidth = ctx.measureText(
               data.currentXp.toString(),
             ).width;
@@ -1892,12 +2141,11 @@ Klik tombol di bawah untuk menampilkan menu`;
               dataY + 18,
             );
 
-            // 2. BADGE LEVEL (Kanan)
+            /* ── level badge ── */
             const badgeW = 90;
             ctx.save();
             ctx.translate(barX + barWidth - badgeW, dataY);
 
-            // Bentuk Badge: Kiri miring (konsisten), kanan lurus (sejajar ujung bar)
             ctx.fillStyle = accentColor;
             ctx.beginPath();
             ctx.moveTo(12, 0);
@@ -1906,17 +2154,16 @@ Klik tombol di bawah untuk menampilkan menu`;
             ctx.lineTo(0, 26);
             ctx.fill();
 
-            // Teks "LVL X" warna hitam pekat di dalam badge
             ctx.fillStyle = "#000000";
             ctx.font = "900 16px sans-serif";
             ctx.textAlign = "center";
-            // Titik X diatur ke 48 agar teks berada tepat di tengah visual panel miring
             ctx.fillText(`LVL ${data.level}`, 48, 19);
             ctx.restore();
 
             return canvas.toBuffer("image/jpeg");
           }
 
+          /* ── resolve user data for profile card ── */
           const levelHelper = await import("../../src/lib/Shon-level.js");
           const profileUser = db.getUser(m.sender) || {};
           const exp = profileUser.exp || 0;
@@ -1924,15 +2171,18 @@ Klik tombol di bawah untuk menampilkan menu`;
           const currentLevelExp = levelHelper.expForLevel(level);
           const nextLevelExp = levelHelper.expForLevel(level + 1);
 
-          let resolvedAvatarUrl = "https://i.ibb.co/3Fh9Q6M/empty-profile.png";
+          let resolvedAvatarUrl =
+            "https://i.ibb.co/3Fh9Q6M/empty-profile.png";
           try {
             const ppUrl = await sock.profilePictureUrl(m.sender, "image");
             if (ppUrl) resolvedAvatarUrl = ppUrl;
-          } catch (e) {}
+          } catch (_e) {
+            /* use default avatar */
+          }
 
           bannerThumbV13 = await createProfileCard({
             name: m.pushName || profileUser.name || "User",
-            level: level,
+            level,
             currentXp: exp - currentLevelExp,
             requiredXp: nextLevelExp - currentLevelExp,
             rank: levelHelper.getRole(level),
@@ -1962,34 +2212,35 @@ Klik tombol di bawah untuk menampilkan menu`;
         };
 
         try {
+          /**
+           * Compact number formatter (1.2K, 3.4M, 1.1B).
+           * @param {number} number
+           * @returns {string}
+           */
           const formatNumber = (number) => {
-            if (number >= 1e9) {
+            if (number >= 1e9)
               return (number / 1e9).toFixed(1).replace(/\.0$/, "") + "B";
-            }
-            if (number >= 1e6) {
+            if (number >= 1e6)
               return (number / 1e6).toFixed(1).replace(/\.0$/, "") + "M";
-            }
-            if (number >= 1e3) {
+            if (number >= 1e3)
               return (number / 1e3).toFixed(1).replace(/\.0$/, "") + "K";
-            }
             return number.toString();
           };
+
           await sock.sendMessage(
             m.chat,
             {
               image: bannerThumbV13,
-              caption: `🎄 ʜᴀʟʟᴏ *${m.pushName}*
-
-╭─ *✦* \`${toMonoUpperBold("biodata bot")}\` *✦*
-│ ʙᴏᴛ : *${botConfig.bot?.name || "ShooNhee-AI"}*
-│ ᴠᴇʀsɪᴏɴ : *${botConfig.bot?.version || "2.1.0"}*
-╰───
-
-╭─ *✦* \`${toMonoUpperBold(`list category`)}\` *✦*
-${menuSorted.map(({ cat }) => `│ *${prefix}menucat ${cat}*`).join("\n")}
-╰─────────────`,
+              caption:
+                `🎄 ʜᴀʟʟᴏ *${m.pushName}*\n\n` +
+                `${STYLE.CORNER_TL} *${STYLE.STAR}* \`${toMonoUpperBold("biodata bot")}\` *${STYLE.STAR}*\n` +
+                `${STYLE.EDGE_V} ʙᴏᴛ : *${botConfig.bot?.name || "ShooNhee-AI"}*\n` +
+                `${STYLE.EDGE_V} ᴠᴇʀsɪᴏɴ : *${botConfig.bot?.version || "2.1.0"}*\n` +
+                `${STYLE.CORNER_BL}───\n\n` +
+                `${STYLE.CORNER_TL} *${STYLE.STAR}* \`${toMonoUpperBold("list category")}\` *${STYLE.STAR}*\n` +
+                `${menuSorted.map(({ cat }) => `${STYLE.EDGE_V} *${prefix}menucat ${cat}*`).join("\n")}\n` +
+                `${STYLE.CORNER_BL}─────────────`,
               contextInfo: contextInfoV13,
-
               footer: `${botConfig.bot?.name || "ShooNhee-AI"}`,
             },
             { quoted: getVerifiedQuoted(botConfig) },
@@ -2012,7 +2263,8 @@ ${menuSorted.map(({ cat }) => `│ *${prefix}menucat ${cat}*`).join("\n")}
         break;
       }
 
-      case 14:
+      /* ─────────────────────────── VARIANT 14 — Location Header Interactive ─────────────────────────── */
+      case 14: {
         try {
           const saluranIdV14 =
             botConfig.saluran?.id || "120363208449943317@newsletter";
@@ -2029,22 +2281,7 @@ ${menuSorted.map(({ cat }) => `│ *${prefix}menucat ${cat}*`).join("\n")}
               id: `${prefix}menucat ${cat}`,
             }),
           }));
-          const obj = JSON.parse(fs.readFileSync("./database/main/users.json"));
-          const jsonStr = JSON.stringify(obj);
-          const bytes = Buffer.byteLength(jsonStr, "utf8");
-          let pp;
-          try {
-            pp = Buffer.from(
-              (
-                await axios.get(
-                  await sock.profilePictureUrl(m.sender, "image"),
-                  { responseType: "arraybuffer" },
-                )
-              ).data,
-            );
-          } catch (error) {
-            pp = fs.readFileSync("./assets/images/pp-kosong.jpg");
-          }
+
           const zanton = [
             {
               name: "single_select",
@@ -2077,71 +2314,76 @@ ${menuSorted.map(({ cat }) => `│ *${prefix}menucat ${cat}*`).join("\n")}
                     deviceListMetadata: {},
                     deviceListMetadataVersion: 2,
                   },
-                  interactiveMessage: proto.Message.InteractiveMessage.create({
-                    contextInfo: {
-                      mentionedJid: [m.sender],
-                      forwardingScore: 19,
-                      isForwarded: true,
-                      forwardedNewsletterMessageInfo: {
-                        newsletterId: saluranIdV14,
-                        newsletterName: `- ${saluranNameV14}`,
-                        serverMessageId: -1,
-                      },
-                      externalAdReply: {
-                        title: botConfig?.bot?.name,
-                        body: `🌾 Dikembangkan oleh ${botConfig?.bot?.developer}`,
-                        thumbnail: fs.readFileSync("./assets/images/ShooNhee.jpg"),
-                        sourceUrl: `https://instagram.com/ShooNhee.md`,
-                        mediaUrl: `https://instagram.com/ShooNhee.md`,
-                        mediaType: 2,
-                        renderLargerThumbnail: true,
-                      },
-                    },
-                    header: {
-                      title: null,
-                      locationMessage: {
-                        degreesLatitude: 0,
-                        degreesLongitude: 0,
-                        name: `꫶ᥫ᭡꫶ ${m.pushName || "User"}`,
-                        url: `https://ss.ss`,
-                        address: `Semoga harimu menyenangkan :3`,
-                        jpegThumbnail: await (await getSharp())(docuThumbV14)
-                          .resize({ width: 300, height: 300 })
-                          .toBuffer(),
-                      },
-                      subtitle: "",
-                      hasMediaAttachment: false,
-                    },
-                    body: { text: null },
-                    footer: {
-                      text:
-                        `Halo kak *${m.pushName}* ≽^• ˕ • ྀི≼\n` +
-                        `*⌞ INFO USER ⌝*\n` +
-                        `‧ Number    : +${m.sender.split("@")[0]}\n` +
-                        `‧ Name    : ${m.pushName}\n\n` +
-                        `*⌞ INFO BOT ⌝*\n` +
-                        `‧ Name    : ${botConfig.bot?.name || "Bot"}\n` +
-                        `‧ Version : ${botConfig.bot?.version || "v1.0.0"}\n` +
-                        `‧ Prefix  : ${m.prefix || "No Prefix"}\n\n` +
-                        `*⌞ CARA PAKAI ⌝*\n` +
-                        `‧ Klik tombol untuk melihat menu kategori\n` +
-                        `‧ Klik *LIHAT SEMUA MENU* untuk seluruh fitur`,
-                    },
-                    nativeFlowMessage:
-                      proto.Message.InteractiveMessage.NativeFlowMessage.create(
-                        {
-                          buttons: zanton,
-                          messageParamsJson: JSON.stringify({
-                            bottom_sheet: {
-                              in_thread_buttons_limit: 1,
-                              divider_indices: [1],
-                              list_title: getTimeGreeting(),
-                              button_title: "𖤍",
-                            },
-                          }),
+                  interactiveMessage:
+                    proto.Message.InteractiveMessage.create({
+                      contextInfo: {
+                        mentionedJid: [m.sender],
+                        forwardingScore: 19,
+                        isForwarded: true,
+                        forwardedNewsletterMessageInfo: {
+                          newsletterId: saluranIdV14,
+                          newsletterName: `- ${saluranNameV14}`,
+                          serverMessageId: -1,
                         },
-                      ),
-                  }),
+                        externalAdReply: {
+                          title: botConfig?.bot?.name,
+                          body: `🌾 Dikembangkan oleh ${botConfig?.bot?.developer}`,
+                          thumbnail: fs.readFileSync(
+                            "./assets/images/ShooNhee.jpg",
+                          ),
+                          sourceUrl: `https://instagram.com/ShooNhee.md`,
+                          mediaUrl: `https://instagram.com/ShooNhee.md`,
+                          mediaType: 2,
+                          renderLargerThumbnail: true,
+                        },
+                      },
+                      header: {
+                        title: null,
+                        locationMessage: {
+                          degreesLatitude: 0,
+                          degreesLongitude: 0,
+                          name: `꫶ᥫ᭡꫶ ${m.pushName || "User"}`,
+                          url: `https://ss.ss`,
+                          address: `Semoga harimu menyenangkan :3`,
+                          jpegThumbnail: await (
+                            await getSharp()
+                          )(docuThumbV14)
+                            .resize({ width: 300, height: 300 })
+                            .toBuffer(),
+                        },
+                        subtitle: "",
+                        hasMediaAttachment: false,
+                      },
+                      body: { text: null },
+                      footer: {
+                        text:
+                          `Halo kak *${m.pushName}* ≽^• ˕ • ྀི≼\n` +
+                          `*⌞ INFO USER ⌝*\n` +
+                          `‧ Number : +${m.sender.split("@")[0]}\n` +
+                          `‧ Name   : ${m.pushName}\n\n` +
+                          `*⌞ INFO BOT ⌝*\n` +
+                          `‧ Name    : ${botConfig.bot?.name || "Bot"}\n` +
+                          `‧ Version : ${botConfig.bot?.version || "v1.0.0"}\n` +
+                          `‧ Prefix  : ${m.prefix || "No Prefix"}\n\n` +
+                          `*⌞ CARA PAKAI ⌝*\n` +
+                          `‧ Klik tombol untuk melihat menu kategori\n` +
+                          `‧ Klik *LIHAT SEMUA MENU* untuk seluruh fitur`,
+                      },
+                      nativeFlowMessage:
+                        proto.Message.InteractiveMessage.NativeFlowMessage.create(
+                          {
+                            buttons: zanton,
+                            messageParamsJson: JSON.stringify({
+                              bottom_sheet: {
+                                in_thread_buttons_limit: 1,
+                                divider_indices: [1],
+                                list_title: getTimeGreeting(),
+                                button_title: "𖤍",
+                              },
+                            }),
+                          },
+                        ),
+                    }),
                 },
               },
             },
@@ -2167,19 +2409,29 @@ ${menuSorted.map(({ cat }) => `│ *${prefix}menucat ${cat}*`).join("\n")}
           );
         }
         break;
+      }
 
-      case 15:
+      /* ─────────────────────────── VARIANT 15 — Weather + Full Interactive ─────────────────────────── */
+      case 15: {
         try {
           const catRows = menuSorted.map(({ cat, emoji }) => ({
             title: `[ ${emoji} ] - ${toMonoUpperBold(`${cat} MENU`)}`,
             description: `Klik untuk membuka ${cat}`,
             id: `${prefix}menucat ${cat}`,
           }));
-          const obj = JSON.parse(fs.readFileSync("./database/main/users.json"));
-          const jsonStr = JSON.stringify(obj);
-          let pp;
+
+          /* ── user database stats ── */
+          const userDbRaw = fs.readFileSync(
+            "./database/main/users.json",
+          );
+          const userDb = JSON.parse(userDbRaw);
+          const userDbStr = JSON.stringify(userDb);
+          const userDbBytes = Buffer.byteLength(userDbStr, "utf8");
+
+          /* ── profile picture fetch ── */
+          let profilePic;
           try {
-            pp = Buffer.from(
+            profilePic = Buffer.from(
               (
                 await axios.get(
                   await sock.profilePictureUrl(m.sender, "image"),
@@ -2187,9 +2439,11 @@ ${menuSorted.map(({ cat }) => `│ *${prefix}menucat ${cat}*`).join("\n")}
                 )
               ).data,
             );
-          } catch (error) {
-            pp = fs.readFileSync("./assets/images/pp-kosong.jpg");
+          } catch (_error) {
+            profilePic = fs.readFileSync("./assets/images/pp-kosong.jpg");
           }
+
+          /* ── button definitions ── */
           const zanton = [
             {
               name: "single_select",
@@ -2231,6 +2485,8 @@ ${menuSorted.map(({ cat }) => `│ *${prefix}menucat ${cat}*`).join("\n")}
               }),
             },
           ];
+
+          /* ── quoted order message ── */
           const ftroliQuoted = {
             key: {
               fromMe: false,
@@ -2241,7 +2497,9 @@ ${menuSorted.map(({ cat }) => `│ *${prefix}menucat ${cat}*`).join("\n")}
               orderMessage: {
                 orderId: "44444444444444",
                 thumbnail:
-                  (await (await getSharp())(pp)
+                  (await (
+                    await getSharp()
+                  )(profilePic)
                     .resize({ width: 300, height: 300 })
                     .toBuffer()) || null,
                 itemCount: totalCmds,
@@ -2267,15 +2525,18 @@ ${menuSorted.map(({ cat }) => `│ *${prefix}menucat ${cat}*`).join("\n")}
               },
             },
           };
-          const res = await axios.get(
+
+          /* ── weather API call ── */
+          const weatherRes = await axios.get(
             "https://bmkg-restapi.vercel.app/v1/weather/33.26.16.2005",
           );
-          const data = res.data.data;
-          const today = data.forecast[0];
-          const now = today.entries[0];
-          const cuaca = now.weather;
-          const suhu = now.temperature_c;
-          const weatherEmoji = {
+          const weatherData = weatherRes.data.data;
+          const todayForecast = weatherData.forecast[0];
+          const currentEntry = todayForecast.entries[0];
+          const cuaca = currentEntry.weather;
+          const suhu = currentEntry.temperature_c;
+
+          const weatherEmojiMap = {
             Cerah: "☀️",
             "Cerah Berawan": "🌤️",
             Berawan: "☁️",
@@ -2284,47 +2545,59 @@ ${menuSorted.map(({ cat }) => `│ *${prefix}menucat ${cat}*`).join("\n")}
             "Hujan Petir": "⛈️",
             Kabut: "🌫️",
           };
+          const emojiCuaca = weatherEmojiMap[cuaca] || "🌤️";
+          const weatherTitle = `🌡️ ${suhu}°C | ${emojiCuaca} ${cuaca}`;
 
-          const emojiCuaca = weatherEmoji[cuaca] || "🌤️";
-          const titles = `🌡️ ${suhu}°C | ${emojiCuaca} ${cuaca}`;
+          /* ── RPG status helper ── */
+          const rpgV15 = () => {
+            const r = db.getUser(m.sender)?.rpg || {};
+            return r.health !== undefined
+              ? `→ *HP*: ${r.health}/${r.maxHealth}\n` +
+                  `→ *Mana*: ${r.mana}/${r.maxMana}\n` +
+                  `→ *Stamina*: ${r.stamina}/${r.maxStamina}`
+              : "";
+          };
+
+          /* ── user data for footer ── */
+          const currentUser = db.getUser(m.sender);
+
           await sock.sendMessage(
             m.chat,
             {
               interactiveMessage: {
-                title: ``,
-                footer: `🌿 Halo *${m.pushName}* 👋
-
-Selamat datang di *${botConfig.bot?.name}* ✨
-Bot ini siap bantu kamu dengan berbagai fitur menarik yang bisa kamu gunakan kapan saja 🚀
-
-Mulai dari hiburan, tools, hingga fitur keren lainnya sudah tersedia di sini 🎄
-Jangan ragu untuk eksplor semua menu yang ada ya!
-
-Gunakan bot dengan bijak dan tetap sopan saat berinteraksi 😊
-Semoga pengalaman kamu menyenangkan dan betah pakai bot ini 🌟
-
-☁︎ *STATISTIK BOT KAMI* ☁︎
-→ *Nama*: ${botConfig.bot?.name}
-→ *Versi*: ${botConfig.bot?.version}
-→ *Total Fitur*: ${totalCmds} Fitur
-→ *Pemilik*: ${botConfig?.owner?.name}
-→ *Prefix*: ${m?.prefix}
-
-☁︎ *STATISTIK KAMU* ☁︎
-→ *Username*: ${m?.pushName}
-→ *Role*: ${m?.isOwner ? "Owner" : m?.isPremium ? "Premium" : "User Biasa"}
-→ *Energi*: ${m?.isOwner || m?.isPremium ? "∞ Unlimited" : (db.getUser(m.sender)?.energi ?? 25)}
-→ *Level*: ${db.getUser(m.sender)?.rpg?.level || db.getUser(m.sender)?.level || 1}
-→ *Exp*: ${(db.getUser(m.sender)?.exp ?? 0).toLocaleString()}
-→ *Koin*: ${(db.getUser(m.sender)?.koin ?? 0).toLocaleString()}
-${(() => {
-  const r = db.getUser(m.sender)?.rpg || {};
-  return r.health !== undefined
-    ? `→ *HP*: ${r.health}/${r.maxHealth}\n→ *Mana*: ${r.mana}/${r.maxMana}\n→ *Stamina*: ${r.stamina}/${r.maxStamina}`
-    : "";
-})()}
-
-Silahkan tekan tombol dibawah untuk memilih category`,
+                title: "",
+                footer:
+                  `🌿 Halo *${m.pushName}* 👋\n\n` +
+                  `Selamat datang di *${botConfig.bot?.name}* ✨\n` +
+                  `Bot ini siap bantu kamu dengan berbagai fitur ` +
+                  `menarik yang bisa kamu gunakan kapan saja 🚀\n\n` +
+                  `Mulai dari hiburan, tools, hingga fitur keren ` +
+                  `lainnya sudah tersedia di sini 🎄\n` +
+                  `Jangan ragu untuk eksplor semua menu yang ada ya!\n\n` +
+                  `Gunakan bot dengan bijak dan tetap sopan saat ` +
+                  `berinteraksi 😊\n` +
+                  `Semoga pengalaman kamu menyenangkan dan betah ` +
+                  `pakai bot ini 🌟\n\n` +
+                  `☁︎ *STATISTIK BOT KAMI* ☁︎\n` +
+                  `→ *Nama*     : ${botConfig.bot?.name}\n` +
+                  `→ *Versi*    : ${botConfig.bot?.version}\n` +
+                  `→ *Total Fitur* : ${totalCmds} Fitur\n` +
+                  `→ *Pemilik*  : ${botConfig?.owner?.name}\n` +
+                  `→ *Prefix*   : ${m?.prefix}\n\n` +
+                  `☁︎ *STATISTIK KAMU* ☁︎\n` +
+                  `→ *Username* : ${m?.pushName}\n` +
+                  `→ *Role*     : ` +
+                  `${m?.isOwner ? "Owner" : m?.isPremium ? "Premium" : "User Biasa"}\n` +
+                  `→ *Energi*   : ` +
+                  `${m?.isOwner || m?.isPremium ? "∞ Unlimited" : (currentUser?.energi ?? 25)}\n` +
+                  `→ *Level*    : ` +
+                  `${currentUser?.rpg?.level || currentUser?.level || 1}\n` +
+                  `→ *Exp*      : ` +
+                  `${(currentUser?.exp ?? 0).toLocaleString()}\n` +
+                  `→ *Koin*     : ` +
+                  `${(currentUser?.koin ?? 0).toLocaleString()}\n` +
+                  `${rpgV15()}\n\n` +
+                  `Silahkan tekan tombol dibawah untuk memilih category`,
                 document: fs.readFileSync("./package.json"),
                 mimetype: "image/png",
                 fileName: `${greeting}`,
@@ -2339,10 +2612,12 @@ Silahkan tekan tombol dibawah untuk memilih category`,
                   isForwarded: true,
                 },
                 externalAdReply: {
-                  title: titles,
+                  title: weatherTitle,
                   body: `Hai ${m.pushName}! Gunakan bot ini dengan bijak`,
                   previewType: "VIDEO",
-                  thumbnail: fs.readFileSync("./assets/images/ShooNhee.jpg"),
+                  thumbnail: fs.readFileSync(
+                    "./assets/images/ShooNhee.jpg",
+                  ),
                   sourceUrl: config.info.website,
                   renderLargerThumbnail: true,
                   containsAutoReply: true,
@@ -2359,7 +2634,8 @@ Silahkan tekan tombol dibawah untuk memilih category`,
                     bottom_sheet: {
                       in_thread_buttons_limit: 2,
                       divider_indices: [1, 2, 3, 4, 5, 999],
-                      list_title: "Silahkan pilih menu yang kamu inginkan",
+                      list_title:
+                        "Silahkan pilih menu yang kamu inginkan",
                       button_title: "🌥️ Lebih Lengkap",
                     },
                     tap_target_configuration: {
@@ -2376,8 +2652,8 @@ Silahkan tekan tombol dibawah untuk memilih category`,
             },
             { quoted: ftroliQuoted },
           );
-        } catch (v14Error) {
-          console.log(v14Error);
+        } catch (v15Error) {
+          console.log(v15Error);
           await sendFallback(
             m,
             sock,
@@ -2385,14 +2661,21 @@ Silahkan tekan tombol dibawah untuk memilih category`,
             imageBuffer,
             thumbBuffer,
             botConfig,
-            "V14",
+            "V15",
           );
         }
         break;
+      }
+
+      /* ─────────────────────────── DEFAULT — Plain Text Fallback ─────────────────────────── */
       default:
         await m.reply(text);
+        break;
     }
 
+    /* ═══════════════════════════════════════════════════════════════════════════
+     *  AUDIO APPENDIX — Menu Sound Effect
+     * ═══════════════════════════════════════════════════════════════════════════ */
     const audioEnabled = db.setting("audioMenu") !== false;
     if (audioEnabled) {
       const audioPath = path.join(
@@ -2412,7 +2695,8 @@ Silahkan tekan tombol dibawah untuk memilih category`,
             },
             { quoted: getVerifiedQuoted(botConfig) },
           );
-        } catch (ffmpegErr) {
+        } catch (_ffmpegErr) {
+          /* retry without special flags */
           await sock.sendMessage(
             m.chat,
             {
@@ -2429,6 +2713,10 @@ Silahkan tekan tombol dibawah untuk memilih category`,
     console.error("[Menu] Error on command execution:", error.message);
   }
 }
+
+/* ═══════════════════════════════════════════════════════════════════════════════
+ *  SECTION 12 — MODULE EXPORT
+ * ═══════════════════════════════════════════════════════════════════════════════ */
 
 export default {
   config: pluginConfig,

@@ -4,8 +4,14 @@ import {
   getCategories,
 } from "../../src/lib/Shon-plugins.js";
 import { getDatabase } from "../../src/lib/Shon-database.js";
+
 import fs from "fs";
 import path from "path";
+
+// ╔══════════════════════════════════════════════════════════════════════════════╗
+// ║                        PLUGIN CONFIGURATION                                  ║
+// ╚══════════════════════════════════════════════════════════════════════════════╝
+
 const pluginConfig = {
   name: "menucat",
   alias: ["mc", "category", "cat"],
@@ -21,6 +27,73 @@ const pluginConfig = {
   energi: 0,
   isEnabled: true,
 };
+
+// ╔══════════════════════════════════════════════════════════════════════════════╗
+// ║                    AESTHETIC SYMBOL MANAGER v2.0                             ║
+// ║  ── Single-render consistency · Cross-platform unicode · WhatsApp-safe ──   ║
+// ╚══════════════════════════════════════════════════════════════════════════════╝
+
+const SYMBOL_SETS = [
+  {
+    name: "box-premium",
+    tl: "╔", tr: "╗", bl: "╚", br: "╝",
+    h: "═", v: "║",
+    sepL: "╟", sepR: "╢", sepH: "─",
+    teeL: "╠", teeB: "╩",
+    bullet: "◈", arrow: "▸", diamond: "◆", star: "✦",
+    bracketL: "❰", bracketR: "❱",
+    dash: "─", dot: "•", marker: "◆",
+  },
+  {
+    name: "round-soft",
+    tl: "╭", tr: "╮", bl: "╰", br: "╯",
+    h: "─", v: "│",
+    sepL: "├", sepR: "┤", sepH: "─",
+    teeL: "├", teeB: "┴",
+    bullet: "⦿", arrow: "▸", diamond: "◆", star: "✦",
+    bracketL: "❬", bracketR: "❭",
+    dash: "─", dot: "•", marker: "◆",
+  },
+  {
+    name: "heavy-block",
+    tl: "▛", tr: "▜", bl: "▙", br: "▟",
+    h: "▀", v: "▌",
+    sepL: "▌", sepR: "▐", sepH: "▄",
+    teeL: "▌", teeB: "▀",
+    bullet: "◉", arrow: "▻", diamond: "◈", star: "✶",
+    bracketL: "❰", bracketR: "❱",
+    dash: "▀", dot: "·", marker: "◈",
+  },
+  {
+    name: "geo-future",
+    tl: "◤", tr: "◥", bl: "◣", br: "◢",
+    h: "━", v: "┃",
+    sepL: "┣", sepR: "┫", sepH: "━",
+    teeL: "┣", teeB: "┻",
+    bullet: "●", arrow: "→", diamond: "◆", star: "✷",
+    bracketL: "〈", bracketR: "〉",
+    dash: "━", dot: "·", marker: "◆",
+  },
+  {
+    name: "elegant-thin",
+    tl: "╓", tr: "╖", bl: "╙", br: "╜",
+    h: "─", v: "│",
+    sepL: "├", sepR: "┤", sepH: "─",
+    teeL: "├", teeB: "└",
+    bullet: "⬡", arrow: "▹", diamond: "◊", star: "✧",
+    bracketL: "❮", bracketR: "❯",
+    dash: "─", dot: "·", marker: "◊",
+  },
+];
+
+function pickSymbolSet() {
+  const idx = Math.floor(Math.random() * SYMBOL_SETS.length);
+  return SYMBOL_SETS[idx];
+}
+
+// ╔══════════════════════════════════════════════════════════════════════════════╗
+// ║                       CATEGORY DATA REGISTRY                                 ║
+// ╚══════════════════════════════════════════════════════════════════════════════╝
 
 const CATEGORY_EMOJIS = {
   owner: "👑",
@@ -45,21 +118,81 @@ const CATEGORY_EMOJIS = {
   store: "🛒",
 };
 
+const CATEGORY_ORDER = [
+  "owner",
+  "main",
+  "utility",
+  "tools",
+  "fun",
+  "game",
+  "download",
+  "search",
+  "sticker",
+  "media",
+  "ai",
+  "group",
+  "religi",
+  "info",
+  "cek",
+  "economy",
+  "user",
+  "canvas",
+  "random",
+  "premium",
+  "jpm",
+  "pushkontak",
+  "panel",
+  "ephoto",
+  "store",
+];
+
+const DEFAULT_MODE_EXCLUDES = {
+  md: ["panel", "pushkontak", "store"],
+  store: ["panel", "pushkontak", "jpm", "ephoto", "cpanel"],
+  pushkontak: ["panel", "store", "jpm", "ephoto", "cpanel"],
+  cpanel: ["pushkontak", "store", "jpm", "ephoto"],
+};
+
+// ╔══════════════════════════════════════════════════════════════════════════════╗
+// ║                        TEXT TRANSFORM UTILITIES                              ║
+// ╚══════════════════════════════════════════════════════════════════════════════╝
+
 function toMonoUpperBold(text) {
-  return text.toUpperCase()
+  return text.toUpperCase();
 }
 
 function toSmallCaps(text) {
-  return text.toUpperCase()
+  return text.toUpperCase();
 }
 
-let cachedThumb = null;
-try {
-  const thumbPath = path.join(process.cwd(), "assets", "images", "ShooNhee2.jpg");
-  if (fs.existsSync(thumbPath)) cachedThumb = fs.readFileSync(thumbPath);
-} catch (e) {}
+// ╔══════════════════════════════════════════════════════════════════════════════╗
+// ║                         THUMBNAIL ASSET CACHE                                ║
+// ║  ── Eager-load on module init · Silent-fail fallback · Single-read ──       ║
+// ╚══════════════════════════════════════════════════════════════════════════════╝
 
-function getContextInfo() {
+let cachedThumb = null;
+
+(function warmThumbnailCache() {
+  try {
+    const thumbPath = path.join(
+      process.cwd(),
+      "assets",
+      "images",
+      "ShooNhee2.jpg"
+    );
+    if (fs.existsSync(thumbPath)) {
+      cachedThumb = fs.readFileSync(thumbPath);
+    }
+  } catch (_e) {
+    /* deliberate no-op: thumbnail is cosmetic */
+  }
+})();
+
+// ╔══════════════════════════════════════════════════════════════════════════════╗
+// ║                        CONTEXT INFO BUILDERS                                 ║
+// ╚══════════════════════════════════════════════════════════════════════════════╝
+
+function buildBaseContextInfo() {
   const saluranId = config.saluran?.id || "120363208449943317@newsletter";
   const saluranName = config.saluran?.name || config.bot?.name || "ShooNhee-AI";
   const botName = config.bot?.name || "ShooNhee-AI";
@@ -73,7 +206,7 @@ function getContextInfo() {
       serverMessageId: 127,
     },
     externalAdReply: {
-      title: `Kategori Menu`,
+      title: "Kategori Menu",
       body: botName,
       sourceUrl: config.saluran?.link || "",
       mediaType: 1,
@@ -83,158 +216,408 @@ function getContextInfo() {
   };
 }
 
+function buildFullContextInfo(m, thumbBuffer, title, body) {
+  const saluranId = config.saluran?.id || "120363208449943317@newsletter";
+  const saluranName = config.saluran?.name || config.bot?.name || "ShooNhee-AI";
+  const saluranLink = config.saluran?.link || "";
+  const botName = config.bot?.name || "ShooNhee-AI";
+
+  return {
+    mentionedJid: [m.sender],
+    forwardingScore: 9999,
+    isForwarded: true,
+    forwardedNewsletterMessageInfo: {
+      newsletterJid: saluranId,
+      newsletterName: saluranName,
+      serverMessageId: 127,
+    },
+    externalAdReply: {
+      title: title || "Kategori Menu",
+      body: body || botName,
+      sourceUrl: saluranLink,
+      mediaType: 1,
+      renderLargerThumbnail: false,
+      thumbnail: thumbBuffer || cachedThumb,
+    },
+  };
+}
+
+// ╔══════════════════════════════════════════════════════════════════════════════╗
+// ║                        MODE EXCLUDE RESOLVER                                 ║
+// ╚══════════════════════════════════════════════════════════════════════════════╝
+
+async function resolveModeExcludeMap() {
+  let modeExcludeMap = { ...DEFAULT_MODE_EXCLUDES };
+
+  try {
+    const { default: botmodePlugin } = await import("../group/botmode.js");
+    if (botmodePlugin?.MODES) {
+      modeExcludeMap = {};
+      for (const [key, val] of Object.entries(botmodePlugin.MODES)) {
+        if (val.excludeCategories) {
+          modeExcludeMap[key] = val.excludeCategories;
+        }
+      }
+    }
+  } catch (_e) {
+    /* fallback silently to default mode exclusions */
+  }
+
+  return modeExcludeMap;
+}
+
+// ╔══════════════════════════════════════════════════════════════════════════════╗
+// ║                     PREMIUM MENU RENDER ENGINE                               ║
+// ║  ── Per-render symbol binding · Declarative section blocks ──               ║
+// ╚══════════════════════════════════════════════════════════════════════════════╝
+
+function renderCategoryList(s, prefix, visibleCats, commandsByCategory, casesByCategory) {
+  const header =
+    `${s.tl}${s.h}${s.h}${s.marker} *${toMonoUpperBold("DAFTAR KATEGORI")}* ${s.marker}${s.h}${s.h}${s.tr}\n` +
+    `${s.v} ${s.arrow} Ketik \`${prefix}menucat <kategori>\`${s.v.padStart(2)}\n`;
+
+  const divider = `${s.teeL}${s.sepH}${s.sepH}〔 *${toMonoUpperBold("KATEGORI")}* 〕${s.sepH}${s.sepH}${s.marker}\n`;
+
+  const bodyLines = visibleCats.map((cat) => {
+    const pluginCmds = commandsByCategory[cat] || [];
+    const caseCmds = casesByCategory[cat] || [];
+    const totalCmds = pluginCmds.length + caseCmds.length;
+    const emoji = CATEGORY_EMOJIS[cat] || "📁";
+    return ` ${s.v} ${emoji} ${cat.toUpperCase()} \`${totalCmds}\` cmds`;
+  });
+
+  const footer =
+    `${s.bl}${s.dash}${s.dash}${s.teeB}${s.dash}${s.dash}${s.br}\n\n` +
+    `${s.star} _Contoh: \`${prefix}menucat tools\`_`;
+
+  return header + "\n" + divider + bodyLines.join("\n") + "\n" + footer;
+}
+
+function renderCommandList(s, prefix, emoji, matchedCat, allCommands, pluginCommands, caseCommands) {
+  const header = `${s.tl}${s.h}${s.h}〔 ${emoji} *${matchedCat.toUpperCase()}* 〕${s.h}${s.h}${s.tr}\n`;
+
+  const bodyLines = allCommands.map((cmd) => ` ${s.v} \`${prefix}${cmd}\``);
+
+  let footer =
+    `\n${s.bl}${s.dash}${s.dash}${s.teeB}${s.dash}${s.dash}${s.br}\n` +
+    `${s.star} Total: \`${allCommands.length}\` commands`;
+
+  if (caseCommands.length > 0) {
+    footer += `\n${s.diamond} (\`${pluginCommands.length}\` plugin + \`${caseCommands.length}\` case)`;
+  }
+
+  return header + bodyLines.join("\n") + footer;
+}
+
+function renderNotFoundError(s, prefix, categoryArg) {
+  return (
+    `${s.tl}${s.h}${s.h}${s.marker} *${toMonoUpperBold("KATEGORI TIDAK DITEMUKAN")}* ${s.marker}${s.h}${s.h}${s.tr}\n` +
+    `${s.v} ${s.dot} Kategori \`${categoryArg}\` tidak tersedia.${s.v.padStart(2)}\n` +
+    `${s.v} ${s.dot} Ketik \`${prefix}menucat\` untuk melihat daftar.${s.v.padStart(2)}\n` +
+    `${s.bl}${s.dash}${s.dash}${s.teeB}${s.dash}${s.dash}${s.br}`
+  );
+}
+
+function renderAccessDenied(s) {
+  return (
+    `${s.tl}${s.h}${s.h}${s.marker} *${toMonoUpperBold("AKSES DITOLAK")}* ${s.marker}${s.h}${s.h}${s.tr}\n` +
+    `${s.v} ${s.dot} Kategori ini hanya untuk owner.${s.v.padStart(2)}\n` +
+    `${s.bl}${s.dash}${s.dash}${s.teeB}${s.dash}${s.dash}${s.br}`
+  );
+}
+
+function renderEmptyCategory(s, matchedCat) {
+  return (
+    `${s.tl}${s.h}${s.h}${s.marker} *${toMonoUpperBold("KATEGORI KOSONG")}* ${s.marker}${s.h}${s.h}${s.tr}\n` +
+    `${s.v} ${s.dot} Kategori \`${matchedCat}\` tidak memiliki command.${s.v.padStart(2)}\n` +
+    `${s.bl}${s.dash}${s.dash}${s.teeB}${s.dash}${s.dash}${s.br}`
+  );
+}
+
+// ╔══════════════════════════════════════════════════════════════════════════════╗
+// ║                    INTERACTIVE MESSAGE FACTORIES                             ║
+// ╚══════════════════════════════════════════════════════════════════════════════╝
+
+async function relayCategoryInteractive(
+  m,
+  sock,
+  txt,
+  visibleCats,
+  prefix,
+  botName,
+  commandsByCategory,
+  casesByCategory,
+  buildCtx
+) {
+  const { generateWAMessageFromContent, proto } = await import("ShooNhee");
+
+  const catRows = visibleCats.map((cat) => {
+    const totalCmds =
+      (commandsByCategory[cat] || []).length +
+      (casesByCategory[cat] || []).length;
+    const emoji = CATEGORY_EMOJIS[cat] || "📁";
+    return {
+      title: `${emoji} ${cat.toUpperCase()}`,
+      description: `${totalCmds} commands`,
+      id: `${prefix}menucat ${cat}`,
+    };
+  });
+
+  const buttons = [
+    {
+      name: "single_select",
+      buttonParamsJson: JSON.stringify({
+        title: "◈ PILIH KATEGORI",
+        sections: [{ title: "❰ DAFTAR KATEGORI ❱", rows: catRows }],
+      }),
+    },
+    {
+      name: "quick_reply",
+      buttonParamsJson: JSON.stringify({
+        display_text: "◂ KEMBALI KE MENU",
+        id: `${prefix}menu`,
+      }),
+    },
+  ];
+
+  const msg = generateWAMessageFromContent(
+    m.chat,
+    {
+      viewOnceMessage: {
+        message: {
+          messageContextInfo: {
+            deviceListMetadata: {},
+            deviceListMetadataVersion: 2,
+          },
+          interactiveMessage: proto.Message.InteractiveMessage.fromObject({
+            body: proto.Message.InteractiveMessage.Body.fromObject({
+              text: txt,
+            }),
+            footer: proto.Message.InteractiveMessage.Footer.fromObject({
+              text: `© ${botName}`,
+            }),
+            header: proto.Message.InteractiveMessage.Header.fromObject({
+              title: "◈ Daftar Kategori",
+              subtitle: `${visibleCats.length} kategori`,
+              hasMediaAttachment: false,
+            }),
+            nativeFlowMessage:
+              proto.Message.InteractiveMessage.NativeFlowMessage.fromObject({
+                buttons,
+              }),
+            contextInfo: buildCtx(
+              "Daftar Kategori",
+              `${visibleCats.length} kategori tersedia`
+            ),
+          }),
+        },
+      },
+    },
+    { userJid: m.sender, quoted: m }
+  );
+
+  return await sock.relayMessage(m.chat, msg.message, {
+    messageId: msg.key.id,
+  });
+}
+
+async function relayCommandsInteractive(
+  m,
+  sock,
+  txt,
+  allCommands,
+  matchedCat,
+  emoji,
+  prefix,
+  botName,
+  buildCtx
+) {
+  const { generateWAMessageFromContent, proto } = await import("ShooNhee");
+
+  const cmdRows = allCommands.map((cmd) => ({
+    title: `${prefix}${toSmallCaps(cmd)}`,
+    description: `Command ${matchedCat}`,
+    id: `${prefix}${cmd}`,
+  }));
+
+  const chunkSize = 10;
+  const sections = [];
+  for (let i = 0; i < cmdRows.length; i += chunkSize) {
+    const chunk = cmdRows.slice(i, i + chunkSize);
+    const partNum = Math.floor(i / chunkSize) + 1;
+    sections.push({
+      title: `${emoji} ${matchedCat.toUpperCase()} \u2014 Bagian ${partNum}`,
+      rows: chunk,
+    });
+  }
+
+  const buttons = [
+    ...sections.map((sec) => ({
+      name: "single_select",
+      buttonParamsJson: JSON.stringify({
+        title: `${emoji} PILIH COMMAND`,
+        sections: [sec],
+      }),
+    })),
+    {
+      name: "quick_reply",
+      buttonParamsJson: JSON.stringify({
+        display_text: "◂ KEMBALI KE KATEGORI",
+        id: `${prefix}menucat`,
+      }),
+    },
+    {
+      name: "quick_reply",
+      buttonParamsJson: JSON.stringify({
+        display_text: "◂ KEMBALI KE MENU",
+        id: `${prefix}menu`,
+      }),
+    },
+  ];
+
+  const msg = generateWAMessageFromContent(
+    m.chat,
+    {
+      viewOnceMessage: {
+        message: {
+          messageContextInfo: {
+            deviceListMetadata: {},
+            deviceListMetadataVersion: 2,
+          },
+          interactiveMessage: proto.Message.InteractiveMessage.fromObject({
+            body: proto.Message.InteractiveMessage.Body.fromObject({
+              text: txt,
+            }),
+            footer: proto.Message.InteractiveMessage.Footer.fromObject({
+              text: `© ${botName}`,
+            }),
+            header: proto.Message.InteractiveMessage.Header.fromObject({
+              title: `${emoji} ${matchedCat.toUpperCase()}`,
+              subtitle: `${allCommands.length} commands`,
+              hasMediaAttachment: false,
+            }),
+            nativeFlowMessage:
+              proto.Message.InteractiveMessage.NativeFlowMessage.fromObject({
+                buttons,
+              }),
+            contextInfo: buildCtx(
+              `${emoji} ${matchedCat}`,
+              `${allCommands.length} commands`
+            ),
+          }),
+        },
+      },
+    },
+    { userJid: m.sender, quoted: m }
+  );
+
+  return await sock.relayMessage(m.chat, msg.message, {
+    messageId: msg.key.id,
+  });
+}
+
+// ╔══════════════════════════════════════════════════════════════════════════════╗
+// ║                        MAIN HANDLER ENTRYPOINT                               ║
+// ╚══════════════════════════════════════════════════════════════════════════════╝
+
 async function handler(m, { sock, db }) {
+  // ── Resolve configuration ─────────────────────────────────────────
   const prefix = config.command?.prefix || ".";
   const args = m.args || [];
   const categoryArg = args[0]?.toLowerCase();
 
+  // ── Resolve catalogs ──────────────────────────────────────────────
   const categories = getCategories();
   const commandsByCategory = getCommandsByCategory();
 
   const { getCasesByCategory } = await import("../../case/ShooNhee.js");
   const casesByCategory = getCasesByCategory();
 
+  // ── Resolve UI variant ────────────────────────────────────────────
   const savedVariant = db.setting("menucatVariant");
   const menucatVariant = savedVariant || config.ui?.menucatVariant || 2;
 
+  // ── Resolve channel metadata ──────────────────────────────────────
   const saluranId = config.saluran?.id || "120363208449943317@newsletter";
   const saluranName = config.saluran?.name || config.bot?.name || "ShooNhee-AI";
   const saluranLink = config.saluran?.link || "";
   const botName = config.bot?.name || "ShooNhee-AI";
 
-  const imagePath = path.join(process.cwd(), "assets", "images", "ShooNhee.jpg");
-  const thumbPath = path.join(process.cwd(), "assets", "images", "ShooNhee2.jpg");
-  let imageBuffer = fs.existsSync(imagePath)
-    ? fs.readFileSync(imagePath)
-    : null;
-  let thumbBuffer = fs.existsSync(thumbPath)
-    ? fs.readFileSync(thumbPath)
-    : null;
+  // ── Load image assets ─────────────────────────────────────────────
+  const imagePath = path.join(
+    process.cwd(),
+    "assets",
+    "images",
+    "ShooNhee.jpg"
+  );
+  const thumbPath = path.join(
+    process.cwd(),
+    "assets",
+    "images",
+    "ShooNhee2.jpg"
+  );
+  const imageBuffer = fs.existsSync(imagePath) ? fs.readFileSync(imagePath) : null;
+  const thumbBuffer = fs.existsSync(thumbPath) ? fs.readFileSync(thumbPath) : null;
 
-  function buildFullContextInfo(title, body) {
-    return {
-      mentionedJid: [m.sender],
-      forwardingScore: 9999,
-      isForwarded: true,
-      forwardedNewsletterMessageInfo: {
-        newsletterJid: saluranId,
-        newsletterName: saluranName,
-        serverMessageId: 127,
-      },
-      externalAdReply: {
-        title: title || "Kategori Menu",
-        body: body || botName,
-        sourceUrl: saluranLink,
-        mediaType: 1,
-        renderLargerThumbnail: false,
-        thumbnail: thumbBuffer || cachedThumb,
-      },
-    };
-  }
+  // ── Bind aesthetic system for this render ─────────────────────────
+  const S = pickSymbolSet();
+  const buildCtx = (title, body) => buildFullContextInfo(m, thumbBuffer, title, body);
+
+  // ╔══════════════════════════════════════════════════════════════════╗
+  // ║              BRANCH A · CATEGORY LIST VIEW                       ║
+  // ╚══════════════════════════════════════════════════════════════════╝
 
   if (!categoryArg) {
+    // ── Resolve bot mode exclusions ───────────────────────────────
     const groupData = m.isGroup ? db.getGroup(m.chat) || {} : {};
     const botMode = groupData.botMode || "md";
-
-    let modeExcludeMap = {
-      md: ["panel", "pushkontak", "store"],
-      store: ["panel", "pushkontak", "jpm", "ephoto", "cpanel"],
-      pushkontak: ["panel", "store", "jpm", "ephoto", "cpanel"],
-      cpanel: ["pushkontak", "store", "jpm", "ephoto"],
-    };
-
-    try {
-      const { default: botmodePlugin } = await import("../group/botmode.js");
-      if (botmodePlugin && botmodePlugin.MODES) {
-        const modes = botmodePlugin.MODES;
-        modeExcludeMap = {};
-        for (const [key, val] of Object.entries(modes)) {
-          if (val.excludeCategories)
-            modeExcludeMap[key] = val.excludeCategories;
-        }
-      }
-    } catch (e) {}
-
+    const modeExcludeMap = await resolveModeExcludeMap();
     const excludeCategories = modeExcludeMap[botMode] || modeExcludeMap.md;
 
-    let txt = `📂 *${toMonoUpperBold("DAFTAR KATEGORI")}*\n\n`;
-    txt += `> Ketik \`${prefix}menucat <kategori>\`\n\n`;
-
-    const categoryOrder = [
-      "owner",
-      "main",
-      "utility",
-      "tools",
-      "fun",
-      "game",
-      "download",
-      "search",
-      "sticker",
-      "media",
-      "ai",
-      "group",
-      "religi",
-      "info",
-      "cek",
-      "economy",
-      "user",
-      "canvas",
-      "random",
-      "premium",
-      "jpm",
-      "pushkontak",
-      "panel",
-      "ephoto",
-      "store",
-    ];
-
-    const allCats = [
-      ...new Set([...categories, ...Object.keys(casesByCategory)]),
-    ];
+    // ── Build unified category catalog ────────────────────────────
+    const allCats = [...new Set([...categories, ...Object.keys(casesByCategory)])];
     const sortedCats = allCats.sort((a, b) => {
-      const indexA = categoryOrder.indexOf(a);
-      const indexB = categoryOrder.indexOf(b);
+      const indexA = CATEGORY_ORDER.indexOf(a);
+      const indexB = CATEGORY_ORDER.indexOf(b);
       return (indexA === -1 ? 999 : indexA) - (indexB === -1 ? 999 : indexB);
     });
 
     const visibleCats = sortedCats.filter((cat) => {
       if (cat === "owner" && !m.isOwner) return false;
       if (excludeCategories.includes(cat.toLowerCase())) return false;
-      const total =
+      const totalCmds =
         (commandsByCategory[cat] || []).length +
         (casesByCategory[cat] || []).length;
-      return total > 0;
+      return totalCmds > 0;
     });
 
-    txt += `╭─〔 📋 *KATEGORI* 〕───⬣\n`;
-    for (const cat of visibleCats) {
-      const pluginCmds = commandsByCategory[cat] || [];
-      const caseCmds = casesByCategory[cat] || [];
-      const totalCmds = pluginCmds.length + caseCmds.length;
-      const emoji = CATEGORY_EMOJIS[cat] || "📁";
-      txt += ` │ ${emoji} ${cat.toUpperCase()} │ \`${totalCmds}\` cmds\n`;
-    }
-    txt += `╰───────⬣\n\n`;
-    txt += `_Contoh: \`${prefix}menucat tools\`_`;
+    // ── Render menu ───────────────────────────────────────────────
+    const txt = renderCategoryList(
+      S, prefix, visibleCats, commandsByCategory, casesByCategory
+    );
 
+    // ── Dispatch by variant ───────────────────────────────────────
     try {
       switch (menucatVariant) {
+        // ── Variant 1 · Plain text reply ──────────────────────
         case 1:
           return await m.reply(txt);
 
+        // ── Variant 2 · Rich context text ─────────────────────
         case 2:
           return await sock.sendMessage(
             m.chat,
             {
               text: txt,
-              contextInfo: buildFullContextInfo(
+              contextInfo: buildCtx(
                 "Daftar Kategori",
-                `${visibleCats.length} kategori tersedia`,
+                `${visibleCats.length} kategori tersedia`
               ),
             },
-            { quoted: m },
+            { quoted: m }
           );
 
+        // ── Variant 3 · Image with caption ────────────────────
         case 3:
           if (imageBuffer) {
             return await sock.sendMessage(
@@ -242,183 +625,114 @@ async function handler(m, { sock, db }) {
               {
                 image: imageBuffer,
                 caption: txt,
-                contextInfo: buildFullContextInfo(
+                contextInfo: buildCtx(
                   "Daftar Kategori",
-                  `${visibleCats.length} kategori tersedia`,
+                  `${visibleCats.length} kategori tersedia`
                 ),
               },
-              { quoted: m },
+              { quoted: m }
             );
           }
           return await sock.sendMessage(
             m.chat,
             {
               text: txt,
-              contextInfo: buildFullContextInfo(
+              contextInfo: buildCtx(
                 "Daftar Kategori",
-                `${visibleCats.length} kategori tersedia`,
+                `${visibleCats.length} kategori tersedia`
               ),
             },
-            { quoted: m },
+            { quoted: m }
           );
 
-        case 4: {
-          const { generateWAMessageFromContent, proto } = await import("ShooNhee");
-          const catRows = visibleCats.map((cat) => {
-            const total =
-              (commandsByCategory[cat] || []).length +
-              (casesByCategory[cat] || []).length;
-            const emoji = CATEGORY_EMOJIS[cat] || "📁";
-            return {
-              title: `${emoji} ${cat.toUpperCase()}`,
-              description: `${total} commands`,
-              id: `${prefix}menucat ${cat}`,
-            };
-          });
-          const buttons = [
-            {
-              name: "single_select",
-              buttonParamsJson: JSON.stringify({
-                title: "📂 ᴘɪʟɪʜ ᴋᴀᴛᴇɢᴏʀɪ",
-                sections: [{ title: "📋 PILIH KATEGORI", rows: catRows }],
-              }),
-            },
-            {
-              name: "quick_reply",
-              buttonParamsJson: JSON.stringify({
-                display_text: "🏠 ᴋᴇᴍʙᴀʟɪ ᴋᴇ ᴍᴇɴᴜ",
-                id: `${prefix}menu`,
-              }),
-            },
-          ];
-          const msg = generateWAMessageFromContent(
-            m.chat,
-            {
-              viewOnceMessage: {
-                message: {
-                  messageContextInfo: {
-                    deviceListMetadata: {},
-                    deviceListMetadataVersion: 2,
-                  },
-                  interactiveMessage:
-                    proto.Message.InteractiveMessage.fromObject({
-                      body: proto.Message.InteractiveMessage.Body.fromObject({
-                        text: txt,
-                      }),
-                      footer:
-                        proto.Message.InteractiveMessage.Footer.fromObject({
-                          text: `© ${botName}`,
-                        }),
-                      header:
-                        proto.Message.InteractiveMessage.Header.fromObject({
-                          title: "📂 Daftar Kategori",
-                          subtitle: `${visibleCats.length} kategori`,
-                          hasMediaAttachment: false,
-                        }),
-                      nativeFlowMessage:
-                        proto.Message.InteractiveMessage.NativeFlowMessage.fromObject(
-                          {
-                            buttons,
-                          },
-                        ),
-                      contextInfo: buildFullContextInfo(
-                        "Daftar Kategori",
-                        `${visibleCats.length} kategori tersedia`,
-                      ),
-                    }),
-                },
-              },
-            },
-            { userJid: m.sender, quoted: m },
+        // ── Variant 4 · Interactive native flow ───────────────
+        case 4:
+          return await relayCategoryInteractive(
+            m, sock, txt, visibleCats, prefix, botName,
+            commandsByCategory, casesByCategory, buildCtx
           );
-          return await sock.relayMessage(m.chat, msg.message, {
-            messageId: msg.key.id,
-          });
-        }
 
+        // ── Fallback · Rich context text ──────────────────────
         default:
           return await sock.sendMessage(
             m.chat,
             {
               text: txt,
-              contextInfo: buildFullContextInfo(
+              contextInfo: buildCtx(
                 "Daftar Kategori",
-                `${visibleCats.length} kategori tersedia`,
+                `${visibleCats.length} kategori tersedia`
               ),
             },
-            { quoted: m },
+            { quoted: m }
           );
       }
     } catch (err) {
-      console.error("[MenuCat] List error:", err.message);
+      console.error("[MenuCat] List dispatch error:", err.message);
       return await sock.sendMessage(
         m.chat,
-        {
-          text: txt,
-          contextInfo: getContextInfo(),
-        },
-        { quoted: m },
+        { text: txt, contextInfo: buildBaseContextInfo() },
+        { quoted: m }
       );
     }
   }
 
-  const allCategories = [
-    ...new Set([...categories, ...Object.keys(casesByCategory)]),
-  ];
+  // ╔══════════════════════════════════════════════════════════════════╗
+  // ║              BRANCH B · COMMAND DETAIL VIEW                      ║
+  // ╚══════════════════════════════════════════════════════════════════╝
+
+  // ── Resolve target category ─────────────────────────────────────
+  const allCategories = [...new Set([...categories, ...Object.keys(casesByCategory)])];
   const matchedCat = allCategories.find((c) => c.toLowerCase() === categoryArg);
 
   if (!matchedCat) {
-    return m.reply(
-      `❌ *KATEGORI TIDAK DITEMUKAN*\n\n> Kategori \`${categoryArg}\` tidak ada.\n> Ketik \`${prefix}menucat\` untuk list kategori.`,
-    );
+    return m.reply(renderNotFoundError(S, prefix, categoryArg));
   }
 
   if (matchedCat === "owner" && !m.isOwner) {
-    return m.reply(`❌ *AKSES DITOLAK*\n\n> Kategori ini hanya untuk owner.`);
+    return m.reply(renderAccessDenied(S));
   }
 
+  // ── Build command catalog ───────────────────────────────────────
   const pluginCommands = commandsByCategory[matchedCat] || [];
   const caseCommands = casesByCategory[matchedCat] || [];
   const allCommands = [...pluginCommands, ...caseCommands];
 
   if (allCommands.length === 0) {
-    return m.reply(
-      `❌ *KOSONG*\n\n> Kategori \`${matchedCat}\` tidak memiliki command.`,
-    );
+    return m.reply(renderEmptyCategory(S, matchedCat));
   }
 
   const emoji = CATEGORY_EMOJIS[matchedCat] || "📁";
 
-  let txt = `╭─〔 ${emoji} *${matchedCat.toUpperCase()}* 〕───⬣\n`;
-  for (const cmd of allCommands) {
-    txt += ` │ \`${prefix}${cmd}\`\n`;
-  }
-  txt += `╰───────⬣\n\n`;
-  txt += `Total: \`${allCommands.length}\` commands\n`;
-  if (caseCommands.length > 0) {
-    txt += `(${pluginCommands.length} plugin + ${caseCommands.length} case)`;
-  }
+  // ── Render menu ─────────────────────────────────────────────────
+  const txt = renderCommandList(
+    S, prefix, emoji, matchedCat,
+    allCommands, pluginCommands, caseCommands
+  );
 
+  // ── Dispatch by variant ───────────────────────────────────────
   try {
     switch (menucatVariant) {
+      // ── Variant 1 · Plain text reply ──────────────────────
       case 1:
         await m.reply(txt);
         break;
 
+      // ── Variant 2 · Rich context text ─────────────────────
       case 2:
         await sock.sendMessage(
           m.chat,
           {
             text: txt,
-            contextInfo: buildFullContextInfo(
+            contextInfo: buildCtx(
               `${emoji} ${matchedCat}`,
-              `${allCommands.length} commands`,
+              `${allCommands.length} commands`
             ),
           },
-          { quoted: m },
+          { quoted: m }
         );
         break;
 
+      // ── Variant 3 · Image with caption ────────────────────
       case 3:
         if (imageBuffer) {
           await sock.sendMessage(
@@ -426,135 +740,62 @@ async function handler(m, { sock, db }) {
             {
               image: imageBuffer,
               caption: txt,
-              contextInfo: buildFullContextInfo(
+              contextInfo: buildCtx(
                 `${emoji} ${matchedCat}`,
-                `${allCommands.length} commands`,
+                `${allCommands.length} commands`
               ),
             },
-            { quoted: m },
+            { quoted: m }
           );
         } else {
           await sock.sendMessage(
             m.chat,
             {
               text: txt,
-              contextInfo: buildFullContextInfo(
+              contextInfo: buildCtx(
                 `${emoji} ${matchedCat}`,
-                `${allCommands.length} commands`,
+                `${allCommands.length} commands`
               ),
             },
-            { quoted: m },
+            { quoted: m }
           );
         }
         break;
 
-      case 4: {
-        const { generateWAMessageFromContent, proto } = await import("ShooNhee");
-        const cmdRows = allCommands.map((cmd) => ({
-          title: `${prefix}${toSmallCaps(cmd)}`,
-          description: `Command ${matchedCat}`,
-          id: `${prefix}${cmd}`,
-        }));
-        const chunkSize = 10;
-        const sections = [];
-        for (let i = 0; i < cmdRows.length; i += chunkSize) {
-          const chunk = cmdRows.slice(i, i + chunkSize);
-          const partNum = Math.floor(i / chunkSize) + 1;
-          sections.push({
-            title: `${emoji} ${matchedCat.toUpperCase()} — Part ${partNum}`,
-            rows: chunk,
-          });
-        }
-        const buttons = [
-          ...sections.map((sec) => ({
-            name: "single_select",
-            buttonParamsJson: JSON.stringify({
-              title: `${emoji} ᴘɪʟɪʜ ᴄᴏᴍᴍᴀɴᴅ`,
-              sections: [sec],
-            }),
-          })),
-          {
-            name: "quick_reply",
-            buttonParamsJson: JSON.stringify({
-              display_text: "📂 ᴋᴇᴍʙᴀʟɪ ᴋᴇ ᴋᴀᴛᴇɢᴏʀɪ",
-              id: `${prefix}menucat`,
-            }),
-          },
-          {
-            name: "quick_reply",
-            buttonParamsJson: JSON.stringify({
-              display_text: "🏠 ᴋᴇᴍʙᴀʟɪ ᴋᴇ ᴍᴇɴᴜ",
-              id: `${prefix}menu`,
-            }),
-          },
-        ];
-        const msg = generateWAMessageFromContent(
-          m.chat,
-          {
-            viewOnceMessage: {
-              message: {
-                messageContextInfo: {
-                  deviceListMetadata: {},
-                  deviceListMetadataVersion: 2,
-                },
-                interactiveMessage: proto.Message.InteractiveMessage.fromObject(
-                  {
-                    body: proto.Message.InteractiveMessage.Body.fromObject({
-                      text: txt,
-                    }),
-                    footer: proto.Message.InteractiveMessage.Footer.fromObject({
-                      text: `© ${botName}`,
-                    }),
-                    header: proto.Message.InteractiveMessage.Header.fromObject({
-                      title: `${emoji} ${matchedCat.toUpperCase()}`,
-                      subtitle: `${allCommands.length} commands`,
-                      hasMediaAttachment: false,
-                    }),
-                    nativeFlowMessage:
-                      proto.Message.InteractiveMessage.NativeFlowMessage.fromObject(
-                        {
-                          buttons,
-                        },
-                      ),
-                    contextInfo: buildFullContextInfo(
-                      `${emoji} ${matchedCat}`,
-                      `${allCommands.length} commands`,
-                    ),
-                  },
-                ),
-              },
-            },
-          },
-          { userJid: m.sender, quoted: m },
+      // ── Variant 4 · Interactive native flow ───────────────
+      case 4:
+        await relayCommandsInteractive(
+          m, sock, txt, allCommands,
+          matchedCat, emoji, prefix, botName, buildCtx
         );
-        await sock.relayMessage(m.chat, msg.message, { messageId: msg.key.id });
         break;
-      }
 
+      // ── Fallback · Rich context text ──────────────────────
       default:
         await sock.sendMessage(
           m.chat,
           {
             text: txt,
-            contextInfo: buildFullContextInfo(
+            contextInfo: buildCtx(
               `${emoji} ${matchedCat}`,
-              `${allCommands.length} commands`,
+              `${allCommands.length} commands`
             ),
           },
-          { quoted: m },
+          { quoted: m }
         );
     }
   } catch (err) {
-    console.error("[MenuCat] Detail error:", err.message);
+    console.error("[MenuCat] Detail dispatch error:", err.message);
     await sock.sendMessage(
       m.chat,
-      {
-        text: txt,
-        contextInfo: getContextInfo(),
-      },
-      { quoted: m },
+      { text: txt, contextInfo: buildBaseContextInfo() },
+      { quoted: m }
     );
   }
 }
+
+// ╔══════════════════════════════════════════════════════════════════════════════╗
+// ║                            MODULE EXPORT                                     ║
+// ╚══════════════════════════════════════════════════════════════════════════════╝
 
 export { pluginConfig as config, handler };

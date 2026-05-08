@@ -12,13 +12,25 @@ import {
 } from "../../src/lib/Shon-plugins.js";
 import { getDatabase } from "../../src/lib/Shon-database.js";
 import { getCasesByCategory, getCaseCount } from "../../case/ShooNhee.js";
+
 import fs from "fs";
 import path from "path";
+
+// ╔══════════════════════════════════════════════════════════════════════════════╗
+// ║                        LAZY-LOADED MODULES                                   ║
+// ╚══════════════════════════════════════════════════════════════════════════════╝
+
 let _sharp = null;
+
 async function getSharp() {
   if (!_sharp) _sharp = (await import("sharp")).default;
   return _sharp;
 }
+
+// ╔══════════════════════════════════════════════════════════════════════════════╗
+// ║                        PLUGIN CONFIGURATION                                  ║
+// ╚══════════════════════════════════════════════════════════════════════════════╝
+
 const pluginConfig = {
   name: "allmenu",
   alias: ["fullmenu", "am", "allcommand", "semua"],
@@ -34,6 +46,73 @@ const pluginConfig = {
   energi: 0,
   isEnabled: true,
 };
+
+// ╔══════════════════════════════════════════════════════════════════════════════╗
+// ║                    AESTHETIC SYMBOL MANAGER v2.0                             ║
+// ║  ── Per-render consistency · Cross-platform unicode · WhatsApp-safe ──       ║
+// ╚══════════════════════════════════════════════════════════════════════════════╝
+
+const SYMBOL_SETS = [
+  {
+    name: "box-premium",
+    tl: "╔", tr: "╗", bl: "╚", br: "╝",
+    h: "═", v: "║",
+    sepL: "╟", sepR: "╢", sepH: "─",
+    teeL: "╠", teeB: "╩",
+    bullet: "◈", arrow: "▸", diamond: "◆", star: "✦",
+    bracketL: "❰", bracketR: "❱",
+    dash: "─", dot: "•", marker: "◆",
+  },
+  {
+    name: "round-soft",
+    tl: "╭", tr: "╮", bl: "╰", br: "╯",
+    h: "─", v: "│",
+    sepL: "├", sepR: "┤", sepH: "─",
+    teeL: "├", teeB: "┴",
+    bullet: "⦿", arrow: "▸", diamond: "◆", star: "✦",
+    bracketL: "❬", bracketR: "❭",
+    dash: "─", dot: "•", marker: "◆",
+  },
+  {
+    name: "heavy-block",
+    tl: "▛", tr: "▜", bl: "▙", br: "▟",
+    h: "▀", v: "▌",
+    sepL: "▌", sepR: "▐", sepH: "▄",
+    teeL: "▌", teeB: "▀",
+    bullet: "◉", arrow: "▻", diamond: "◈", star: "✶",
+    bracketL: "❰", bracketR: "❱",
+    dash: "▀", dot: "·", marker: "◈",
+  },
+  {
+    name: "geo-future",
+    tl: "◤", tr: "◥", bl: "◣", br: "◢",
+    h: "━", v: "┃",
+    sepL: "┣", sepR: "┫", sepH: "━",
+    teeL: "┣", teeB: "┻",
+    bullet: "●", arrow: "→", diamond: "◆", star: "✷",
+    bracketL: "〈", bracketR: "〉",
+    dash: "━", dot: "·", marker: "◆",
+  },
+  {
+    name: "elegant-thin",
+    tl: "╓", tr: "╖", bl: "╙", br: "╜",
+    h: "─", v: "│",
+    sepL: "├", sepR: "┤", sepH: "─",
+    teeL: "├", teeB: "└",
+    bullet: "⬡", arrow: "▹", diamond: "◊", star: "✧",
+    bracketL: "❮", bracketR: "❯",
+    dash: "─", dot: "·", marker: "◊",
+  },
+];
+
+function pickSymbolSet() {
+  const idx = Math.floor(Math.random() * SYMBOL_SETS.length);
+  return SYMBOL_SETS[idx];
+}
+
+// ╔══════════════════════════════════════════════════════════════════════════════╗
+// ║                       CATEGORY DATA REGISTRY                                 ║
+// ╚══════════════════════════════════════════════════════════════════════════════╝
 
 const CATEGORY_EMOJIS = {
   owner: "👑",
@@ -66,9 +145,56 @@ const CATEGORY_EMOJIS = {
   pushkontak: "📱",
 };
 
+const CATEGORY_ORDER = [
+  "owner",
+  "main",
+  "utility",
+  "tools",
+  "fun",
+  "game",
+  "download",
+  "search",
+  "sticker",
+  "media",
+  "ai",
+  "group",
+  "religi",
+  "info",
+  "cek",
+  "economy",
+  "user",
+  "canvas",
+  "random",
+  "premium",
+];
+
+// ╔══════════════════════════════════════════════════════════════════════════════╗
+// ║                        MODE FILTERING CONFIG                                 ║
+// ╚══════════════════════════════════════════════════════════════════════════════╝
+
+const DEFAULT_MODE_ALLOWED = {
+  md: null,
+  store: ["main", "group", "sticker", "owner", "store"],
+  pushkontak: ["main", "group", "sticker", "owner", "pushkontak"],
+};
+
+const DEFAULT_MODE_EXCLUDE = {
+  md: ["panel", "pushkontak", "store"],
+  store: null,
+  pushkontak: null,
+};
+
+// ╔══════════════════════════════════════════════════════════════════════════════╗
+// ║                        TEXT TRANSFORM UTILITIES                              ║
+// ╚══════════════════════════════════════════════════════════════════════════════╝
+
 function toSmallCaps(text) {
-  return text.toUpperCase()
+  return text.toUpperCase();
 }
+
+// ╔══════════════════════════════════════════════════════════════════════════════╗
+// ║                     COMMAND METADATA RESOLVER                                ║
+// ╚══════════════════════════════════════════════════════════════════════════════╝
 
 function getCommandSymbols(cmdName) {
   const plugin = getPlugin(cmdName);
@@ -83,11 +209,14 @@ function getCommandSymbols(cmdName) {
   return symbols.length > 0 ? " " + symbols.join(" ") : "";
 }
 
-function getContextInfo(botConfig, m, thumbBuffer) {
+// ╔══════════════════════════════════════════════════════════════════════════════╗
+// ║                        CONTEXT INFO BUILDERS                                 ║
+// ╚══════════════════════════════════════════════════════════════════════════════╝
+
+function buildBaseContextInfo(botConfig, m) {
   const saluranId = botConfig.saluran?.id || "120363208449943317@newsletter";
   const saluranName =
     botConfig.saluran?.name || botConfig.bot?.name || "ShooNhee-AI";
-  const saluranLink = botConfig.saluran?.link || "";
 
   return {
     mentionedJid: [m.sender],
@@ -101,152 +230,13 @@ function getContextInfo(botConfig, m, thumbBuffer) {
   };
 }
 
-async function handler(m, { sock, config: botConfig, db, uptime }) {
-  const prefix = botConfig.command?.prefix || ".";
-  const user = db.getUser(m.sender);
-  const groupData = m.isGroup ? db.getGroup(m.chat) || {} : {};
-  const botMode = groupData.botMode || "md";
-
-  const categories = getCategories();
-  const commandsByCategory = getCommandsByCategory();
-  const casesByCategory = getCasesByCategory();
-
-  let totalCommands = 0;
-  for (const category of categories) {
-    totalCommands += (commandsByCategory[category] || []).length;
-  }
-  const totalCases = getCaseCount();
-  const totalFeatures = totalCommands + totalCases;
-
-  let userRole = "User",
-    roleEmoji = "👤";
-  if (m.isOwner) {
-    userRole = "Owner";
-    roleEmoji = "👑";
-  } else if (m.isPremium) {
-    userRole = "Premium";
-    roleEmoji = "💎";
-  }
-
-  const greeting = getTimeGreeting();
-
-  let txt = `Hai *@${m.pushName || "User"}* 🪸
-Aku ${botConfig.bot?.name || "ShooNhee-AI"}, bot WhatsApp yang siap bantu kamu.  
-
-Kamu bisa pakai aku buat cari info, ambil data, atau bantu hal-hal sederhana langsung lewat WhatsApp — praktis tanpa ribet.
-
-`;
-  txt += `╭─〔 📖 *KETERANGAN* 〕───⬣\n`;
-  txt += ` │ Ⓞ = Owner Only\n`;
-  txt += ` │ ⓟ = Premium Only\n`;
-  txt += ` │ Ⓛ = Limit Required\n`;
-  txt += ` │ Ⓐ = Admin Only\n`;
-  txt += `╰───────⬣\n\n`;
-
-  const categoryOrder = [
-    "owner",
-    "main",
-    "utility",
-    "tools",
-    "fun",
-    "game",
-    "download",
-    "search",
-    "sticker",
-    "media",
-    "ai",
-    "group",
-    "religi",
-    "info",
-    "cek",
-    "economy",
-    "user",
-    "canvas",
-    "random",
-    "premium",
-  ];
-  const sortedCategories = [...categories].sort((a, b) => {
-    const indexA = categoryOrder.indexOf(a);
-    const indexB = categoryOrder.indexOf(b);
-    return (indexA === -1 ? 999 : indexA) - (indexB === -1 ? 999 : indexB);
-  });
-
-  let modeAllowedMap = {
-    md: null,
-    store: ["main", "group", "sticker", "owner", "store"],
-    pushkontak: ["main", "group", "sticker", "owner", "pushkontak"],
-  };
-  let modeExcludeMap = {
-    md: ["panel", "pushkontak", "store"],
-    store: null,
-    pushkontak: null,
-  };
-
-  try {
-    const { default: botmodePlugin } = await import("../group/botmode.js");
-    if (botmodePlugin && botmodePlugin.MODES) {
-      const modes = botmodePlugin.MODES;
-      modeAllowedMap = {};
-      modeExcludeMap = {};
-      for (const [key, val] of Object.entries(modes)) {
-        modeAllowedMap[key] = val.allowedCategories;
-        modeExcludeMap[key] = val.excludeCategories;
-      }
-    }
-  } catch (e) {}
-
-  const allowedCategories = modeAllowedMap[botMode];
-  const excludeCategories = modeExcludeMap[botMode] || [];
-
-  for (const category of sortedCategories) {
-    if (category === "owner" && !m.isOwner) continue;
-
-    if (
-      allowedCategories &&
-      !allowedCategories.includes(category.toLowerCase())
-    )
-      continue;
-    if (excludeCategories && excludeCategories.includes(category.toLowerCase()))
-      continue;
-
-    const pluginCmds = commandsByCategory[category] || [];
-    const caseCmds = casesByCategory[category] || [];
-    const allCmds = [...pluginCmds, ...caseCmds];
-    if (allCmds.length === 0) continue;
-
-    const emoji = CATEGORY_EMOJIS[category] || "📋";
-    const categoryName = toSmallCaps(category);
-
-    txt += `╭─〔 ${emoji} *${categoryName}* 〕───⬣\n`;
-    for (const cmd of allCmds) {
-      const symbols = getCommandSymbols(cmd);
-      txt += ` │ ◦ *${prefix}${cmd}*${symbols}\n`;
-    }
-    txt += `╰───────⬣\n\n`;
-  }
-
-  txt += `_© ${botConfig.bot?.name || "ShooNhee-AI"} | ${new Date().getFullYear()}_\n`;
-  txt += `_ᴅᴇᴠᴇʟᴏᴘᴇʀ: ${botConfig.bot?.developer || "Lucky Archz"}_`;
-
-  const imagePath = path.join(process.cwd(), "assets", "images", "ShooNhee.jpg");
-  const thumbPath = path.join(process.cwd(), "assets", "images", "ShooNhee2.jpg");
-
-  let imageBuffer = fs.existsSync(imagePath)
-    ? fs.readFileSync(imagePath)
-    : null;
-  let thumbBuffer = fs.existsSync(thumbPath)
-    ? fs.readFileSync(thumbPath)
-    : null;
-
-  const savedVariant = db.setting("allmenuVariant");
-  const allmenuVariant = savedVariant || botConfig.ui?.allmenuVariant || 2;
-
+function buildFullContextInfo(botConfig, m, imageBuffer) {
   const saluranId = botConfig.saluran?.id || "120363208449943317@newsletter";
   const saluranName =
     botConfig.saluran?.name || botConfig.bot?.name || "ShooNhee-AI";
   const saluranLink = botConfig.saluran?.link || "";
 
-  const fullContextInfo = {
+  return {
     mentionedJid: [m.sender],
     forwardingScore: 9999,
     isForwarded: true,
@@ -264,13 +254,246 @@ Kamu bisa pakai aku buat cari info, ambil data, atau bantu hal-hal sederhana lan
       renderLargerThumbnail: true,
     },
   };
+}
+
+// ╔══════════════════════════════════════════════════════════════════════════════╗
+// ║                       MODE FILTER RESOLVER                                   ║
+// ╚══════════════════════════════════════════════════════════════════════════════╝
+
+async function resolveModeFilters() {
+  let modeAllowedMap = { ...DEFAULT_MODE_ALLOWED };
+  let modeExcludeMap = { ...DEFAULT_MODE_EXCLUDE };
+
+  try {
+    const { default: botmodePlugin } = await import("../group/botmode.js");
+    if (botmodePlugin && botmodePlugin.MODES) {
+      const modes = botmodePlugin.MODES;
+      modeAllowedMap = {};
+      modeExcludeMap = {};
+      for (const [key, val] of Object.entries(modes)) {
+        modeAllowedMap[key] = val.allowedCategories;
+        modeExcludeMap[key] = val.excludeCategories;
+      }
+    }
+  } catch (_e) {
+    /* deliberate no-op: fallback to default mode filters */
+  }
+
+  return { modeAllowedMap, modeExcludeMap };
+}
+
+// ╔══════════════════════════════════════════════════════════════════════════════╗
+// ║                      CATEGORY CATALOG BUILDER                                ║
+// ╚══════════════════════════════════════════════════════════════════════════════╝
+
+function buildVisibleCategories(
+  sortedCategories,
+  commandsByCategory,
+  casesByCategory,
+  m,
+  allowedCategories,
+  excludeCategories
+) {
+  return sortedCategories.filter((cat) => {
+    if (cat === "owner" && !m.isOwner) return false;
+    if (
+      allowedCategories &&
+      !allowedCategories.includes(cat.toLowerCase())
+    )
+      return false;
+    if (
+      excludeCategories &&
+      excludeCategories.includes(cat.toLowerCase())
+    )
+      return false;
+
+    const cmds = [
+      ...(commandsByCategory[cat] || []),
+      ...(casesByCategory[cat] || []),
+    ];
+    return cmds.length > 0;
+  });
+}
+
+// ╔══════════════════════════════════════════════════════════════════════════════╗
+// ║                     PREMIUM MENU RENDER ENGINE                               ║
+// ╚══════════════════════════════════════════════════════════════════════════════╝
+
+function renderHeader(s, botConfig, m, totalFeatures, userRole, roleEmoji) {
+  const botName = botConfig.bot?.name || "ShooNhee-AI";
+  const greeting = getTimeGreeting();
+
+  return (
+    `${s.tl}${s.h}${s.h}${s.marker} *${botName}* ${s.marker}${s.h}${s.h}${s.tr}\n` +
+    `${s.v} ${s.star} ${greeting}, *@${m.pushName || "User"}* ${s.v.padStart(2)}\n` +
+    `${s.v} ${roleEmoji} Role: \`${userRole}\` ${s.v.padStart(2)}\n` +
+    `${s.v} ${s.diamond} Total Fitur: \`${totalFeatures}\` cmds ${s.v.padStart(2)}\n` +
+    `${s.bl}${s.dash}${s.dash}${s.teeB}${s.dash}${s.dash}${s.br}\n\n` +
+    `Aku ${botName}, bot WhatsApp yang siap bantu kamu.\n` +
+    `Kamu bisa pakai aku buat cari info, ambil data, atau bantu hal-hal sederhana langsung lewat WhatsApp ${s.bullet} praktis tanpa ribet.\n\n`
+  );
+}
+
+function renderLegend(s) {
+  return (
+    `${s.tl}${s.h}${s.h}〔 *KETERANGAN* 〕${s.h}${s.h}${s.tr}\n` +
+    `${s.v} ${s.dot} Ⓞ = Owner Only${s.v.padStart(2)}\n` +
+    `${s.v} ${s.dot} ⓟ = Premium Only${s.v.padStart(2)}\n` +
+    `${s.v} ${s.dot} Ⓛ = Limit Required${s.v.padStart(2)}\n` +
+    `${s.v} ${s.dot} Ⓐ = Admin Only${s.v.padStart(2)}\n` +
+    `${s.bl}${s.dash}${s.dash}${s.teeB}${s.dash}${s.dash}${s.br}\n\n`
+  );
+}
+
+function renderCategorySection(s, emoji, categoryName, allCmds, prefix) {
+  let section = `${s.tl}${s.h}${s.h}〔 ${emoji} *${categoryName}* 〕${s.h}${s.h}${s.tr}\n`;
+  for (const cmd of allCmds) {
+    const symbols = getCommandSymbols(cmd);
+    section += ` ${s.v} ${s.bullet} *${prefix}${cmd}*${symbols}\n`;
+  }
+  section += `${s.bl}${s.dash}${s.dash}${s.teeB}${s.dash}${s.dash}${s.br}\n\n`;
+  return section;
+}
+
+function renderFooter(botConfig) {
+  const botName = botConfig.bot?.name || "ShooNhee-AI";
+  const developer = botConfig.bot?.developer || "Lucky Archz";
+  return (
+    `_© ${botName} | ${new Date().getFullYear()}_\n` +
+    `_ᴅᴇᴠᴇʟᴏᴘᴇʀ: ${developer}_`
+  );
+}
+
+// ╔══════════════════════════════════════════════════════════════════════════════╗
+// ║                     INTERACTIVE MESSAGE FACTORIES                            ║
+// ╚══════════════════════════════════════════════════════════════════════════════╝
+
+async function buildInteractiveCategoryRows(
+  visibleCategories,
+  commandsByCategory,
+  casesByCategory,
+  prefix
+) {
+  return visibleCategories.map((cat) => {
+    const cmds = [
+      ...(commandsByCategory[cat] || []),
+      ...(casesByCategory[cat] || []),
+    ];
+    const emoji = CATEGORY_EMOJIS[cat] || "📋";
+    return {
+      title: `${emoji} ${toSmallCaps(cat)}`,
+      description: `${cmds.length} commands`,
+      id: `${prefix}menucat ${cat}`,
+    };
+  });
+}
+
+// ╔══════════════════════════════════════════════════════════════════════════════╗
+// ║                        MAIN HANDLER ENTRYPOINT                               ║
+// ╚══════════════════════════════════════════════════════════════════════════════╝
+
+async function handler(m, { sock, config: botConfig, db, uptime }) {
+  // ── Resolve configuration ─────────────────────────────────────────
+  const prefix = botConfig.command?.prefix || ".";
+  const user = db.getUser(m.sender);
+  const groupData = m.isGroup ? db.getGroup(m.chat) || {} : {};
+  const botMode = groupData.botMode || "md";
+
+  // ── Resolve catalogs ──────────────────────────────────────────────
+  const categories = getCategories();
+  const commandsByCategory = getCommandsByCategory();
+  const casesByCategory = getCasesByCategory();
+
+  // ── Compute statistics ────────────────────────────────────────────
+  let totalCommands = 0;
+  for (const category of categories) {
+    totalCommands += (commandsByCategory[category] || []).length;
+  }
+  const totalCases = getCaseCount();
+  const totalFeatures = totalCommands + totalCases;
+
+  // ── Resolve user role ─────────────────────────────────────────────
+  let userRole = "User";
+  let roleEmoji = "👤";
+  if (m.isOwner) {
+    userRole = "Owner";
+    roleEmoji = "👑";
+  } else if (m.isPremium) {
+    userRole = "Premium";
+    roleEmoji = "💎";
+  }
+
+  // ── Sort categories ───────────────────────────────────────────────
+  const sortedCategories = [...categories].sort((a, b) => {
+    const indexA = CATEGORY_ORDER.indexOf(a);
+    const indexB = CATEGORY_ORDER.indexOf(b);
+    return (indexA === -1 ? 999 : indexA) - (indexB === -1 ? 999 : indexB);
+  });
+
+  // ── Resolve mode filters ──────────────────────────────────────────
+  const { modeAllowedMap, modeExcludeMap } = await resolveModeFilters();
+  const allowedCategories = modeAllowedMap[botMode];
+  const excludeCategories = modeExcludeMap[botMode] || [];
+
+  // ── Bind aesthetic system ─────────────────────────────────────────
+  const S = pickSymbolSet();
+
+  // ── Render menu content ───────────────────────────────────────────
+  let txt = renderHeader(S, botConfig, m, totalFeatures, userRole, roleEmoji);
+  txt += renderLegend(S);
+
+  for (const category of sortedCategories) {
+    if (category === "owner" && !m.isOwner) continue;
+    if (
+      allowedCategories &&
+      !allowedCategories.includes(category.toLowerCase())
+    )
+      continue;
+    if (
+      excludeCategories &&
+      excludeCategories.includes(category.toLowerCase())
+    )
+      continue;
+
+    const pluginCmds = commandsByCategory[category] || [];
+    const caseCmds = casesByCategory[category] || [];
+    const allCmds = [...pluginCmds, ...caseCmds];
+    if (allCmds.length === 0) continue;
+
+    const emoji = CATEGORY_EMOJIS[category] || "📋";
+    const categoryName = toSmallCaps(category);
+
+    txt += renderCategorySection(S, emoji, categoryName, allCmds, prefix);
+  }
+
+  txt += renderFooter(botConfig);
+
+  // ── Load image assets ─────────────────────────────────────────────
+  const imagePath = path.join(process.cwd(), "assets", "images", "ShooNhee.jpg");
+  const thumbPath = path.join(process.cwd(), "assets", "images", "ShooNhee2.jpg");
+
+  const imageBuffer = fs.existsSync(imagePath) ? fs.readFileSync(imagePath) : null;
+  const thumbBuffer = fs.existsSync(thumbPath) ? fs.readFileSync(thumbPath) : null;
+
+  // ── Resolve UI variant ────────────────────────────────────────────
+  const savedVariant = db.setting("allmenuVariant");
+  const allmenuVariant = savedVariant || botConfig.ui?.allmenuVariant || 2;
+
+  // ── Build shared context info ─────────────────────────────────────
+  const fullContextInfo = buildFullContextInfo(botConfig, m, imageBuffer);
+
+  // ╔══════════════════════════════════════════════════════════════════╗
+  // ║              DISPATCH BY UI VARIANT                              ║
+  // ╚══════════════════════════════════════════════════════════════════╝
 
   try {
     switch (allmenuVariant) {
+      // ── Variant 1 · Plain text reply ──────────────────────
       case 1:
         await m.reply(txt);
         break;
 
+      // ── Variant 2 · Image with rich context ───────────────
       case 2:
         if (imageBuffer) {
           await sock.sendMessage(
@@ -280,7 +503,7 @@ Kamu bisa pakai aku buat cari info, ambil data, atau bantu hal-hal sederhana lan
               caption: txt,
               contextInfo: fullContextInfo,
             },
-            { quoted: m },
+            { quoted: m }
           );
         } else {
           await sock.sendMessage(
@@ -289,11 +512,12 @@ Kamu bisa pakai aku buat cari info, ambil data, atau bantu hal-hal sederhana lan
               text: txt,
               contextInfo: fullContextInfo,
             },
-            { quoted: m },
+            { quoted: m }
           );
         }
         break;
 
+      // ── Variant 3 · Document-style delivery ───────────────
       case 3: {
         let resizedThumb = thumbBuffer;
         if (thumbBuffer) {
@@ -313,62 +537,48 @@ Kamu bisa pakai aku buat cari info, ambil data, atau bantu hal-hal sederhana lan
             mimetype: "image/png",
             fileLength: 999999999999,
             fileSize: 999999999999,
-            fileName: `${toSmallCaps(botConfig.bot?.name || "ShooNhee-AI")} — ᴀʟʟ ᴍᴇɴᴜ`,
+            fileName: `${toSmallCaps(botConfig.bot?.name || "ShooNhee-AI")} \u2014 \u0280\u1d07\u1d4f \u1d0d\u1d07\u0500\u1d1c`,
             caption: txt,
             jpegThumbnail: resizedThumb,
             contextInfo: fullContextInfo,
           },
-          { quoted: m },
+          { quoted: m }
         );
         break;
       }
 
+      // ── Variant 4 · Interactive native flow ───────────────
       case 4: {
         const { generateWAMessageFromContent, proto } = await import("ShooNhee");
-        const categoryRows = sortedCategories
-          .filter((cat) => {
-            if (cat === "owner" && !m.isOwner) return false;
-            if (
-              allowedCategories &&
-              !allowedCategories.includes(cat.toLowerCase())
-            )
-              return false;
-            if (
-              excludeCategories &&
-              excludeCategories.includes(cat.toLowerCase())
-            )
-              return false;
-            const cmds = [
-              ...(commandsByCategory[cat] || []),
-              ...(casesByCategory[cat] || []),
-            ];
-            return cmds.length > 0;
-          })
-          .map((cat) => {
-            const cmds = [
-              ...(commandsByCategory[cat] || []),
-              ...(casesByCategory[cat] || []),
-            ];
-            const emoji = CATEGORY_EMOJIS[cat] || "📋";
-            return {
-              title: `${emoji} ${toSmallCaps(cat)}`,
-              description: `${cmds.length} commands`,
-              id: `${prefix}menucat ${cat}`,
-            };
-          });
+
+        const visibleCategories = buildVisibleCategories(
+          sortedCategories,
+          commandsByCategory,
+          casesByCategory,
+          m,
+          allowedCategories,
+          excludeCategories
+        );
+
+        const categoryRows = await buildInteractiveCategoryRows(
+          visibleCategories,
+          commandsByCategory,
+          casesByCategory,
+          prefix
+        );
 
         const buttons = [
           {
             name: "single_select",
             buttonParamsJson: JSON.stringify({
-              title: "📁 ᴘɪʟɪʜ ᴋᴀᴛᴇɢᴏʀɪ",
-              sections: [{ title: "📋 PILIH KATEGORI", rows: categoryRows }],
+              title: "◈ ᴘɪʟɪʜ ᴋᴀᴛᴇɢᴏʀɪ",
+              sections: [{ title: "❰ DAFTAR KATEGORI ❱", rows: categoryRows }],
             }),
           },
           {
             name: "quick_reply",
             buttonParamsJson: JSON.stringify({
-              display_text: "🏠 ᴋᴇᴍʙᴀʟɪ ᴋᴇ ᴍᴇɴᴜ",
+              display_text: "◂ ᴋᴇᴍʙᴀʟɪ ᴋᴇ ᴍᴇɴᴜ",
               id: `${prefix}menu`,
             }),
           },
@@ -380,7 +590,7 @@ Kamu bisa pakai aku buat cari info, ambil data, atau bantu hal-hal sederhana lan
             const { prepareWAMessageMedia } = await import("ShooNhee");
             headerMedia = await prepareWAMessageMedia(
               { image: imageBuffer },
-              { upload: sock.waUploadToServer },
+              { upload: sock.waUploadToServer }
             );
           } catch {}
         }
@@ -394,36 +604,35 @@ Kamu bisa pakai aku buat cari info, ambil data, atau bantu hal-hal sederhana lan
                   deviceListMetadata: {},
                   deviceListMetadataVersion: 2,
                 },
-                interactiveMessage: proto.Message.InteractiveMessage.fromObject(
-                  {
-                    body: proto.Message.InteractiveMessage.Body.fromObject({
-                      text: txt,
+                interactiveMessage: proto.Message.InteractiveMessage.fromObject({
+                  body: proto.Message.InteractiveMessage.Body.fromObject({
+                    text: txt,
+                  }),
+                  footer: proto.Message.InteractiveMessage.Footer.fromObject({
+                    text: `© ${botConfig.bot?.name || "ShooNhee-AI"}`,
+                  }),
+                  header: proto.Message.InteractiveMessage.Header.fromObject({
+                    title: botConfig.bot?.name || "ShooNhee-AI",
+                    hasMediaAttachment: !!headerMedia,
+                    ...(headerMedia || {}),
+                  }),
+                  nativeFlowMessage:
+                    proto.Message.InteractiveMessage.NativeFlowMessage.fromObject({
+                      buttons,
                     }),
-                    footer: proto.Message.InteractiveMessage.Footer.fromObject({
-                      text: `© ${botConfig.bot?.name || "ShooNhee-AI"}`,
-                    }),
-                    header: proto.Message.InteractiveMessage.Header.fromObject({
-                      title: botConfig.bot?.name || "ShooNhee-AI",
-                      hasMediaAttachment: !!headerMedia,
-                      ...(headerMedia || {}),
-                    }),
-                    nativeFlowMessage:
-                      proto.Message.InteractiveMessage.NativeFlowMessage.fromObject(
-                        { buttons },
-                      ),
-                    contextInfo: fullContextInfo,
-                  },
-                ),
+                  contextInfo: fullContextInfo,
+                }),
               },
             },
           },
-          { userJid: m.sender, quoted: m },
+          { userJid: m.sender, quoted: m }
         );
 
         await sock.relayMessage(m.chat, msg.message, { messageId: msg.key.id });
         break;
       }
 
+      // ── Variant 5 · Interactive message alternate ─────────
       case 5: {
         await sock.sendMessage(
           m.chat,
@@ -479,11 +688,12 @@ Kamu bisa pakai aku buat cari info, ambil data, atau bantu hal-hal sederhana lan
               },
             },
           },
-          { quoted: m },
+          { quoted: m }
         );
         break;
       }
 
+      // ── Fallback · Image with context ─────────────────────
       default:
         if (imageBuffer) {
           await sock.sendMessage(
@@ -493,28 +703,32 @@ Kamu bisa pakai aku buat cari info, ambil data, atau bantu hal-hal sederhana lan
               caption: txt,
               contextInfo: fullContextInfo,
             },
-            { quoted: m },
+            { quoted: m }
           );
         } else {
           await m.reply(txt);
         }
     }
   } catch (error) {
-    console.error("[AllMenu] Error:", error.message);
+    console.error("[AllMenu] Dispatch error:", error.message);
     if (imageBuffer) {
       await sock.sendMessage(
         m.chat,
         {
           image: imageBuffer,
           caption: txt,
-          contextInfo: getContextInfo(botConfig, m),
+          contextInfo: buildBaseContextInfo(botConfig, m),
         },
-        { quoted: m },
+        { quoted: m }
       );
     } else {
       await m.reply(txt);
     }
   }
 }
+
+// ╔══════════════════════════════════════════════════════════════════════════════╗
+// ║                            MODULE EXPORT                                     ║
+// ╚══════════════════════════════════════════════════════════════════════════════╝
 
 export { pluginConfig as config, handler };
