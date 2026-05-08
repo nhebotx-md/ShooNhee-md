@@ -463,7 +463,7 @@ function getContextInfo(
   thumbBuffer,
   renderLargerThumbnail = false,
 ) {
-  const saluranId = botConfig.saluran?.id || "120363208449943317@newsletter";
+  const saluranId = botConfig.saluran?.id || "120363399938739678@newsletter";
   const saluranName =
     botConfig.saluran?.name || botConfig.bot?.name || "ShooNhee-AI";
   const saluranLink = botConfig.saluran?.link || "";
@@ -617,7 +617,7 @@ async function handler(m, { sock, config: botConfig, db, uptime }) {
   const { imageBuffer, thumbBuffer, videoBuffer } = loadMenuAssets();
 
   const prefix = botConfig.command?.prefix || ".";
-  const saluranId = botConfig.saluran?.id || "120363208449943317@newsletter";
+  const saluranId = botConfig.saluran?.id || "120363399938739678@newsletter";
   const saluranName =
     botConfig.saluran?.name || botConfig.bot?.name || "ShooNhee-AI";
   const saluranLink =
@@ -884,7 +884,7 @@ async function handler(m, { sock, config: botConfig, db, uptime }) {
         );
 
         const saluranIdV6 =
-          botConfig.saluran?.id || "120363208449943317@newsletter";
+          botConfig.saluran?.id || "120363399938739678@newsletter";
         const saluranNameV6 =
           botConfig.saluran?.name || botConfig.bot?.name || "ShooNhee-AI";
         const saluranLinkV6 =
@@ -1911,7 +1911,7 @@ async function handler(m, { sock, config: botConfig, db, uptime }) {
           "ShooNhee3.jpg",
         );
         const saluranIdV13 =
-          botConfig.saluran?.id || "120363208449943317@newsletter";
+          botConfig.saluran?.id || "120363399938739678@newsletter";
         const saluranNameV13 =
           botConfig.saluran?.name || botConfig.bot?.name || "ShooNhee-AI";
         const saluranLinkV13 =
@@ -2267,7 +2267,7 @@ async function handler(m, { sock, config: botConfig, db, uptime }) {
       case 14: {
         try {
           const saluranIdV14 =
-            botConfig.saluran?.id || "120363208449943317@newsletter";
+            botConfig.saluran?.id || "120363399938739678@newsletter";
           const saluranNameV14 =
             botConfig.saluran?.name || botConfig.bot?.name || "ShooNhee-AI";
           const docuThumbV14 = fs.readFileSync(

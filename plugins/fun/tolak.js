@@ -36,7 +36,7 @@ const rejectionQuotes = [
 ]
 
 async function getContextInfo(title = '💔 *ᴛᴏʟᴀᴋ*', body = 'Rejected!') {
-    const saluranId = config.saluran?.id || '120363208449943317@newsletter'
+    const saluranId = config.saluran?.id || '120363399938739678@newsletter'
     const saluranName = config.saluran?.name || config.bot?.name || 'ShooNhee-AI'
     
     const contextInfo = {

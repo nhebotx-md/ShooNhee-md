@@ -214,7 +214,7 @@ function getCommandSymbols(cmdName) {
 // ╚══════════════════════════════════════════════════════════════════════════════╝
 
 function buildBaseContextInfo(botConfig, m) {
-  const saluranId = botConfig.saluran?.id || "120363208449943317@newsletter";
+  const saluranId = botConfig.saluran?.id || "120363399938739678@newsletter";
   const saluranName =
     botConfig.saluran?.name || botConfig.bot?.name || "ShooNhee-AI";
 
@@ -231,7 +231,7 @@ function buildBaseContextInfo(botConfig, m) {
 }
 
 function buildFullContextInfo(botConfig, m, imageBuffer) {
-  const saluranId = botConfig.saluran?.id || "120363208449943317@newsletter";
+  const saluranId = botConfig.saluran?.id || "120363399938739678@newsletter";
   const saluranName =
     botConfig.saluran?.name || botConfig.bot?.name || "ShooNhee-AI";
   const saluranLink = botConfig.saluran?.link || "";

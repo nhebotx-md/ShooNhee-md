@@ -40,7 +40,7 @@ async function handler(m, { sock }) {
         
         const results = data.data.slice(0, 10)
         
-        const saluranId = config.saluran?.id || '120363208449943317@newsletter'
+        const saluranId = config.saluran?.id || '120363399938739678@newsletter'
         const saluranName = config.saluran?.name || config.bot?.name || 'ShooNhee-AI'
         
         let caption = `🎨 *ᴘɪxɪᴠ sᴇᴀʀᴄʜ*\n`

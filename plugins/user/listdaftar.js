@@ -26,7 +26,7 @@ async function handler(m, { sock }) {
         return m.reply(`❌ Belum ada user yang terdaftar!`)
     }
     
-    const saluranId = config.saluran?.id || '120363208449943317@newsletter'
+    const saluranId = config.saluran?.id || '120363399938739678@newsletter'
     const saluranName = config.saluran?.name || config.bot?.name || 'ShooNhee-AI'
     
     let text = `📋 *ᴅᴀꜰᴛᴀʀ ᴜsᴇʀ ᴛᴇʀᴅᴀꜰᴛᴀʀ*\n\n`

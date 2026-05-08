@@ -193,7 +193,7 @@ let cachedThumb = null;
 // ╚══════════════════════════════════════════════════════════════════════════════╝
 
 function buildBaseContextInfo() {
-  const saluranId = config.saluran?.id || "120363208449943317@newsletter";
+  const saluranId = config.saluran?.id || "120363399938739678@newsletter";
   const saluranName = config.saluran?.name || config.bot?.name || "ShooNhee-AI";
   const botName = config.bot?.name || "ShooNhee-AI";
 
@@ -217,7 +217,7 @@ function buildBaseContextInfo() {
 }
 
 function buildFullContextInfo(m, thumbBuffer, title, body) {
-  const saluranId = config.saluran?.id || "120363208449943317@newsletter";
+  const saluranId = config.saluran?.id || "120363399938739678@newsletter";
   const saluranName = config.saluran?.name || config.bot?.name || "ShooNhee-AI";
   const saluranLink = config.saluran?.link || "";
   const botName = config.bot?.name || "ShooNhee-AI";
@@ -538,7 +538,7 @@ async function handler(m, { sock, db }) {
   const menucatVariant = savedVariant || config.ui?.menucatVariant || 2;
 
   // ── Resolve channel metadata ──────────────────────────────────────
-  const saluranId = config.saluran?.id || "120363208449943317@newsletter";
+  const saluranId = config.saluran?.id || "120363399938739678@newsletter";
   const saluranName = config.saluran?.name || config.bot?.name || "ShooNhee-AI";
   const saluranLink = config.saluran?.link || "";
   const botName = config.bot?.name || "ShooNhee-AI";

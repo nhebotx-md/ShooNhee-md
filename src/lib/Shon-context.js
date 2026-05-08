@@ -57,7 +57,7 @@ function getRandomPraise() {
 }
 
 function getGameContextInfo(title = '🎮 OURIN GAMES', body = 'Have fun playing!') {
-    const saluranId = config.saluran?.id || '120363208449943317@newsletter'
+    const saluranId = config.saluran?.id || '120363399938739678@newsletter'
     const saluranName = config.saluran?.name || config.bot?.name || 'ShooNhee-AI'
     
     const contextInfo = {
@@ -85,7 +85,7 @@ function getGameContextInfo(title = '🎮 OURIN GAMES', body = 'Have fun playing
 }
 
 function getWinnerContextInfo(title = '🏆 WINNER!', body = 'Selamat kamu menang!') {
-    const saluranId = config.saluran?.id || '120363208449943317@newsletter'
+    const saluranId = config.saluran?.id || '120363399938739678@newsletter'
     const saluranName = config.saluran?.name || config.bot?.name || 'ShooNhee-AI'
     
     const contextInfo = {
@@ -114,7 +114,7 @@ function getWinnerContextInfo(title = '🏆 WINNER!', body = 'Selamat kamu menan
 }
 
 function getRpgContextInfo(title = '⚔️ OURIN RPG', body = 'Adventure awaits!') {
-    const saluranId = config.saluran?.id || '120363208449943317@newsletter'
+    const saluranId = config.saluran?.id || '120363399938739678@newsletter'
     const saluranName = config.saluran?.name || config.bot?.name || 'ShooNhee-AI'
     
     const contextInfo = {
