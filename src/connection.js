@@ -333,7 +333,8 @@ async function startConnection(options = {}) {
 // SOCKET CONFIGURATION
 // ==============================
 const socketConfig = {
-  version: [2, 3000, 1033105955],
+  // Gunakan versi yang baru diambil dari Baileys agar tidak ditolak WhatsApp.
+  version,
   logger,
 
   printQRInTerminal:
@@ -411,91 +412,115 @@ connectionState.sock = sock
 extendSocket(sock)
 
   // ── 11.6 Pairing code flow ────────────────────────────────
-  if (usePairingCode && !sock.authState.creds.registered) {
-  let phoneNumber = pairingNumber;
+  // Pairing ditunda sampai event QR diterima agar WebSocket sudah siap.
+  let pairingRequested = false;
+  let normalizedPairingNumber = pairingNumber.replace(/[^0-9]/g, "");
 
-  if (!phoneNumber || phoneNumber === "") {
+  const requestPairingCodeWhenReady = async () => {
+    if (!usePairingCode || sock.authState.creds.registered || pairingRequested) {
+      return;
+    }
+
+    if (!normalizedPairingNumber) {
+      colors.logger.warn("pairing", "Nomor pairing belum diatur di config");
+      normalizedPairingNumber = (await askQuestion(
+        colors.chalk.cyan(
+          "📱 Masukkan nomor WhatsApp (contoh: 6281234567890): "
+        )
+      )).replace(/[^0-9]/g, "");
+    }
+
+    if (!/^\d{8,15}$/.test(normalizedPairingNumber)) {
+      colors.logger.error(
+        "pairing",
+        "Format nomor tidak valid. Gunakan country code tanpa +, spasi, atau tanda baca."
+      );
+      return;
+    }
+
+    pairingRequested = true;
     console.log("");
-    colors.logger.warn("pairing", "Nomor pairing belum diatur di config");
-    console.log("");
-
-    phoneNumber = await askQuestion(
-      colors.chalk.cyan(
-        "📱 Masukkan nomor WhatsApp (contoh: 6281234567890): "
-      )
-    );
-  }
-
-  phoneNumber = phoneNumber.replace(/[^0-9]/g, "");
-
-  console.log("");
-  console.log(
-    colors.createBanner([
-      " PAIRING SESSION ",
-      "",
-      ` Device  : WhatsApp`,
-      ` Number  : +${phoneNumber}`,
-      "",
-      " Menghubungkan ke server...",
-    ])
-  );
-  console.log("");
-
-  colors.logger.info("pairing", `Meminta kode untuk ${phoneNumber}`);
-
-  try {
-    await new Promise((resolve) => setTimeout(resolve, 3000));
-
-    const code = await sock.requestPairingCode(phoneNumber, "SHOONHEE");
-
-    console.log("");
-
-    // MAIN CODE DISPLAY (lebih clean & fokus)
     console.log(
       colors.createBanner([
-        " PAIRING CODE ",
+        " PAIRING SESSION ",
         "",
-        " Gunakan kode berikut untuk login:",
+        " Device  : WhatsApp",
+        ` Number  : +${normalizedPairingNumber}`,
         "",
-        `   ${colors.chalk.bold(colors.chalk.hex("#22D3EE")(code))}   `,
-        "",
+        " WebSocket siap, meminta kode...",
       ])
     );
+    console.log("");
 
-    // INSTRUCTION PANEL
-    console.log(
-      colors.createBanner([
-        " INSTRUKSI ",
-        "",
-        " 1. Buka WhatsApp di HP",
-        " 2. Masuk ke Settings",
-        " 3. Pilih Linked Devices",
-        " 4. Klik 'Link a Device'",
-        " 5. Masukkan kode di atas",
-        "",
-      ])
+    colors.logger.info(
+      "pairing",
+      `Meminta kode untuk ${normalizedPairingNumber}`
     );
 
-    console.log("");
+    try {
+      await new Promise((resolve) => setTimeout(resolve, 5000));
 
-    colors.logger.success("pairing", "Kode berhasil dibuat");
-  } catch (error) {
-    console.log("");
+      if (sock.ws && sock.ws.isOpen === false) {
+        throw new Error("WebSocket belum siap atau sudah tertutup");
+      }
 
-    console.log(
-      colors.createBanner([
-        " ERROR PAIRING ",
-        "",
-        ` ${error.message}`,
-        "",
-      ])
-    );
+      const code = await sock.requestPairingCode(
+        normalizedPairingNumber,
+        "SHOONHEE"
+      );
 
-    console.log("");
+      console.log("");
+      console.log(
+        colors.createBanner([
+          " PAIRING CODE ",
+          "",
+          " Gunakan kode berikut untuk login:",
+          "",
+          `   ${colors.chalk.bold(colors.chalk.hex("#22D3EE")(code))}   `,
+          "",
+        ])
+      );
 
-    colors.logger.error("pairing", `Gagal: ${error.message}`);
-  }
-}
+      console.log(
+        colors.createBanner([
+          " INSTRUKSI ",
+          "",
+          " 1. Buka WhatsApp di HP",
+          " 2. Masuk ke Settings",
+          " 3. Pilih Linked Devices",
+          " 4. Klik 'Link a Device'",
+          " 5. Pilih 'Link with phone number instead'",
+          " 6. Masukkan kode di atas",
+          "",
+        ])
+      );
+      console.log("");
+      colors.logger.success("pairing", "Kode berhasil dibuat");
+    } catch (error) {
+      pairingRequested = false;
+      const statusCode =
+        error?.output?.statusCode ?? error?.statusCode ?? "unknown";
+      const payload =
+        error?.output?.payload?.message ?? error?.output?.payload ?? "";
+
+      console.log("");
+      console.log(
+        colors.createBanner([
+          " ERROR PAIRING ",
+          "",
+          ` ${error.message}`,
+          ` status=${statusCode}`,
+          payload ? ` payload=${JSON.stringify(payload)}` : "",
+          "",
+        ])
+      );
+      console.log("");
+      colors.logger.error(
+        "pairing",
+        `Gagal: ${error.message} | status=${statusCode}`
+      );
+    }
+  };
 
   // ── 11.7 Event: credentials update ───────────────────────
   sock.ev.on("creds.update", saveCreds);
@@ -515,6 +540,11 @@ extendSocket(sock)
           if (!err) console.log(qrText);
         }
       );
+    }
+
+    // Pairing code diminta sekali setelah event QR menandakan socket siap.
+    if (qr && usePairingCode) {
+      void requestPairingCodeWhenReady();
     }
 
     // ── Connection closed ──

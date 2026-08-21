@@ -907,6 +907,94 @@ nano config.js
 npm start
 ```
 
+### ◉ Termux + Ubuntu PRoot — Background Runtime
+
+Untuk penggunaan Termux yang direkomendasikan, jalankan bot di Ubuntu PRoot melalui `tmux`. Jangan menggunakan `nohup npm start` langsung di Termux karena bot berada di dalam Ubuntu PRoot.
+
+```bash
+# Jalankan dari prompt Termux ($), bukan dari root@localhost Ubuntu.
+pkg update -y
+pkg install -y proot-distro tmux
+termux-wake-lock
+
+# Pastikan Ubuntu dan repository bot tersedia.
+proot-distro login ubuntu -- bash -lc 'test -f /root/ShooNhee-md/index.js && echo REPOSITORY_OK'
+
+# Buat script bot di dalam Ubuntu.
+proot-distro login ubuntu -- bash -c 'cat > /root/start-bot.sh << "BOT"
+#!/bin/bash
+cd /root/ShooNhee-md || exit 1
+exec node index.js
+BOT
+chmod +x /root/start-bot.sh'
+
+# Buat loop auto-restart di Termux.
+cat > ~/shoonhee-loop.sh <<'LOOP'
+#!/data/data/com.termux/files/usr/bin/bash
+LOG="$HOME/.shoonhee-termux.log"
+while true; do
+  printf "[launcher] start %s\n" "$(date '+%Y-%m-%d %H:%M:%S')" >> "$LOG"
+  proot-distro login ubuntu -- bash /root/start-bot.sh >> "$LOG" 2>&1
+  printf "[launcher] bot berhenti; restart dalam 10 detik\n" >> "$LOG"
+  sleep 10
+done
+LOOP
+chmod +x ~/shoonhee-loop.sh
+
+# Buat launcher tmux yang mencegah sesi ganda.
+cat > ~/start-shoonhee <<'LAUNCHER'
+#!/data/data/com.termux/files/usr/bin/bash
+termux-wake-lock >/dev/null 2>&1 || true
+if tmux has-session -t shoonhee 2>/dev/null; then
+  echo "Bot sudah berjalan."
+  exit 0
+fi
+tmux new-session -d -s shoonhee "$HOME/shoonhee-loop.sh"
+echo "Bot aktif di tmux session shoonhee."
+LAUNCHER
+chmod +x ~/start-shoonhee
+
+# Jalankan dan cek.
+~/start-shoonhee
+tmux ls
+tail -n 50 ~/.shoonhee-termux.log
+```
+
+### ◉ Kontrol Bot Termux
+
+```bash
+# Melihat status.
+tmux has-session -t shoonhee && echo ONLINE || echo OFFLINE
+
+# Melihat layar bot.
+tmux attach -t shoonhee
+# Keluar tanpa menghentikan bot: tekan CTRL+B, lalu D.
+
+# Melihat log.
+tail -f ~/.shoonhee-termux.log
+
+# Menghentikan bot.
+tmux kill-session -t shoonhee
+termux-wake-unlock
+```
+
+### ◉ Termux:Boot setelah Android Reboot
+
+Pasang aplikasi **Termux:Boot** dari sumber yang sama dengan aplikasi Termux, buka satu kali, lalu buat script berikut:
+
+```bash
+mkdir -p ~/.termux/boot
+cat > ~/.termux/boot/shoonhee-boot <<'BOOT'
+#!/data/data/com.termux/files/usr/bin/bash
+sleep 30
+termux-wake-lock >/dev/null 2>&1 || true
+bash "$HOME/start-shoonhee"
+BOOT
+chmod +x ~/.termux/boot/shoonhee-boot
+```
+
+Atur Android pada **Settings → Apps → Termux → Battery → Unrestricted** dan aktifkan Autostart jika tersedia. Jangan gunakan **Force stop** pada Termux; tindakan tersebut menghentikan semua proses Termux.
+
 ### ◉ 🔵 Linux / VPS (Production)
 
 ```bash
@@ -1551,21 +1639,18 @@ npm start
 
 ### ◉ Android Background Restriction
 
-```bash
-# ╔═════════════════════════════════════════════════════════════╗
-# ║  FIX: ANDROID BACKGROUND KILL                               ║
-# ╚═════════════════════════════════════════════════════════════╝
+Untuk Termux + Ubuntu PRoot, gunakan **tmux + `termux-wake-lock` + Termux:Boot**. Jangan mengandalkan `nohup npm start` dari Termux karena perintah tersebut tidak otomatis masuk ke Ubuntu PRoot dan tidak menyediakan kontrol sesi yang baik.
 
-# Opsi 1: Termux wake lock (mencegah sleep)
+```bash
+# Jalankan dari Termux.
 termux-wake-lock
 
-# Opsi 2: Jalankan dengan nohup
-nohup npm start > bot.log 2>&1 &
+tmux ls
 
-# Opsi 3: Termux services (persistent)
-pkg install termux-services
-sv-enable shoonhee
+tail -n 50 ~/.shoonhee-termux.log
 ```
+
+Jika proses tetap mati saat layar dikunci, ubah baterai Termux menjadi **Unrestricted/Tidak dibatasi**, izinkan background activity, dan nonaktifkan pembatasan baterai untuk Termux. Perangkat Android tertentu juga memerlukan izin Autostart dan penguncian Termux di daftar aplikasi terbaru.
 
 ---
 

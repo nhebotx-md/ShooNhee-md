@@ -349,6 +349,7 @@ install_termux_packages() {
         "vim"
         "neofetch"
         "htop"
+        "tmux"
         "ncurses-utils"
         "bc"
         "bash-completion"
@@ -686,6 +687,125 @@ EOF
 }
 
 # ═══════════════════════════════════════════════════════════════════════════
+# BACKGROUND RUNTIME: TMUX + TERMUX:BOOT
+# ═══════════════════════════════════════════════════════════════════════════
+
+configure_background_runtime() {
+    show_section_header "Configuring Background Runtime" "🔁"
+
+    # Loop ini berjalan di Termux dan memulai ulang bot jika Node berhenti.
+    cat > "$HOME/shoonhee-loop.sh" <<'LOOP'
+#!/data/data/com.termux/files/usr/bin/bash
+
+SESSION="shoonhee"
+LOG="$HOME/.shoonhee-termux.log"
+
+mkdir -p "$(dirname "$LOG")"
+
+while true; do
+    printf '[launcher] start %s\n' "$(date '+%Y-%m-%d %H:%M:%S')" >> "$LOG"
+    proot-distro login ubuntu -- bash /root/start-bot.sh >> "$LOG" 2>&1
+    CODE=$?
+    printf '[launcher] bot berhenti status=%s; restart dalam 10 detik\n' "$CODE" >> "$LOG"
+    sleep 10
+done
+LOOP
+    chmod +x "$HOME/shoonhee-loop.sh"
+
+    # Launcher utama yang aman dijalankan berulang kali.
+    cat > "$HOME/start-shoonhee" <<'LAUNCHER'
+#!/data/data/com.termux/files/usr/bin/bash
+
+SESSION="shoonhee"
+
+termux-wake-lock >/dev/null 2>&1 || true
+
+if tmux has-session -t "$SESSION" 2>/dev/null; then
+    echo "[ShooNhee] Bot sudah berjalan."
+    exit 0
+fi
+
+tmux new-session -d -s "$SESSION" "$HOME/shoonhee-loop.sh"
+echo "[ShooNhee] Bot aktif di tmux session: $SESSION"
+LAUNCHER
+    chmod +x "$HOME/start-shoonhee"
+
+    # Kontrol harian bot.
+    cat > "$HOME/shoonhee-control" <<'CONTROL'
+#!/data/data/com.termux/files/usr/bin/bash
+
+case "${1:-status}" in
+    start)
+        exec "$HOME/start-shoonhee"
+        ;;
+    stop)
+        tmux kill-session -t shoonhee 2>/dev/null || true
+        termux-wake-unlock >/dev/null 2>&1 || true
+        echo "[ShooNhee] Bot dihentikan."
+        ;;
+    restart)
+        tmux kill-session -t shoonhee 2>/dev/null || true
+        sleep 1
+        exec "$HOME/start-shoonhee"
+        ;;
+    status)
+        if tmux has-session -t shoonhee 2>/dev/null; then
+            echo "[ShooNhee] ONLINE — tmux session aktif."
+        else
+            echo "[ShooNhee] OFFLINE — tmux session tidak ditemukan."
+            exit 1
+        fi
+        ;;
+    attach)
+        exec tmux attach -t shoonhee
+        ;;
+    log)
+        tail -n "${2:-80}" "$HOME/.shoonhee-termux.log"
+        ;;
+    follow)
+        tail -f "$HOME/.shoonhee-termux.log"
+        ;;
+    *)
+        echo "Usage: shoonhee-control {start|stop|restart|status|attach|log [lines]|follow}"
+        exit 2
+        ;;
+esac
+CONTROL
+    chmod +x "$HOME/shoonhee-control"
+
+    # Alias pendek untuk shell Bash Termux.
+    cat > "$HOME/.shoonhee-aliases" <<'ALIASES'
+alias bot-start='$HOME/shoonhee-control start'
+alias bot-stop='$HOME/shoonhee-control stop'
+alias bot-restart='$HOME/shoonhee-control restart'
+alias bot-status='$HOME/shoonhee-control status'
+alias bot-attach='$HOME/shoonhee-control attach'
+alias bot-log='$HOME/shoonhee-control log 80'
+alias bot-follow='$HOME/shoonhee-control follow'
+ALIASES
+
+    touch "$HOME/.bashrc"
+    if ! grep -Fq 'source "$HOME/.shoonhee-aliases"' "$HOME/.bashrc"; then
+        printf '\n# ShooNhee bot controls\nsource "$HOME/.shoonhee-aliases"\n' >> "$HOME/.bashrc"
+    fi
+
+    # Pemicu otomatis setelah Android reboot melalui Termux:Boot.
+    mkdir -p "$HOME/.termux/boot"
+    cat > "$HOME/.termux/boot/shoonhee-boot" <<'BOOT'
+#!/data/data/com.termux/files/usr/bin/bash
+
+sleep 30
+termux-wake-lock >/dev/null 2>&1 || true
+bash "$HOME/start-shoonhee"
+BOOT
+    chmod +x "$HOME/.termux/boot/shoonhee-boot"
+
+    print_success "Background launcher created at ~/start-shoonhee"
+    print_success "Control script created at ~/shoonhee-control"
+    print_success "Termux:Boot script created at ~/.termux/boot/shoonhee-boot"
+}
+
+# ═══════════════════════════════════════════════════════════════════════════
 # EDIT CONFIGURATION
 # ═══════════════════════════════════════════════════════════════════════════
 
@@ -774,6 +894,9 @@ show_final_menu() {
     # Quick commands reference
     print_info "Quick Commands Reference:"
     echo -e "  ${CYAN}•${RESET} Start bot:           ${BOLD}~/start-shoonhee${RESET}"
+    echo -e "  ${CYAN}•${RESET} Control bot:         ${BOLD}~/shoonhee-control status|stop|restart${RESET}"
+    echo -e "  ${CYAN}•${RESET} Bot log:             ${BOLD}~/shoonhee-control follow${RESET}"
+    echo -e "  ${CYAN}•${RESET} Attach tmux:         ${BOLD}~/shoonhee-control attach${RESET}"
     echo -e "  ${CYAN}•${RESET} Login to Ubuntu:     ${BOLD}~/login-ubuntu.sh${RESET}"
     echo -e "  ${CYAN}•${RESET} Bot directory:       ${BOLD}/root/ShooNhee-md${RESET} (inside proot)"
     echo -e "  ${CYAN}•${RESET} Config file:         ${BOLD}/root/ShooNhee-md/config.js${RESET}"
@@ -870,10 +993,14 @@ main() {
     # Step 7: Install bot dependencies
     install_bot_dependencies
     
-    # Step 8: Configure startup
+        # Step 8: Configure startup foreground compatibility
     configure_startup
-    
-    # Step 9: Show final menu
+
+    # Step 9: Configure tmux background runtime and Termux:Boot
+    configure_background_runtime
+
+    # Step 10: Show final menu
+
     show_final_menu
 }
 
