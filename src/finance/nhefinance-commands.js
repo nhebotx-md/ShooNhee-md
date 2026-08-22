@@ -1,5 +1,9 @@
 import { callNHEfinance, financeIntegrationHelp, formatRupiah, NHEfinanceApiError } from './nhefinance-api.js'
 
+// Plugin finance memakai modul ini sebagai satu pintu untuk helper dan command.
+// Re-export menjaga import `formatRupiah` pada plugin tetap kompatibel.
+export { formatRupiah }
+
 const CATEGORY_KEYWORDS = {
   income: [['gaji', 'Gaji'], ['freelance', 'Freelance'], ['bonus', 'Bonus'], ['hadiah', 'Hadiah']],
   expense: [['makan', 'Makanan'], ['kuliner', 'Makanan'], ['transport', 'Transportasi'], ['bensin', 'Transportasi'], ['ojek', 'Transportasi'], ['tagihan', 'Tagihan'], ['listrik', 'Tagihan'], ['internet', 'Tagihan'], ['belanja', 'Belanja'], ['hiburan', 'Hiburan'], ['sekolah', 'Pendidikan'], ['kursus', 'Pendidikan'], ['obat', 'Kesehatan'], ['dokter', 'Kesehatan'], ['sewa', 'Tempat Tinggal'], ['kos', 'Tempat Tinggal'], ['pulsa', 'Komunikasi'], ['langganan', 'Langganan'], ['donasi', 'Donasi'], ['hobi', 'Hobi'], ['utang', 'Pembayaran Utang']]

@@ -1,6 +1,10 @@
 import test from 'node:test'
 import assert from 'node:assert/strict'
-import { parseTransactionText } from '../src/finance/nhefinance-commands.js'
+import { formatRupiah, parseTransactionText } from '../src/finance/nhefinance-commands.js'
+
+test('formatRupiah diekspor untuk plugin finance', () => {
+  assert.match(formatRupiah(50000), /Rp\s*50\.000/u)
+})
 
 test('parser transaksi menerima nominal aman serta kategori dan catatan eksplisit', () => {
   assert.deepEqual(parseTransactionText('50000 Makanan | makan siang'), {
