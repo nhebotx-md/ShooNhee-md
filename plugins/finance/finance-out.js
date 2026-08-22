@@ -1,78 +1,12 @@
-const { default: config } = await import('../../config.js')
-import { 
-    sendInteractive, 
-    interactiveBuilder 
-} from '../../src/handlerbutton.js'
-import { addExpense } from '../../src/finance/financehandler.js'
+import { financeErrorText, recordFinanceTransaction, formatRupiah } from '../../src/finance/nhefinance-commands.js'
 
-const pluginConfig = {
-    name: 'finance-out',
-    alias: ['out'],
-    category: 'finance',
-    description: 'Catat pengeluaran',
-    usage: '.out 20000 makan',
-    example: '.out 15000 kopi',
-    isOwner: false,
-    isPremium: false,
-    isGroup: false,
-    isPrivate: false,
-    cooldown: 2,
-    energi: 1,
-    isEnabled: true
-}
+const pluginConfig = { name: 'finance-out', alias: ['out'], category: 'finance', description: 'Catat pengeluaran NHEfinance', usage: '.out 30000 Makanan | makan siang', example: '.out 35000 Makanan | makan siang', isOwner: false, isPremium: false, isGroup: false, isPrivate: false, cooldown: 2, energi: 1, isEnabled: true }
 
-function formatRp(num) {
-    return 'Rp ' + num.toLocaleString('id-ID')
-}
-
-async function handler(m, { sock }) {
-    try {
-        const args = m.text.trim().split(' ')
-        const amount = Number(args[0])
-        const note = args.slice(1).join(' ') || '-'
-
-        // ========================
-        // VALIDASI
-        // ========================
-        if (!amount || isNaN(amount)) {
-            return m.reply(`❌ Format salah
-
-Contoh:
-.out 20000 makan`)
-        }
-
-        // ========================
-        // EXECUTE
-        // ========================
-        addExpense(m.sender, amount, note)
-
-        // ========================
-        // RESPONSE + FLOW
-        // ========================
-        const text = `📤 *EXPENSE TERCATAT*
-
-💸 ${formatRp(amount)}
-📝 ${note}
-
-Pengeluaran berhasil disimpan.`
-
-        const buttons = [
-            interactiveBuilder.quickReply('➖ Tambah Lagi', '.out'),
-            interactiveBuilder.quickReply('💳 Cek Wallet', '.wallet'),
-            interactiveBuilder.quickReply('📥 Tambah Income', '.in'),
-            interactiveBuilder.quickReply('🎯 Target', '.target')
-        ]
-
-        await sendInteractive(sock, m.chat, {
-            text,
-            footer: 'Finance System • Expense',
-            interactiveButtons: buttons
-        })
-
-    } catch (error) {
-        console.error('Expense Error:', error)
-        await m.reply(`❌ *GAGAL*\n\n> ${error.message}`)
-    }
+async function handler(m) {
+  try {
+    const result = await recordFinanceTransaction(m, 'expense')
+    return m.reply(`${result.duplicate ? 'ℹ️' : '✅'} *Pengeluaran NHEfinance*\n\nNominal: *${formatRupiah(result.amount)}*\nKategori: ${result.category.name}\nAkun: ${result.account.name}\nCatatan: ${result.note}${result.duplicate ? '\n\nPesan ini sudah pernah dicatat; saldo tidak diubah dua kali.' : ''}`)
+  } catch (error) { return m.reply(financeErrorText(error)) }
 }
 
 export { pluginConfig as config, handler }

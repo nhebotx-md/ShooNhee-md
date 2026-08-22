@@ -1,0 +1,13 @@
+# Project TODO
+
+- [x] Audit command finance lokal, identitas pengirim WhatsApp, database JSON, scheduler, dan model proses bot.
+- [x] Add explicit NHEfinance account-linking so a WhatsApp JID is never treated as a Google or Manus identity by itself.
+- [x] Add a bot-to-NHEfinance authenticated API contract with scoped commands, replay protection, and no finance data stored in bot JSON files.
+- [x] Replace local finance command writes with NHEfinance-backed income, expense, account summary, budget, goal, and report commands.
+- [x] Add user-controlled finance reminders with time zone, idempotent delivery, and opt-out handling.
+- [x] Add tests, security documentation, migration guidance for local finance data, and deployment instructions for the persistent bot runtime.
+- [x] Use NHEfinance as the only authoritative source for linked WhatsApp finance data; prohibit mirrored JSON writes after linking.
+- [x] Implement one-time link-code approval, scoped bot authentication, and revocable WhatsApp-JID-to-NHEfinance-user binding.
+- [x] Preserve each inbound WhatsApp message ID as an idempotency key for synced financial writes.
+- [x] Run a restart-safe automatic reminder dispatcher in the active bot runtime and acknowledge only deliveries confirmed by WhatsApp send success.
+- [x] Add linked-bot commands for transfers, personal debts/receivables, debt payments, and recurring transactions using NHEfinance as source of truth.

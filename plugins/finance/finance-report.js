@@ -1,72 +1,13 @@
-const { default: config } = await import('../../config.js')
-import { compareMonths, getMonthlySummary } from '../../src/finance/financehandler.js'
+import { financeErrorText, formatRupiah, linkedFinance } from '../../src/finance/nhefinance-commands.js'
 
-const pluginConfig = {
-    name: 'finance-report',
-    alias: ['report', 'laporan'],
-    category: 'finance',
-    description: 'Laporan keuangan bulanan',
-    usage: '.report',
-    example: '.report',
-    isOwner: false,
-    isPremium: false,
-    isGroup: false,
-    isPrivate: false,
-    cooldown: 3,
-    energi: 1,
-    isEnabled: true
-}
+const pluginConfig = { name: 'finance-report', alias: ['report', 'laporan'], category: 'finance', description: 'Laporan arus kas NHEfinance', usage: '.report [YYYY-MM]', example: '.report 2026-08', isOwner: false, isPremium: false, isGroup: false, isPrivate: false, cooldown: 3, energi: 1, isEnabled: true }
 
-async function handler(m, { sock }) {
-    try {
-        const args = m.text.trim().split(' ')
-        const sub = args[0]
-
-        // ========================
-        // DEFAULT REPORT
-        // ========================
-        if (!sub) {
-            const now = new Date()
-            const data = getMonthlySummary(
-                m.sender,
-                now.getFullYear(),
-                now.getMonth()
-            )
-
-            return m.reply(`📊 *LAPORAN BULAN INI*
-
-📥 Income: ${data.income}
-📤 Expense: ${data.expense}
-💰 Balance: ${data.balance}`)
-        }
-
-        // ========================
-        // COMPARE
-        // ========================
-        if (sub === 'compare') {
-            const { current, previous } = compareMonths(m.sender)
-
-            return m.reply(`📊 *PERBANDINGAN BULAN*
-
-📅 Bulan Ini
-📥 ${current.income}
-📤 ${current.expense}
-💰 ${current.balance}
-
-📅 Bulan Lalu
-📥 ${previous.income}
-📤 ${previous.expense}
-💰 ${previous.balance}`)
-        }
-
-        return m.reply('❌ Subcommand tidak dikenal')
-
-    } catch (error) {
-        console.error('Report Error:', error)
-        await m.reply(`❌ *GAGAL*
-
-> ${error.message}`)
-    }
+async function handler(m) {
+  try {
+    const periodMonth = (m.text || '').trim() || new Date().toISOString().slice(0, 7)
+    const { report } = await linkedFinance(m.sender, 'reports.month', { periodMonth })
+    return m.reply(`📊 *Laporan NHEfinance ${periodMonth}*\n\nPemasukan: *${formatRupiah(report.income)}*\nPengeluaran: *${formatRupiah(report.expense)}*\nArus kas: *${formatRupiah(report.cashFlow)}*\nSaving rate: *${report.savingRate ?? 0}%*\n\nLihat halaman Laporan NHEfinance untuk rincian kategori dan grafik.`)
+  } catch (error) { return m.reply(financeErrorText(error)) }
 }
 
 export { pluginConfig as config, handler }

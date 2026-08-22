@@ -1,49 +1,13 @@
-const { default: config } = await import('../../config.js')
-import { getHistory } from '../../src/finance/financehandler.js'
+import { financeErrorText, formatRupiah, linkedFinance } from '../../src/finance/nhefinance-commands.js'
 
-const pluginConfig = {
-    name: 'finance-history',
-    alias: ['history', 'riwayat'],
-    category: 'finance',
-    description: 'Lihat riwayat transaksi',
-    usage: '.history 10',
-    example: '.history 5',
-    isOwner: false,
-    isPremium: false,
-    isGroup: false,
-    isPrivate: false,
-    cooldown: 3,
-    energi: 1,
-    isEnabled: true
-}
+const pluginConfig = { name: 'finance-history', alias: ['history', 'riwayat'], category: 'finance', description: 'Riwayat transaksi NHEfinance', usage: '.history', example: '.history', isOwner: false, isPremium: false, isGroup: false, isPrivate: false, cooldown: 2, energi: 1, isEnabled: true }
 
-async function handler(m, { sock }) {
-    try {
-        const limit = Number(m.text.trim()) || 10
-
-        const data = getHistory(m.sender, limit)
-
-        if (!data.length) {
-            return m.reply('📭 Belum ada transaksi')
-        }
-
-        let text = `📜 *RIWAYAT (${limit})*\n\n`
-
-        data.forEach((t, i) => {
-            const type = t.type === 'income' ? '📥' : '📤'
-            const date = new Date(t.date).toLocaleDateString()
-
-            text += `${i + 1}. ${type} ${t.amount}\n`
-            text += `📝 ${t.note}\n`
-            text += `📅 ${date}\n\n`
-        })
-
-        return m.reply(text)
-
-    } catch (error) {
-        console.error('History Error:', error)
-        await m.reply(`❌ *GAGAL*\n\n> ${error.message}`)
-    }
+async function handler(m) {
+  try {
+    const { transactions } = await linkedFinance(m.sender, 'transactions.list', { limit: 10 })
+    if (!transactions.length) return m.reply('Belum ada transaksi NHEfinance.')
+    return m.reply(`🧾 *10 Transaksi Terbaru*\n\n${transactions.map((item) => `${item.type === 'income' ? '+' : item.type === 'expense' ? '-' : '↔'} *${formatRupiah(item.amount)}* — ${item.category?.name || 'Transfer'}\n${item.note || '-'} · ${new Date(item.occurredAt).toLocaleDateString('id-ID')}`).join('\n\n')}`)
+  } catch (error) { return m.reply(financeErrorText(error)) }
 }
 
 export { pluginConfig as config, handler }

@@ -34,6 +34,15 @@ const config = {
     prefix: '.'
   },
 
+  nhefinance: {
+    enabled: process.env.NHEFINANCE_ENABLED !== 'false',
+    baseUrl: process.env.NHEFINANCE_BASE_URL || 'https://finorafinanc-hbyzxtda.manus.space',
+    linkPageUrl: process.env.NHEFINANCE_LINK_PAGE_URL || 'https://finorafinanc-hbyzxtda.manus.space/settings/whatsapp',
+    // Set only in the bot host environment. Never commit this secret.
+    serviceSecret: process.env.NHEFINANCE_BOT_SERVICE_SECRET || '',
+    reminderPollMs: Number(process.env.NHEFINANCE_REMINDER_POLL_MS) || 60000
+  },
+
   vercel: {
     // ambil token vercel: https://vercel.com/account/tokens
     token: ''                        // Vercel Token untuk fitur deploy ( Kalau .deploy mau work, ini wajib di isi )

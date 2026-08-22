@@ -10,6 +10,7 @@ import { startAutoBackup } from './src/lib/Shon-backup.js'
 import { handleAntiTagSW } from './src/lib/Shon-group-protection.js'
 import { initSholatScheduler } from './src/lib/Shon-sholat-scheduler.js'
 import { initNotifScheduler } from './src/lib/Shon-notif-scheduler.js'
+import { initFinanceReminderDispatcher } from './src/lib/Shon-finance-reminder.js'
 import { initAutoJpmScheduler } from './src/lib/Shon-auto-jpm.js'
 import { startMemoryMonitor } from './src/lib/Shon-memory-monitor.js'
 import { startTempCleaner } from './src/lib/Shon-temp-cleaner.js'
@@ -263,6 +264,7 @@ async function main() {
         initAutoJpmScheduler(sock)
         initSholatScheduler(sock)
         initNotifScheduler(sock)
+        initFinanceReminderDispatcher(sock)
         try {
           const { initSahurCron } = await import('./plugins/religi/autosahur.js')
           initSahurCron(sock)
