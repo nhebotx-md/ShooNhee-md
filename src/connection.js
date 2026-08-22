@@ -471,10 +471,9 @@ extendSocket(sock)
         throw new Error("WebSocket belum siap atau sudah tertutup");
       }
 
-      const code = await sock.requestPairingCode(
-        normalizedPairingNumber,
-        "SHOONHEE"
-      );
+      // Jangan memaksa kode kustom. Baileys menghasilkan kode Crockford yang
+      // sesuai dengan format penautan WhatsApp bila argumen kedua dihilangkan.
+      const code = await sock.requestPairingCode(normalizedPairingNumber);
 
       console.log("");
       console.log(
