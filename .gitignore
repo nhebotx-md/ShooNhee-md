@@ -2,3 +2,6 @@ node_modules
 package-lock.json
 session
 storage
+.env
+.env.*
+!.env.example

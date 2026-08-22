@@ -25,6 +25,24 @@ Salin `.env.example` ke pengelola environment hosting bot. Isi `NHEFINANCE_BOT_S
 
 Setelah environment tersedia, restart proses bot. Bot harus tetap berjalan agar pengiriman reminder otomatis berfungsi. Jika runtime bot sedang mati, notifikasi belum diakui; bot akan kembali mencoba saat hidup dan waktu reminder pengguna telah terlewati.
 
+### Langkah khusus Termux Android
+
+Di Termux, gunakan file `.env` pribadi; file ini sudah diabaikan Git dan kini dimuat otomatis oleh Node.js saat menjalankan `npm run start:termux`. Ketik perintah berikut satu per satu:
+
+```sh
+cd ~/ShooNhee-md
+nano .env
+```
+
+Tempel dua baris berikut. Ganti hanya bagian setelah tanda `=` pada `NHEFINANCE_BOT_SERVICE_SECRET` dengan secret layanan yang sama; jangan kirim nilainya melalui chat.
+
+```dotenv
+NHEFINANCE_BASE_URL=https://finorafinanc-hbyzxtda.manus.space
+NHEFINANCE_BOT_SERVICE_SECRET=ISI_SECRET_LAYANAN_YANG_SAMA
+```
+
+Di editor `nano`, tekan `Ctrl+O`, lalu `Enter` untuk menyimpan dan `Ctrl+X` untuk keluar. Periksa dahulu tanpa menyalakan bot memakai `npm run check:nhefinance`. Jika keluar tulisan `Konfigurasi NHEfinance siap.`, hentikan bot lama dengan `Ctrl+C` dan jalankan kembali menggunakan `npm run start:termux`. Bila secret lama tidak diketahui, rotasikan secret layanan terlebih dahulu; dua secret berbeda akan menyebabkan request bot ditolak.
+
 ## Alur penggunaan pengguna
 
 Pengguna mengirim `.nhefinance link`. Bot mengembalikan kode yang hanya berlaku sementara. Pengguna lalu membuka `https://finorafinanc-hbyzxtda.manus.space/settings/whatsapp` dalam keadaan login, memasukkan kode, dan menyetujui tautan. Setelah itu, `.nhefinance status` memverifikasi relasi aktif dan mendaftarkan JID untuk dispatcher reminder.
