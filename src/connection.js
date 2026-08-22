@@ -346,9 +346,10 @@ const socketConfig = {
     keys: makeCacheableSignalKeyStore(state.keys, logger),
   },
 
-  // Gunakan fingerprint yang dibentuk library, bukan tuple Safari statis.
-  // Profil ini tetap stabil ketika metadata platform Baileys berubah.
-  browser: Browsers.macOS("ShooNhee"),
+  // Profil Ubuntu Chrome terbukti kompatibel untuk pairing code Baileys.
+  // Hindari fingerprint Mac Safari pada runtime Linux/Termux karena dapat
+  // ditolak WhatsApp saat penautan perangkat melalui nomor telepon.
+  browser: Browsers.ubuntu("Chrome"),
 
   // Beri WebSocket waktu yang cukup pada jaringan seluler/Termux yang lambat.
   connectTimeoutMs: 60_000,

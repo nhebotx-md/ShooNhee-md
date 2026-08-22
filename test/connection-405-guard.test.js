@@ -10,8 +10,8 @@ const connectionSource = fs.readFileSync(
   'utf8'
 )
 
-test('koneksi memakai profil browser Baileys yang resmi', () => {
-  assert.match(connectionSource, /Browsers\.macOS\("ShooNhee"\)/)
+test('koneksi memakai profil companion Ubuntu Chrome yang kompatibel', () => {
+  assert.match(connectionSource, /Browsers\.ubuntu\("Chrome"\)/)
   assert.match(connectionSource, /connectTimeoutMs:\s*60_000/)
 })
 
