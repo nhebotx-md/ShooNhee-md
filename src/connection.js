@@ -18,6 +18,7 @@ import {
   useMultiFileAuthState,
   makeCacheableSignalKeyStore,
   fetchLatestBaileysVersion,
+  Browsers,
 } from "ShooNhee";
 import { Boom } from "@hapi/boom";
 import pino from "pino";
@@ -345,7 +346,13 @@ const socketConfig = {
     keys: makeCacheableSignalKeyStore(state.keys, logger),
   },
 
-  browser: ["Mac OS", "Safari", "17.0"],
+  // Gunakan fingerprint yang dibentuk library, bukan tuple Safari statis.
+  // Profil ini tetap stabil ketika metadata platform Baileys berubah.
+  browser: Browsers.macOS("ShooNhee"),
+
+  // Beri WebSocket waktu yang cukup pada jaringan seluler/Termux yang lambat.
+  connectTimeoutMs: 60_000,
+  keepAliveIntervalMs: 30_000,
 
   // ==============================
   // PERFORMANCE & BEHAVIOR
@@ -574,6 +581,29 @@ extendSocket(sock)
           "Sesi habis — hapus folder storage lalu restart"
         );
         connectionState.reconnectAttempts = 0;
+        return;
+      }
+
+      // 405 menandakan handshake ditolak WhatsApp. Jangan membuat loop reconnect
+      // cepat yang berulang pada session yang sama; coba terbatas lalu tampilkan
+      // diagnosis yang jelas agar session dapat ditautkan ulang bila diperlukan.
+      if (statusCode === 405) {
+        connectionState.reconnectAttempts++;
+        const max405Attempts = 2;
+
+        if (connectionState.reconnectAttempts <= max405Attempts) {
+          colors.logger.info(
+            "whatsapp",
+            `Handshake ditolak, mencoba ulang ${connectionState.reconnectAttempts}/${max405Attempts} dalam 30 detik`
+          );
+          setTimeout(() => startConnection(options), 30_000);
+        } else {
+          colors.logger.error(
+            "whatsapp",
+            "WhatsApp menolak handshake berulang kali. Session lama disimpan; tautkan ulang perangkat melalui Linked Devices bila status ini tetap muncul."
+          );
+          connectionState.reconnectAttempts = 0;
+        }
         return;
       }
 
