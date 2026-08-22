@@ -52,4 +52,4 @@ Data lokal lama pada `src/finance/Userfinance.json` tidak dihapus otomatis dan t
 
 ## Verifikasi pengelola
 
-Jalankan `node --test test/**/*.test.js` di repositori bot. Pada proyek NHEfinance, jalankan `pnpm test`, `pnpm exec tsc --noEmit`, dan `pnpm build`. Pengujian endpoint HMAC `server/whatsappBotApi.secret.test.ts` memastikan secret yang dipasang menerima signature yang benar dan menolak signature palsu tanpa menampilkan nilainya.
+Jalankan `node --test test/**/*.test.js` di repositori bot. Pada proyek NHEfinance, jalankan `pnpm test`, `pnpm exec tsc --noEmit`, dan `pnpm build`. Pengujian endpoint HMAC `server/whatsappBotApi.secret.test.ts` memastikan secret yang dipasang menerima signature yang benar dan menolak signature palsu tanpa menampilkan nilainya. Regresi route-level `server/whatsapp.integration.test.ts` mensimulasikan request HMAC dengan dua JID tertaut, approval dan unlink dari caller pengguna berbeda, transaksi ulang dengan ID pesan sama, serta polling dan acknowledgement reminder berulang tanpa delivery kedua.

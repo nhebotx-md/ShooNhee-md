@@ -11,3 +11,5 @@
 - [x] Preserve each inbound WhatsApp message ID as an idempotency key for synced financial writes.
 - [x] Run a restart-safe automatic reminder dispatcher in the active bot runtime and acknowledge only deliveries confirmed by WhatsApp send success.
 - [x] Add linked-bot commands for transfers, personal debts/receivables, debt payments, and recurring transactions using NHEfinance as source of truth.
+- [x] Add executable integration coverage for the signed API link, unlink, write-idempotency, and reminder-delivery contracts.
+- [ ] Verify the production deployment runbook against the configured secret, persistent runtime, restart, and failure-recovery behavior.
