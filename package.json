@@ -69,7 +69,7 @@
     "qs": "^6.14.1",
     "rate-limiter-flexible": "^9.1.1",
     "sharp": "^0.32.6",
-    "ShooNhee": "npm:@whiskeysockets/baileys@7.0.0-rc14",
+    "ShooNhee": "github:Itsukichann/Baileys#2071f8a8604ec56666177984c6f4a18df8ed192b",
     "skia-canvas": "^3.0.8",
     "something": "^0.0.1",
     "ssh2": "^1.17.0",
