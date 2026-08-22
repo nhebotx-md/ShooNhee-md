@@ -13,3 +13,5 @@
 - [x] Add linked-bot commands for transfers, personal debts/receivables, debt payments, and recurring transactions using NHEfinance as source of truth.
 - [x] Add executable integration coverage for the signed API link, unlink, write-idempotency, and reminder-delivery contracts.
 - [ ] Verify the production deployment runbook against the configured secret, persistent runtime, restart, and failure-recovery behavior.
+- [ ] Verify the Termux environment-file loading, restart command, and post-restart health check without exposing the shared service secret.
+- [ ] Fix the Termux configuration health-check import so it reads the exported bot config before accessing NHEfinance settings.

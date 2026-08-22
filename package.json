@@ -7,7 +7,7 @@
     "start": "node --env-file-if-exists=.env index.js",
     "dev": "NODE_ENV=development node --env-file-if-exists=.env index.js",
     "start:termux": "node --env-file-if-exists=.env index.js",
-    "check:nhefinance": "node --env-file-if-exists=.env --input-type=module -e \"import config from './config.js'; if (!config.nhefinance.baseUrl.startsWith('https://')) throw new Error('NHEFINANCE_BASE_URL harus memakai HTTPS.'); if (!config.nhefinance.serviceSecret) throw new Error('NHEFINANCE_BOT_SERVICE_SECRET belum diatur.'); console.log('Konfigurasi NHEfinance siap.');\"",
+    "check:nhefinance": "node --env-file-if-exists=.env scripts/check-nhefinance.mjs",
     "test": "node --test test/**/*.test.js"
   },
   "keywords": [
