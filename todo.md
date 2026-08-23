@@ -14,4 +14,5 @@
 - [x] Add executable integration coverage for the signed API link, unlink, write-idempotency, and reminder-delivery contracts.
 - [ ] Verify the production deployment runbook against the configured secret, persistent runtime, restart, and failure-recovery behavior.
 - [ ] Verify the Termux environment-file loading, restart command, and post-restart health check without exposing the shared service secret.
-- [ ] Fix the Termux configuration health-check import so it reads the exported bot config before accessing NHEfinance settings.
+- [ ] Replace the missing Termux service secret with a newly entered value and verify it through the local health check.
+- [x] Fix the Termux configuration health-check import so it reads the exported bot config before accessing NHEfinance settings.
