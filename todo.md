@@ -15,5 +15,6 @@
 - [ ] Verify the production deployment runbook against the configured secret, persistent runtime, restart, and failure-recovery behavior.
 - [ ] Verify the Termux environment-file loading, restart command, and post-restart health check without exposing the shared service secret.
 - [ ] Replace the missing Termux service secret with a newly entered value and verify it through the local health check.
+- [x] Add a regression that confirms the Termux health check rejects an empty service secret.
 - [x] Ensure the full bot test command exits cleanly after connection-module tests without leaving open runtime handles.
 - [x] Fix the Termux configuration health-check import so it reads the exported bot config before accessing NHEfinance settings.
