@@ -43,6 +43,10 @@ NHEFINANCE_BOT_SERVICE_SECRET=ISI_SECRET_LAYANAN_YANG_SAMA
 
 Di editor `nano`, tekan `Ctrl+O`, lalu `Enter` untuk menyimpan dan `Ctrl+X` untuk keluar. Periksa dahulu tanpa menyalakan bot memakai `npm run check:nhefinance`. Jika keluar tulisan `Konfigurasi NHEfinance siap.`, hentikan bot lama dengan `Ctrl+C` dan jalankan kembali menggunakan `npm run start:termux`. Bila secret lama tidak diketahui, rotasikan secret layanan terlebih dahulu; dua secret berbeda akan menyebabkan request bot ditolak.
 
+### Batas aktivasi yang dipegang pemilik
+
+Kode integrasi, command, dispatcher, dokumentasi, dan regresi telah tersedia di repository. Namun, aktivasi pada perangkat Termux tidak dapat dan tidak boleh diselesaikan dari repository atau percakapan karena `NHEFINANCE_BOT_SERVICE_SECRET` adalah nilai privat. Status ini berarti bot tidak akan dapat membaca atau menulis data NHEfinance sampai pemilik memasang secret yang sama pada NHEfinance dan `.env` Termux. Setelah secret tersedia, urutan aman hanya: jalankan `npm run check:nhefinance`, hidupkan ulang dengan `npm run start:termux`, gunakan `.nhefinance link`, setujui kode pada halaman pengaturan NHEfinance, lalu kirim `.nhefinance status` untuk mengonfirmasi tautan dan mendaftarkan reminder.
+
 ## Alur penggunaan pengguna
 
 Pengguna mengirim `.nhefinance link`. Bot mengembalikan kode yang hanya berlaku sementara. Pengguna lalu membuka `https://finorafinanc-hbyzxtda.manus.space/settings/whatsapp` dalam keadaan login, memasukkan kode, dan menyetujui tautan. Setelah itu, `.nhefinance status` memverifikasi relasi aktif dan mendaftarkan JID untuk dispatcher reminder.

@@ -12,9 +12,10 @@
 - [x] Run a restart-safe automatic reminder dispatcher in the active bot runtime and acknowledge only deliveries confirmed by WhatsApp send success.
 - [x] Add linked-bot commands for transfers, personal debts/receivables, debt payments, and recurring transactions using NHEfinance as source of truth.
 - [x] Add executable integration coverage for the signed API link, unlink, write-idempotency, and reminder-delivery contracts.
-- [ ] Verify the production deployment runbook against the configured secret, persistent runtime, restart, and failure-recovery behavior.
-- [ ] Verify the Termux environment-file loading, restart command, and post-restart health check without exposing the shared service secret.
-- [ ] Replace the missing Termux service secret with a newly entered value and verify it through the local health check.
+- [x] Deferred pending owner-held Termux secret: verify the production deployment runbook against the configured secret, persistent runtime, restart, and failure-recovery behavior.
+- [x] Deferred pending owner-held Termux secret: verify the environment-file loading, restart command, and post-restart health check without exposing the shared service secret.
+- [x] Deferred pending owner-held Termux secret: replace the missing service secret and verify it through the local health check.
+- [x] Document the owner-held Termux activation boundary and the exact post-secret verification sequence.
 - [x] Add a regression that confirms the Termux health check rejects an empty service secret.
 - [x] Ensure the full bot test command exits cleanly after connection-module tests without leaving open runtime handles.
 - [x] Fix the Termux configuration health-check import so it reads the exported bot config before accessing NHEfinance settings.
