@@ -9,9 +9,8 @@ const packageJson = JSON.parse(
   fs.readFileSync(path.join(testDir, '../package.json'), 'utf8')
 )
 
-test('runtime memakai Baileys mod Itsukichann pada commit yang dipin', () => {
-  assert.match(
-    packageJson.dependencies.ShooNhee,
-    /^github:Itsukichann\/Baileys#2071f8a8604ec56666177984c6f4a18df8ed192b$/
-  )
+test('branch eksperimen mem-pin Ourin Baileys dan alias kompatibilitas runtime', () => {
+  assert.equal(packageJson.dependencies['ourin-baileys'], '9.0.21')
+  assert.equal(packageJson.dependencies.ShooNhee, 'npm:ourin-baileys@9.0.21')
+  assert.equal(packageJson.dependencies.jimp, '^1.6.0')
 })

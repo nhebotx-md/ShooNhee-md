@@ -1025,7 +1025,7 @@ async function messageHandler(msg, sock, options = {}) {
           const { default: path } = await import('path')
           const { default: os } = await import('os')
           const { promisify } = await import('util')
-          const { generateWAMessage, getBuffer, generateWAMessageFromContent, proto, generateMessageID } = await import('ShooNhee')
+          const { generateWAMessage, generateWAMessageFromContent, proto, generateMessageID } = await import('ShooNhee')
           const { exec: childExec } = await import('child_process')
           const exec = promisify(childExec)
           

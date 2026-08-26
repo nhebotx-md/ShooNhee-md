@@ -1,4 +1,4 @@
-import { Jimp } from 'jimp'
+import { BlendMode, Jimp, JimpMime } from 'jimp'
 const BOARD_MAPS = [
     {
         map: "https://telegra.ph/file/46a0c38104f79cdbfe83f.jpg",
@@ -54,9 +54,9 @@ async function drawBoard(boardImageURL, user1 = null, user2 = null, user3 = null
 
             try {
                 const playerImage = await Jimp.read(PLAYER_IMAGES[player.index]);
-                playerImage.resize(50, 50);
+                playerImage.resize({ w: 50, h: 50 });
                 board.composite(playerImage, x - 4, y - 4, {
-                    mode: Jimp.BLEND_SOURCE_OVER,
+                    mode: BlendMode.SRC_OVER,
                     opacitySource: 1,
                     opacityDest: 1
                 });
@@ -65,7 +65,7 @@ async function drawBoard(boardImageURL, user1 = null, user2 = null, user3 = null
             }
         }
 
-        return await board.getBufferAsync(Jimp.MIME_PNG);
+        return await board.getBuffer(JimpMime.png);
     } catch (error) {
         console.error('[ULARTANGGA] Error drawing board:', error.message);
         return null;

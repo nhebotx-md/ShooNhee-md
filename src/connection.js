@@ -19,7 +19,7 @@ import {
   makeCacheableSignalKeyStore,
   fetchLatestBaileysVersion,
   Browsers,
-} from "ShooNhee";
+} from "ourin-baileys";
 import { Boom } from "@hapi/boom";
 import pino from "pino";
 import fs from "fs";
