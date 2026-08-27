@@ -24,3 +24,6 @@
 - [x] Add regressions and operating instructions for code expiry, revocation, and replay-safe use.
 - [x] Update the ShooNhee `.nhefinance` command to display and refresh permanent link-code states without registering reminders before approval.
 - [x] Simplify the ShooNhee link response so ordinary users understand that their unique code must be entered in the NHEfinance web account they want to control.
+- [x] Align the finance link plugin with the published NHEfinance flow: the bot creates the code, the user approves it on the connected NHEfinance web account, and finance commands use that account's live data.
+- [x] Add a concise post-link command guide and a direct NHEfinance connection page link in ShooNhee responses without disclosing runtime implementation details.
+- [x] Extend ShooNhee command regressions, run the bot suite, and synchronize the verified plugin update to GitHub.

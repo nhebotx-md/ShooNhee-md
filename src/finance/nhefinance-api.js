@@ -54,7 +54,7 @@ export async function callNHEfinance(jid, action, payload = {}) {
 }
 
 export function financeIntegrationHelp() {
-  return `Tautkan akun NHEfinance terlebih dahulu dengan *.nhefinance link*. Setelah menerima kode, buka ${config.nhefinance?.linkPageUrl || 'halaman pengaturan NHEfinance'} dalam keadaan login dan setujui kode tersebut.`
+  return `Tautkan akun NHEfinance terlebih dahulu dengan *.nhefinance link*. Setelah menerima kode, buka ${config.nhefinance?.linkPageUrl || 'halaman Bot WhatsApp di NHEfinance'} saat login, masukkan kode pada halaman *Bot WhatsApp*, lalu tekan *Hubungkan bot ke akun ini*.`
 }
 
 export function formatRupiah(amount) {

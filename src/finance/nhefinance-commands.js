@@ -12,7 +12,7 @@ const CATEGORY_KEYWORDS = {
 function normalized(value) { return String(value || '').trim().toLocaleLowerCase('id-ID') }
 
 export function financeErrorText(error) {
-  if (error instanceof NHEfinanceApiError && error.code === 'NOT_CONFIGURED') return '⚠️ Integrasi bot belum dikonfigurasi oleh pengelola. Secret layanan NHEfinance belum tersedia.'
+  if (error instanceof NHEfinanceApiError && error.code === 'NOT_CONFIGURED') return '⚠️ Fitur finance WhatsApp sedang dipersiapkan oleh pengelola. Silakan coba kembali beberapa saat lagi.'
   if (error instanceof NHEfinanceApiError && error.status === 401) return `🔐 WhatsApp ini belum ditautkan ke NHEfinance.\n\n${financeIntegrationHelp()}`
   return `❌ ${error?.message || 'Permintaan finance tidak dapat diproses.'}`
 }

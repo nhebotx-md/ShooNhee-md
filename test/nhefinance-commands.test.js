@@ -1,6 +1,7 @@
 import test from 'node:test'
 import assert from 'node:assert/strict'
-import { formatRupiah, parseTransactionText } from '../src/finance/nhefinance-commands.js'
+import { financeErrorText, formatRupiah, parseTransactionText } from '../src/finance/nhefinance-commands.js'
+import { financeIntegrationHelp, NHEfinanceApiError } from '../src/finance/nhefinance-api.js'
 import { config as linkPluginConfig } from '../plugins/finance/finance-link.js'
 
 test('formatRupiah diekspor untuk plugin finance', () => {
@@ -25,4 +26,10 @@ test('command penautan menyediakan pemeriksaan dan pembatalan kode tertunda', ()
   assert.match(linkPluginConfig.usage, /status/)
   assert.match(linkPluginConfig.usage, /cancel/)
   assert.match(linkPluginConfig.usage, /unlink/)
+})
+
+test('bantuan finance mengarahkan ke halaman Bot WhatsApp tanpa membocorkan detail teknis', () => {
+  assert.match(financeIntegrationHelp(), /halaman \*Bot WhatsApp\*/)
+  const message = financeErrorText(new NHEfinanceApiError('belum siap', { code: 'NOT_CONFIGURED' }))
+  assert.doesNotMatch(message, /secret|Termux|runner|runtime/i)
 })

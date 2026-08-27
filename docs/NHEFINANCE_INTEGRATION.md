@@ -49,7 +49,7 @@ Kode integrasi, command, dispatcher, dokumentasi, dan regresi telah tersedia di 
 
 ## Alur penggunaan pengguna
 
-Pengguna mengirim `.nhefinance link`. Bot mengembalikan kode yang hanya berlaku sementara. Hanya **kode terbaru** untuk nomor tersebut yang dapat disetujui; membuat kode baru otomatis menonaktifkan kode tertunda sebelumnya. Pengguna lalu membuka `https://finorafinanc-hbyzxtda.manus.space/settings/whatsapp` dalam keadaan login, memasukkan kode, dan menyetujui tautan. `.nhefinance status` membedakan kode tertunda, kode kedaluwarsa, tautan aktif, atau belum tertaut. JID baru dicatat untuk dispatcher reminder setelah statusnya aktif, bukan saat kode pertama kali diterbitkan.
+Pengguna mengirim `.nhefinance link`. Bot mengembalikan kode yang hanya berlaku sementara. Hanya **kode terbaru** untuk nomor tersebut yang dapat disetujui; membuat kode baru otomatis menonaktifkan kode tertunda sebelumnya. Pengguna kemudian membuka `https://finorafinanc-hbyzxtda.manus.space/settings/whatsapp` saat login, memasukkan kode pada halaman **Bot WhatsApp**, dan menekan **Hubungkan bot ke akun ini**. Setelah aktif, seluruh command finance di chat mengambil dan mencatat data pada akun NHEfinance yang sama. `.nhefinance status` membedakan kode tertunda, kode kedaluwarsa, tautan aktif, atau belum tertaut. JID baru dicatat untuk dispatcher reminder setelah statusnya aktif, bukan saat kode pertama kali diterbitkan.
 
 | Kebutuhan | Command | Contoh |
 |---|---|---|
