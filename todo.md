@@ -19,3 +19,7 @@
 - [x] Add a regression that confirms the Termux health check rejects an empty service secret.
 - [x] Ensure the full bot test command exits cleanly after connection-module tests without leaving open runtime handles.
 - [x] Fix the Termux configuration health-check import so it reads the exported bot config before accessing NHEfinance settings.
+- [x] Audit the requested WhatsApp access-code session option B against the existing NHEfinance link-code contract.
+- [x] Sync ShooNhee command state and reminder registration with the approved permanent WhatsApp link-code flow selected by the user.
+- [x] Add regressions and operating instructions for code expiry, revocation, and replay-safe use.
+- [x] Update the ShooNhee `.nhefinance` command to display and refresh permanent link-code states without registering reminders before approval.

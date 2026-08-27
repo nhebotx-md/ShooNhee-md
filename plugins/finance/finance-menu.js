@@ -5,7 +5,7 @@ const pluginConfig = { name: 'finance-menu', alias: ['finance', 'fm'], category:
 async function handler(m) {
   try {
     const { dashboard } = await linkedFinance(m.sender, 'dashboard')
-    return m.reply(`${dashboardMessage(dashboard)}\n\n*Command cepat*\n• *.in 50000 Gaji | catatan*\n• *.out 30000 Makanan | catatan*\n• *.transfer 50000 Cash > Bank | catatan*\n• *.history* · *.report* · *.insight*\n• *.account* · *.budget* · *.target*\n• *.debt* · *.recurring* · *.reminder set 07:00*\n\nBelum tertaut? Gunakan *.nhefinance link*.`)
+    return m.reply(`${dashboardMessage(dashboard)}\n\n*Command cepat*\n• *.in 50000 Gaji | catatan*\n• *.out 30000 Makanan | catatan*\n• *.transfer 50000 Cash > Bank | catatan*\n• *.history* · *.report* · *.insight*\n• *.account* · *.budget* · *.target*\n• *.debt* · *.recurring* · *.reminder set 07:00*\n\n*Status akses WhatsApp*\n• *.nhefinance link* — buat kode terbaru\n• *.nhefinance status* — cek status kode/tautan\n• *.nhefinance cancel* — batalkan kode tertunda\n• *.nhefinance unlink* — putuskan tautan aktif\n\nBelum tertaut? Gunakan *.nhefinance link*.`)
   } catch (error) { return m.reply(financeErrorText(error)) }
 }
 

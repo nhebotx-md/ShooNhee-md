@@ -49,12 +49,14 @@ Kode integrasi, command, dispatcher, dokumentasi, dan regresi telah tersedia di 
 
 ## Alur penggunaan pengguna
 
-Pengguna mengirim `.nhefinance link`. Bot mengembalikan kode yang hanya berlaku sementara. Pengguna lalu membuka `https://finorafinanc-hbyzxtda.manus.space/settings/whatsapp` dalam keadaan login, memasukkan kode, dan menyetujui tautan. Setelah itu, `.nhefinance status` memverifikasi relasi aktif dan mendaftarkan JID untuk dispatcher reminder.
+Pengguna mengirim `.nhefinance link`. Bot mengembalikan kode yang hanya berlaku sementara. Hanya **kode terbaru** untuk nomor tersebut yang dapat disetujui; membuat kode baru otomatis menonaktifkan kode tertunda sebelumnya. Pengguna lalu membuka `https://finorafinanc-hbyzxtda.manus.space/settings/whatsapp` dalam keadaan login, memasukkan kode, dan menyetujui tautan. `.nhefinance status` membedakan kode tertunda, kode kedaluwarsa, tautan aktif, atau belum tertaut. JID baru dicatat untuk dispatcher reminder setelah statusnya aktif, bukan saat kode pertama kali diterbitkan.
 
 | Kebutuhan | Command | Contoh |
 |---|---|---|
 | Menautkan akun | `.nhefinance link` | `.nhefinance link` |
-| Cek atau cabut tautan | `.nhefinance status` / `.nhefinance unlink` | `.nhefinance unlink` |
+| Cek status kode atau tautan | `.nhefinance status` | `.nhefinance status` |
+| Batalkan kode tertunda | `.nhefinance cancel` | `.nhefinance cancel` |
+| Cabut tautan aktif | `.nhefinance unlink` | `.nhefinance unlink` |
 | Pemasukan/pengeluaran | `.in` / `.out` | `.out 30000 Makanan | makan siang` |
 | Transfer internal | `.transfer` | `.transfer 50000 Cash > Bank | setoran` |
 | Ringkasan, riwayat, laporan | `.finance`, `.history`, `.report`, `.insight` | `.report` |
@@ -74,4 +76,4 @@ Data lokal lama pada `src/finance/Userfinance.json` tidak dihapus otomatis dan t
 
 ## Verifikasi pengelola
 
-Jalankan `node --test test/**/*.test.js` di repositori bot. Pada proyek NHEfinance, jalankan `pnpm test`, `pnpm exec tsc --noEmit`, dan `pnpm build`. Pengujian endpoint HMAC `server/whatsappBotApi.secret.test.ts` memastikan secret yang dipasang menerima signature yang benar dan menolak signature palsu tanpa menampilkan nilainya. Regresi route-level `server/whatsapp.integration.test.ts` mensimulasikan request HMAC dengan dua JID tertaut, approval dan unlink dari caller pengguna berbeda, transaksi ulang dengan ID pesan sama, serta polling dan acknowledgement reminder berulang tanpa delivery kedua.
+Jalankan `node --test test/**/*.test.js` di repositori bot. Pada proyek NHEfinance, jalankan `pnpm test`, `pnpm exec tsc --noEmit`, dan `pnpm build`. Pengujian endpoint HMAC `server/whatsappBotApi.secret.test.ts` memastikan secret yang dipasang menerima signature yang benar dan menolak signature palsu tanpa menampilkan nilainya. Regresi route-level `server/whatsapp.integration.test.ts` mensimulasikan request HMAC dengan dua JID tertaut, status aktif, kode tertunda dan kedaluwarsa, pembatalan kode dari JID asal, approval dan unlink dari caller pengguna berbeda, transaksi ulang dengan ID pesan sama, serta polling dan acknowledgement reminder berulang tanpa delivery kedua.
