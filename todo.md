@@ -23,3 +23,4 @@
 - [x] Sync ShooNhee command state and reminder registration with the approved permanent WhatsApp link-code flow selected by the user.
 - [x] Add regressions and operating instructions for code expiry, revocation, and replay-safe use.
 - [x] Update the ShooNhee `.nhefinance` command to display and refresh permanent link-code states without registering reminders before approval.
+- [x] Simplify the ShooNhee link response so ordinary users understand that their unique code must be entered in the NHEfinance web account they want to control.
