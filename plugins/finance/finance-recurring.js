@@ -1,7 +1,7 @@
 import { accountForTransaction, categoryForTransaction, financeErrorText, linkedFinance } from '../../src/finance/nhefinance-commands.js'
 import { formatRupiah } from '../../src/finance/nhefinance-api.js'
 
-const pluginConfig = { name: 'finance-recurring', alias: ['recurring', 'rutin'], category: 'finance', description: 'Kelola transaksi berulang NHEfinance', usage: '.recurring list | .recurring add in|out | nominal | kategori | monthly | YYYY-MM-DD | catatan', example: '.recurring add out | 100000 | Internet | monthly | 2026-09-01 | paket bulanan', isOwner: false, isPremium: false, isGroup: false, isPrivate: false, cooldown: 3, energi: 1, isEnabled: true }
+const pluginConfig = { name: 'finance-recurring', alias: ['recurring', 'rutin'], category: 'finance', description: 'Kelola transaksi berulang NHEfinance', usage: '.recurring list | .recurring add in|out | nominal | kategori | monthly | YYYY-MM-DD | catatan', example: '.recurring add out | 100000 | Internet | monthly | 2026-09-01 | paket bulanan', isOwner: false, isPremium: false, isGroup: false, isPrivate: true, cooldown: 3, energi: 1, isEnabled: true }
 const frequencies = new Set(['weekly', 'monthly', 'quarterly', 'yearly', 'one_time'])
 
 async function handler(m) {

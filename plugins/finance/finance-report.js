@@ -1,6 +1,6 @@
 import { financeErrorText, formatRupiah, linkedFinance } from '../../src/finance/nhefinance-commands.js'
 
-const pluginConfig = { name: 'finance-report', alias: ['report', 'laporan'], category: 'finance', description: 'Laporan arus kas NHEfinance', usage: '.report [YYYY-MM]', example: '.report 2026-08', isOwner: false, isPremium: false, isGroup: false, isPrivate: false, cooldown: 3, energi: 1, isEnabled: true }
+const pluginConfig = { name: 'finance-report', alias: ['report', 'laporan'], category: 'finance', description: 'Laporan arus kas NHEfinance', usage: '.report [YYYY-MM]', example: '.report 2026-08', isOwner: false, isPremium: false, isGroup: false, isPrivate: true, cooldown: 3, energi: 1, isEnabled: true }
 
 async function handler(m) {
   try {

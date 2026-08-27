@@ -1,6 +1,6 @@
 import { financeErrorText, formatRupiah, linkedFinance } from '../../src/finance/nhefinance-commands.js'
 
-const pluginConfig = { name: 'finance-budget', alias: ['budget', 'anggaran'], category: 'finance', description: 'Pantau anggaran NHEfinance', usage: '.budget [YYYY-MM]', example: '.budget', isOwner: false, isPremium: false, isGroup: false, isPrivate: false, cooldown: 3, energi: 1, isEnabled: true }
+const pluginConfig = { name: 'finance-budget', alias: ['budget', 'anggaran'], category: 'finance', description: 'Pantau anggaran NHEfinance', usage: '.budget [YYYY-MM]', example: '.budget', isOwner: false, isPremium: false, isGroup: false, isPrivate: true, cooldown: 3, energi: 1, isEnabled: true }
 
 async function handler(m) {
   const periodMonth = (m.text || '').trim() || new Date().toISOString().slice(0, 7)

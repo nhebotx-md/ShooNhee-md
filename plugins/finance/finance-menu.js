@@ -1,6 +1,6 @@
 import { dashboardMessage, financeErrorText, linkedFinance } from '../../src/finance/nhefinance-commands.js'
 
-const pluginConfig = { name: 'finance-menu', alias: ['finance', 'fm'], category: 'finance', description: 'Pusat command finance NHEfinance', usage: '.finance', example: '.finance', isOwner: false, isPremium: false, isGroup: false, isPrivate: false, cooldown: 2, energi: 1, isEnabled: true }
+const pluginConfig = { name: 'finance-menu', alias: ['finance', 'fm'], category: 'finance', description: 'Pusat command finance NHEfinance', usage: '.finance', example: '.finance', isOwner: false, isPremium: false, isGroup: false, isPrivate: true, cooldown: 2, energi: 1, isEnabled: true }
 
 async function handler(m) {
   try {

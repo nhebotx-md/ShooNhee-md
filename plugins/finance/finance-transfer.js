@@ -1,7 +1,7 @@
 import { accountForTransaction, financeErrorText, linkedFinance } from '../../src/finance/nhefinance-commands.js'
 import { formatRupiah } from '../../src/finance/nhefinance-api.js'
 
-const pluginConfig = { name: 'finance-transfer', alias: ['transfer', 'tf'], category: 'finance', description: 'Transfer antar akun NHEfinance', usage: '.transfer 50000 Cash > Bank | catatan', example: '.transfer 100000 Cash > Tabungan | setoran', isOwner: false, isPremium: false, isGroup: false, isPrivate: false, cooldown: 3, energi: 1, isEnabled: true }
+const pluginConfig = { name: 'finance-transfer', alias: ['transfer', 'tf'], category: 'finance', description: 'Transfer antar akun NHEfinance', usage: '.transfer 50000 Cash > Bank | catatan', example: '.transfer 100000 Cash > Tabungan | setoran', isOwner: false, isPremium: false, isGroup: false, isPrivate: true, cooldown: 3, energi: 1, isEnabled: true }
 const norm = (value) => String(value || '').trim().toLocaleLowerCase('id-ID')
 
 async function handler(m) {

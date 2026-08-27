@@ -1,6 +1,6 @@
 import { financeErrorText, linkedFinance } from '../../src/finance/nhefinance-commands.js'
 
-const pluginConfig = { name: 'finance-reminder', alias: ['reminder', 'pengingat'], category: 'finance', description: 'Atur reminder keuangan WhatsApp', usage: '.reminder set 07:00 | .reminder off', example: '.reminder set 07:00', isOwner: false, isPremium: false, isGroup: false, isPrivate: false, cooldown: 3, energi: 1, isEnabled: true }
+const pluginConfig = { name: 'finance-reminder', alias: ['reminder', 'pengingat'], category: 'finance', description: 'Atur reminder keuangan WhatsApp', usage: '.reminder set 07:00 | .reminder off', example: '.reminder set 07:00', isOwner: false, isPremium: false, isGroup: false, isPrivate: true, cooldown: 3, energi: 1, isEnabled: true }
 
 async function handler(m) {
   const text = (m.text || '').trim().toLowerCase()

@@ -13,6 +13,10 @@ function normalized(value) { return String(value || '').trim().toLocaleLowerCase
 
 export function financeErrorText(error) {
   if (error instanceof NHEfinanceApiError && error.code === 'NOT_CONFIGURED') return '⚠️ Fitur finance WhatsApp sedang dipersiapkan oleh pengelola. Silakan coba kembali beberapa saat lagi.'
+  if (error instanceof NHEfinanceApiError && error.code === 'FINANCE_ACCESS_CODE_REQUIRED') return '🔐 Buat kode akses terlebih dahulu di halaman Bot WhatsApp NHEfinance, lalu kirim *.nhefinance unlock <kode-akses>* melalui chat pribadi ini.'
+  if (error instanceof NHEfinanceApiError && error.code === 'FINANCE_ACCESS_CODE_INVALID') return '🔐 Kode akses tidak dapat diverifikasi. Periksa kembali lalu coba *.nhefinance unlock <kode-akses>* di chat pribadi.'
+  if (error instanceof NHEfinanceApiError && error.code === 'FINANCE_ACCESS_CODE_LOCKED') return '🔒 Terlalu banyak percobaan kode akses. Tunggu beberapa menit sebelum mencoba kembali.'
+  if (error instanceof NHEfinanceApiError && (error.code === 'FINANCE_SESSION_REQUIRED' || error.code === 'FINANCE_SESSION_EXPIRED')) return '🔐 Sesi finance WhatsApp belum aktif atau sudah berakhir. Kirim *.nhefinance unlock <kode-akses>* di chat pribadi untuk membuka sesi baru.'
   if (error instanceof NHEfinanceApiError && error.status === 401) return `🔐 WhatsApp ini belum ditautkan ke NHEfinance.\n\n${financeIntegrationHelp()}`
   return `❌ ${error?.message || 'Permintaan finance tidak dapat diproses.'}`
 }

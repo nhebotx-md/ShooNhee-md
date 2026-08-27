@@ -1,4 +1,4 @@
-import { createHmac } from 'node:crypto'
+import { createHmac, randomBytes } from 'node:crypto'
 import config from '../../config.js'
 
 export class NHEfinanceApiError extends Error {
@@ -24,7 +24,8 @@ export function isNHEfinanceConfigured() {
 
 export async function callNHEfinance(jid, action, payload = {}) {
   const settings = integrationConfig()
-  const body = JSON.stringify({ action, jid, payload })
+  const requestId = randomBytes(20).toString('hex')
+  const body = JSON.stringify({ action, jid, requestId, payload })
   const timestamp = String(Date.now())
   const signature = createHmac('sha256', settings.serviceSecret).update(`${timestamp}.${body}`, 'utf8').digest('hex')
   let response
@@ -49,7 +50,7 @@ export async function callNHEfinance(jid, action, payload = {}) {
   } catch {
     throw new NHEfinanceApiError('NHEfinance mengirim respons yang tidak valid.', { status: 502, code: 'INVALID_RESPONSE' })
   }
-  if (!response.ok || !data?.ok) throw new NHEfinanceApiError(data?.error || 'Permintaan ke NHEfinance gagal.', { status: response.status, code: 'REQUEST_REJECTED' })
+  if (!response.ok || !data?.ok) throw new NHEfinanceApiError(data?.error || 'Permintaan ke NHEfinance gagal.', { status: response.status, code: data?.code || 'REQUEST_REJECTED' })
   return data
 }
 

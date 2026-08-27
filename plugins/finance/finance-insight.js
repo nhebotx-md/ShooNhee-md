@@ -1,6 +1,6 @@
 import { financeErrorText, formatRupiah, linkedFinance } from '../../src/finance/nhefinance-commands.js'
 
-const pluginConfig = { name: 'finance-insight', alias: ['insight'], category: 'finance', description: 'Insight keuangan aktual NHEfinance', usage: '.insight', example: '.insight', isOwner: false, isPremium: false, isGroup: false, isPrivate: false, cooldown: 3, energi: 1, isEnabled: true }
+const pluginConfig = { name: 'finance-insight', alias: ['insight'], category: 'finance', description: 'Insight keuangan aktual NHEfinance', usage: '.insight', example: '.insight', isOwner: false, isPremium: false, isGroup: false, isPrivate: true, cooldown: 3, energi: 1, isEnabled: true }
 
 async function handler(m) {
   try {

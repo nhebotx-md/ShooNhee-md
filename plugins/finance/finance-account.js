@@ -1,6 +1,6 @@
 import { financeErrorText, linkedFinance, listAccountsMessage } from '../../src/finance/nhefinance-commands.js'
 
-const pluginConfig = { name: 'finance-account', alias: ['account', 'akun'], category: 'finance', description: 'Kelola akun/dompet NHEfinance', usage: '.account | .account add Nama | cash | 0', example: '.account add Cash | cash | 0', isOwner: false, isPremium: false, isGroup: false, isPrivate: false, cooldown: 3, energi: 1, isEnabled: true }
+const pluginConfig = { name: 'finance-account', alias: ['account', 'akun'], category: 'finance', description: 'Kelola akun/dompet NHEfinance', usage: '.account | .account add Nama | cash | 0', example: '.account add Cash | cash | 0', isOwner: false, isPremium: false, isGroup: false, isPrivate: true, cooldown: 3, energi: 1, isEnabled: true }
 
 async function handler(m) {
   const text = (m.text || '').trim()

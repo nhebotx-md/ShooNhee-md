@@ -1,6 +1,6 @@
 import { financeErrorText, formatRupiah, linkedFinance } from '../../src/finance/nhefinance-commands.js'
 
-const pluginConfig = { name: 'finance-target', alias: ['target'], category: 'finance', description: 'Kelola target NHEfinance', usage: '.target | .target add Nama | 1000000 | 2026-12-31 | .target save ID 50000', example: '.target add Laptop | 10000000 | 2026-12-31', isOwner: false, isPremium: false, isGroup: false, isPrivate: false, cooldown: 3, energi: 1, isEnabled: true }
+const pluginConfig = { name: 'finance-target', alias: ['target'], category: 'finance', description: 'Kelola target NHEfinance', usage: '.target | .target add Nama | 1000000 | 2026-12-31 | .target save ID 50000', example: '.target add Laptop | 10000000 | 2026-12-31', isOwner: false, isPremium: false, isGroup: false, isPrivate: true, cooldown: 3, energi: 1, isEnabled: true }
 
 async function handler(m) {
   const text = (m.text || '').trim()

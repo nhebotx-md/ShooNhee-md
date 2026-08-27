@@ -1,7 +1,7 @@
 import { accountForTransaction, financeErrorText, linkedFinance } from '../../src/finance/nhefinance-commands.js'
 import { formatRupiah } from '../../src/finance/nhefinance-api.js'
 
-const pluginConfig = { name: 'finance-debt', alias: ['debt', 'utang', 'piutang'], category: 'finance', description: 'Kelola hutang dan piutang pribadi', usage: '.debt list | .debt add debt|piutang | Nama | Nominal | YYYY-MM-DD | catatan | .debt pay ID | nominal | catatan', example: '.debt add debt | Rina | 500000 | 2026-09-01 | cicilan laptop', isOwner: false, isPremium: false, isGroup: false, isPrivate: false, cooldown: 3, energi: 1, isEnabled: true }
+const pluginConfig = { name: 'finance-debt', alias: ['debt', 'utang', 'piutang'], category: 'finance', description: 'Kelola hutang dan piutang pribadi', usage: '.debt list | .debt add debt|piutang | Nama | Nominal | YYYY-MM-DD | catatan | .debt pay ID | nominal | catatan', example: '.debt add debt | Rina | 500000 | 2026-09-01 | cicilan laptop', isOwner: false, isPremium: false, isGroup: false, isPrivate: true, cooldown: 3, energi: 1, isEnabled: true }
 
 function debtListMessage(debts) {
   if (!debts?.length) return 'Belum ada catatan hutang atau piutang aktif.'

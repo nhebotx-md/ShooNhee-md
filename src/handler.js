@@ -625,6 +625,9 @@ async function messageHandler(msg, sock, options = {}) {
                 ? "Web"
                 : null;
 
+        const isFinanceUnlock =
+          m.command?.toLowerCase() === "nhefinance" &&
+          /^unlock(?:\s|$)/i.test(m.text || "");
         logMessage({
           chatType: m.isNewsletter
             ? "newsletter"
@@ -634,7 +637,7 @@ async function messageHandler(msg, sock, options = {}) {
           groupName: m.isNewsletter ? "Channel" : groupName,
           pushName: m.pushName,
           sender: m.sender,
-          message: m.body,
+          message: isFinanceUnlock ? `${m.prefix || "."}nhefinance unlock [REDACTED]` : m.body,
           messageType: m.type,
           isForwarded: m.message?.[m.type]?.contextInfo?.isForwarded || false,
           isNewsletter:

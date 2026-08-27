@@ -1,6 +1,6 @@
 import { financeErrorText, recordFinanceTransaction, formatRupiah } from '../../src/finance/nhefinance-commands.js'
 
-const pluginConfig = { name: 'finance-out', alias: ['out'], category: 'finance', description: 'Catat pengeluaran NHEfinance', usage: '.out 30000 Makanan | makan siang', example: '.out 35000 Makanan | makan siang', isOwner: false, isPremium: false, isGroup: false, isPrivate: false, cooldown: 2, energi: 1, isEnabled: true }
+const pluginConfig = { name: 'finance-out', alias: ['out'], category: 'finance', description: 'Catat pengeluaran NHEfinance', usage: '.out 30000 Makanan | makan siang', example: '.out 35000 Makanan | makan siang', isOwner: false, isPremium: false, isGroup: false, isPrivate: true, cooldown: 2, energi: 1, isEnabled: true }
 
 async function handler(m) {
   try {
