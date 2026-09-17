@@ -2,11 +2,12 @@ import { createHmac, randomBytes } from 'node:crypto'
 import config from '../../config.js'
 
 export class NHEfinanceApiError extends Error {
-  constructor(message, { status = 500, code = 'NHEFINANCE_API_ERROR' } = {}) {
+  constructor(message, { status = 500, code = 'NHEFINANCE_API_ERROR', action = '' } = {}) {
     super(message)
     this.name = 'NHEfinanceApiError'
     this.status = status
     this.code = code
+    this.action = action
   }
 }
 
@@ -41,16 +42,16 @@ export async function callNHEfinance(jid, action, payload = {}) {
       signal: AbortSignal.timeout(15_000)
     })
   } catch {
-    throw new NHEfinanceApiError('NHEfinance tidak dapat dihubungi. Coba ulangi beberapa saat lagi.', { status: 503, code: 'UNREACHABLE' })
+    throw new NHEfinanceApiError('NHEfinance tidak dapat dihubungi. Coba ulangi beberapa saat lagi.', { status: 503, code: 'UNREACHABLE', action })
   }
 
   let data
   try {
     data = await response.json()
   } catch {
-    throw new NHEfinanceApiError('NHEfinance mengirim respons yang tidak valid.', { status: 502, code: 'INVALID_RESPONSE' })
+    throw new NHEfinanceApiError('NHEfinance mengirim respons yang tidak valid.', { status: 502, code: 'INVALID_RESPONSE', action })
   }
-  if (!response.ok || !data?.ok) throw new NHEfinanceApiError(data?.error || 'Permintaan ke NHEfinance gagal.', { status: response.status, code: data?.code || 'REQUEST_REJECTED' })
+  if (!response.ok || !data?.ok) throw new NHEfinanceApiError(data?.error || 'Permintaan ke NHEfinance gagal.', { status: response.status, code: data?.code || 'REQUEST_REJECTED', action })
   return data
 }
 

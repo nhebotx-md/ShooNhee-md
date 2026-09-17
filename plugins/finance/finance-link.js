@@ -30,7 +30,9 @@ function sessionText(session) {
 async function handler(m, context) {
   const reply = (text) => secureReply(m, context, text)
   const [actionInput = '', ...accessCodeParts] = (m.text || '').trim().split(/\s+/)
-  const action = actionInput.toLowerCase()
+  // Shortcut untuk tombol web yang mengirim `.nhefinance` tanpa argumen.
+  // Pengguna langsung memperoleh kode penautan, bukan hanya halaman bantuan.
+  const action = actionInput.toLowerCase() || 'link'
   const accessCode = accessCodeParts.join(' ')
   try {
     if (action === 'link') {
