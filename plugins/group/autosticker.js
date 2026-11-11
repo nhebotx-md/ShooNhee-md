@@ -85,10 +85,16 @@ async function autoStickerHandler(m, sock) {
                         (type === 'viewOnceMessageV2' && content?.message?.videoMessage)
         
         if (!isImage && !isVideo) return false
+
+        const mediaMessage = isVideo
+            ? (msg.videoMessage || content?.message?.videoMessage)
+            : (msg.imageMessage || content?.message?.imageMessage)
+        const declaredSize = Number(mediaMessage?.fileLength)
+        if (Number.isFinite(declaredSize) && declaredSize > 10 * 1024 * 1024) return false
+        if (isVideo && Number(mediaMessage?.seconds || 0) > 10) return false
         
         const buffer = await m.download()
         if (!buffer || buffer.length === 0) return false
-        
         if (buffer.length > 10 * 1024 * 1024) return false
         
         if (isImage) {
@@ -97,10 +103,6 @@ async function autoStickerHandler(m, sock) {
                 author: config.sticker?.author || 'Bot'
             })
         } else if (isVideo) {
-            const videoMsg = msg.videoMessage || content?.message?.videoMessage
-            const duration = videoMsg?.seconds || 0
-            if (duration > 10) return false
-            
             await sock.sendVideoAsSticker(m.chat, buffer, m, {
                 packname: config.sticker?.packname || 'ShooNhee',
                 author: config.sticker?.author || 'Bot'

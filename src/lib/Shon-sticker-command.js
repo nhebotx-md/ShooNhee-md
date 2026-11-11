@@ -1,190 +1,143 @@
-/**
- * @file src/lib/stickerCommand.js
- * @description Global sticker-to-command mapping system
- */
+import fs from 'node:fs'
+import path from 'node:path'
+import crypto from 'node:crypto'
+import { fileURLToPath } from 'node:url'
 
-import fs from 'fs'
-import path from 'path'
-import crypto from 'crypto'
-import { fileURLToPath } from 'url'
 const __filename = fileURLToPath(import.meta.url)
 const __dirname = path.dirname(__filename)
 const STICKER_CMD_FILE = path.join(__dirname, '../../database/stickerCommands.json')
+let stickerCommands = Object.create(null)
 
-// In-memory cache
-let stickerCommands = {}
-
-// Load from file
-function loadStickerCommands() {
-    try {
-        if (fs.existsSync(STICKER_CMD_FILE)) {
-            const data = fs.readFileSync(STICKER_CMD_FILE, 'utf-8')
-            stickerCommands = JSON.parse(data)
-        }
-    } catch (e) {
-        stickerCommands = {}
-    }
-    return stickerCommands
+function normalizeHash(value) {
+  if (Buffer.isBuffer(value) || value instanceof Uint8Array) value = Buffer.from(value).toString('base64')
+  if (typeof value !== 'string') return null
+  const hash = value.trim()
+  return hash.length >= 32 && hash.length <= 128 && /^[A-Za-z0-9+/=_-]+$/.test(hash) ? hash : null
 }
 
-// Save to file
-function saveStickerCommands() {
-    try {
-        const dir = path.dirname(STICKER_CMD_FILE)
-        if (!fs.existsSync(dir)) {
-            fs.mkdirSync(dir, { recursive: true })
-        }
-        fs.writeFileSync(STICKER_CMD_FILE, JSON.stringify(stickerCommands, null, 2))
-    } catch (e) {
-        console.error('Error saving sticker commands:', e)
-    }
+function getStickerMessage(m, quotedOnly = false) {
+  if (!m) return null
+  if (quotedOnly) return m.quoted?.message?.stickerMessage || null
+  return m.message?.stickerMessage ||
+    m.quoted?.message?.stickerMessage ||
+    m.message?.documentWithCaptionMessage?.message?.stickerMessage || null
 }
 
-/**
- * Generate unique hash for sticker
- * Uses fileSha256 or mediaKey as identifier
- */
 function getStickerHash(m) {
-    if (!m) return null
-    
-    // Check if message is sticker
-    const stickerMsg = m.message?.stickerMessage || 
-                       m.quoted?.message?.stickerMessage ||
-                       m.message?.documentWithCaptionMessage?.message?.stickerMessage
-    
-    if (!stickerMsg) return null
-    
-    // Use fileSha256 as primary identifier
-    if (stickerMsg.fileSha256) {
-        // Convert buffer to base64 string for storage
-        const sha = Buffer.isBuffer(stickerMsg.fileSha256) 
-            ? stickerMsg.fileSha256.toString('base64')
-            : stickerMsg.fileSha256
-        return sha
-    }
-    
-    // Fallback to mediaKey
-    if (stickerMsg.mediaKey) {
-        const key = Buffer.isBuffer(stickerMsg.mediaKey)
-            ? stickerMsg.mediaKey.toString('base64')
-            : stickerMsg.mediaKey
-        return key
-    }
-    
-    return null
+  const sticker = getStickerMessage(m)
+  return normalizeHash(sticker?.fileSha256)
 }
 
-/**
- * Get sticker hash from quoted message
- */
 function getQuotedStickerHash(m) {
-    if (!m.quoted) return null
-    
-    const stickerMsg = m.quoted.message?.stickerMessage
-    if (!stickerMsg) return null
-    
-    if (stickerMsg.fileSha256) {
-        const sha = Buffer.isBuffer(stickerMsg.fileSha256)
-            ? stickerMsg.fileSha256.toString('base64')
-            : stickerMsg.fileSha256
-        return sha
-    }
-    
-    if (stickerMsg.mediaKey) {
-        const key = Buffer.isBuffer(stickerMsg.mediaKey)
-            ? stickerMsg.mediaKey.toString('base64')
-            : stickerMsg.mediaKey
-        return key
-    }
-    
-    return null
+  const sticker = getStickerMessage(m, true)
+  return normalizeHash(sticker?.fileSha256)
 }
 
-/**
- * Add sticker command mapping (global)
- */
-function addStickerCommand(stickerHash, command, addedBy) {
-    if (!stickerHash || !command) return false
-    
-    loadStickerCommands()
-    
-    stickerCommands[stickerHash] = {
-        command: command.toLowerCase().replace(/^\./, ''), // Remove leading dot
-        addedBy: addedBy,
-        addedAt: Date.now()
+function loadStickerCommands() {
+  try {
+    if (!fs.existsSync(STICKER_CMD_FILE)) {
+      stickerCommands = Object.create(null)
+      return stickerCommands
     }
-    
-    saveStickerCommands()
+    const parsed = JSON.parse(fs.readFileSync(STICKER_CMD_FILE, 'utf8'))
+    if (!parsed || typeof parsed !== 'object' || Array.isArray(parsed)) throw new Error('Format database mapping tidak valid')
+    stickerCommands = Object.assign(Object.create(null), parsed)
+  } catch (error) {
+    console.error('[StickerCommand] Database mapping tidak dapat dimuat:', error.message)
+    stickerCommands = Object.create(null)
+  }
+  return stickerCommands
+}
+
+function saveStickerCommands() {
+  const tempFile = `${STICKER_CMD_FILE}.${process.pid}.${crypto.randomBytes(6).toString('hex')}.tmp`
+  try {
+    fs.mkdirSync(path.dirname(STICKER_CMD_FILE), { recursive: true })
+    fs.writeFileSync(tempFile, JSON.stringify(stickerCommands, null, 2), { encoding: 'utf8', flag: 'wx', mode: 0o600 })
+    fs.renameSync(tempFile, STICKER_CMD_FILE)
     return true
-}
-
-/**
- * Delete sticker command
- */
-function deleteStickerCommand(stickerHash) {
-    if (!stickerHash) return false
-    
-    loadStickerCommands()
-    
-    if (stickerCommands[stickerHash]) {
-        delete stickerCommands[stickerHash]
-        saveStickerCommands()
-        return true
-    }
-    
+  } catch (error) {
+    console.error('[StickerCommand] Mapping tidak dapat disimpan:', error.message)
+    try { if (fs.existsSync(tempFile)) fs.unlinkSync(tempFile) } catch {}
     return false
+  }
 }
 
-/**
- * Get command for sticker
- */
+function normalizeCommand(value) {
+  if (typeof value !== 'string') return null
+  const command = value.trim().toLowerCase().replace(/^\.+/, '')
+  return /^[a-z0-9][a-z0-9_-]{0,63}$/.test(command) ? command : null
+}
+
+function addStickerCommand(stickerHash, command, addedBy) {
+  const hash = normalizeHash(stickerHash)
+  const normalizedCommand = normalizeCommand(command)
+  if (!hash || !normalizedCommand) return false
+  loadStickerCommands()
+  const previous = stickerCommands[hash]
+  stickerCommands[hash] = {
+    command: normalizedCommand,
+    addedBy: typeof addedBy === 'string' ? addedBy.slice(0, 128) : '',
+    addedAt: Date.now(),
+  }
+  if (saveStickerCommands()) return true
+  if (previous) stickerCommands[hash] = previous
+  else delete stickerCommands[hash]
+  return false
+}
+
+function deleteStickerCommand(stickerHash) {
+  const hash = normalizeHash(stickerHash)
+  if (!hash) return false
+  loadStickerCommands()
+  if (!Object.prototype.hasOwnProperty.call(stickerCommands, hash)) return false
+  const previous = stickerCommands[hash]
+  delete stickerCommands[hash]
+  if (saveStickerCommands()) return true
+  stickerCommands[hash] = previous
+  return false
+}
+
 function getStickerCommand(stickerHash) {
-    if (!stickerHash) return null
-    return stickerCommands[stickerHash] || null
+  const hash = normalizeHash(stickerHash)
+  return hash ? stickerCommands[hash] || null : null
 }
 
-/**
- * List all sticker commands
- */
 function listStickerCommands() {
-    return Object.entries(stickerCommands).map(([hash, data]) => ({
-        hash: hash.substring(0, 10) + '...',
-        fullHash: hash,
-        command: data.command,
-        addedBy: data.addedBy,
-        addedAt: data.addedAt
-    }))
+  return Object.entries(stickerCommands).map(([hash, data]) => ({
+    hash: `${hash.slice(0, 10)}...`,
+    fullHash: hash,
+    command: data.command,
+    addedBy: data.addedBy,
+    addedAt: data.addedAt,
+  }))
 }
 
-/**
- * Find sticker command by command name
- */
 function findByCommand(commandName) {
-    const cmd = commandName.toLowerCase().replace(/^\./, '')
-    
-    for (const [hash, data] of Object.entries(stickerCommands)) {
-        if (data.command === cmd) {
-            return { hash, ...data }
-        }
-    }
-    
-    return null
+  const command = normalizeCommand(commandName)
+  if (!command) return null
+  for (const [hash, data] of Object.entries(stickerCommands)) {
+    if (data.command === command) return { hash, ...data }
+  }
+  return null
 }
 
-/**
- * Check if message is a registered sticker command
- */
 function checkStickerCommand(m) {
-    const hash = getStickerHash(m)
-    if (!hash) return null
-    
-    const cmdData = getStickerCommand(hash)
-    if (!cmdData) return null
-    
-    return cmdData.command
+  const hash = getStickerHash(m)
+  return hash ? getStickerCommand(hash)?.command || null : null
 }
 
-// Initialize
 loadStickerCommands()
 
-export { getStickerHash, getQuotedStickerHash, addStickerCommand, deleteStickerCommand, getStickerCommand, listStickerCommands, findByCommand, checkStickerCommand, loadStickerCommands }
+export {
+  getStickerHash,
+  getQuotedStickerHash,
+  addStickerCommand,
+  deleteStickerCommand,
+  getStickerCommand,
+  listStickerCommands,
+  findByCommand,
+  checkStickerCommand,
+  loadStickerCommands,
+  saveStickerCommands,
+}

@@ -1,159 +1,123 @@
 import axios from 'axios'
+import { parseHttpUrl } from '../../src/lib/Shon-media-safety.js'
+
+const API_URL = 'https://www.tikwm.com/api/'
+const TIKWM_HOSTS = ['tikwm.com']
+
+function normalizeMediaUrl(value) {
+  if (!value) return null
+  try {
+    return parseHttpUrl(new URL(String(value), 'https://www.tikwm.com').toString(), { allowedHosts: TIKWM_HOSTS, requireHttps: true }).toString()
+  } catch {
+    try {
+      return parseHttpUrl(String(value), { requireHttps: true }).toString()
+    } catch {
+      return null
+    }
+  }
+}
+
 async function tiktokDl(url) {
-	return new Promise(async (resolve, reject) => {
-		try {
-			let data = []
-			function formatNumber(integer) {
-				let numb = parseInt(integer)
-				return Number(numb).toLocaleString().replace(/,/g, '.')
-			}
-			
-			function formatDate(n, locale = 'en') {
-				let d = new Date(n)
-				return d.toLocaleDateString(locale, {
-					weekday: 'long',
-					day: 'numeric',
-					month: 'long',
-					year: 'numeric',
-					hour: 'numeric',
-					minute: 'numeric',
-					second: 'numeric'
-				})
-			}
-			
-			let domain = 'https://www.tikwm.com/api/';
-			let res = await (await axios.post(domain, {}, {
-				headers: {
-					'Accept': 'application/json, text/javascript, */*; q=0.01',
-					'Accept-Language': 'id-ID,id;q=0.9,en-US;q=0.8,en;q=0.7',
-					'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8',
-					'Origin': 'https://www.tikwm.com',
-					'Referer': 'https://www.tikwm.com/',
-					'Sec-Ch-Ua': '"Not)A;Brand" ;v="24" , "Chromium" ;v="116"',
-					'Sec-Ch-Ua-Mobile': '?1',
-					'Sec-Ch-Ua-Platform': 'Android',
-					'Sec-Fetch-Dest': 'empty',
-					'Sec-Fetch-Mode': 'cors',
-					'Sec-Fetch-Site': 'same-origin',
-					'User-Agent': 'Mozilla/5.0 (Linux; Android 10; K) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/116.0.0.0 Mobile Safari/537.36',
-					'X-Requested-With': 'XMLHttpRequest'
-				},
-				params: {
-					url: url,
-					count: 12,
-					cursor: 0,
-					web: 1,
-					hd: 1
-				}
-			})).data.data
-			if (res?.duration == 0) {
-				res.images.map(v => {
-					data.push({ type: 'photo', url: v })
-				})
-			} else {
-				data.push({
-					type: 'watermark',
-					url: 'https://www.tikwm.com' + res?.wmplay || "/undefined",
-				}, {
-					type: 'nowatermark',
-					url: 'https://www.tikwm.com' + res?.play || "/undefined",
-				}, {
-					type: 'nowatermark_hd',
-					url: 'https://www.tikwm.com' + res?.hdplay || "/undefined"
-				})
-			}
-			let json = {
-				status: true,
-				title: res.title,
-				taken_at: formatDate(res.create_time).replace('1970', ''),
-				region: res.region,
-				id: res.id,
-				durations: res.duration,
-				duration: res.duration + ' Seconds',
-				cover: 'https://www.tikwm.com' + res.cover,
-				size_wm: res.wm_size,
-				size_nowm: res.size,
-				size_nowm_hd: res.hd_size,
-				data: data,
-				music_info: {
-					id: res.music_info.id,
-					title: res.music_info.title,
-					author: res.music_info.author,
-					album: res.music_info.album ? res.music_info.album : null,
-					url: 'https://www.tikwm.com' + res.music || res.music_info.play
-				},
-				stats: {
-					views: formatNumber(res.play_count),
-					likes: formatNumber(res.digg_count),
-					comment: formatNumber(res.comment_count),
-					share: formatNumber(res.share_count),
-					download: formatNumber(res.download_count)
-				},
-				author: {
-					id: res.author.id,
-					fullname: res.author.unique_id,
-					nickname: res.author.nickname,
-					avatar: 'https://www.tikwm.com' + res.author.avatar
-				}
-			}
-			resolve(json)
-		} catch (e) {
-			
-		}
-	});
+  const response = await axios.get(API_URL, {
+    params: { url, count: 12, cursor: 0, web: 1, hd: 1 },
+    timeout: 30000,
+    maxContentLength: 2 * 1024 * 1024,
+    headers: {
+      Accept: 'application/json',
+      'User-Agent': 'Mozilla/5.0 (Linux; Android 10) AppleWebKit/537.36 Chrome/120.0.0.0 Mobile Safari/537.36',
+    },
+  })
+  const raw = response.data?.data
+  if (!raw || response.data?.code !== 0) throw new Error(response.data?.msg || 'TikWM tidak mengembalikan media.')
+
+  const duration = Number(raw.duration) || 0
+  const data = duration === 0 && Array.isArray(raw.images)
+    ? raw.images.map((image) => ({ type: 'photo', url: normalizeMediaUrl(image) })).filter((item) => item.url)
+    : [
+        { type: 'watermark', url: normalizeMediaUrl(raw.wmplay) },
+        { type: 'nowatermark', url: normalizeMediaUrl(raw.play) },
+        { type: 'nowatermark_hd', url: normalizeMediaUrl(raw.hdplay) },
+      ].filter((item) => item.url)
+
+  if (!data.length) throw new Error('TikWM tidak memiliki tautan media yang dapat digunakan.')
+
+  const normalizeImage = (value) => normalizeMediaUrl(value)
+  const musicUrl = normalizeMediaUrl(raw.music || raw.music_info?.play)
+  return {
+    status: true,
+    title: String(raw.title || ''),
+    taken_at: raw.create_time ? new Date(Number(raw.create_time) * 1000).toISOString() : '',
+    region: raw.region || '',
+    id: raw.id || '',
+    durations: duration,
+    duration: `${duration} Seconds`,
+    cover: normalizeImage(raw.cover),
+    data,
+    music_info: {
+      id: raw.music_info?.id || '',
+      title: raw.music_info?.title || '',
+      author: raw.music_info?.author || '',
+      album: raw.music_info?.album || null,
+      url: musicUrl,
+    },
+    stats: {
+      views: Number(raw.play_count) || 0,
+      likes: Number(raw.digg_count) || 0,
+      comment: Number(raw.comment_count) || 0,
+      share: Number(raw.share_count) || 0,
+      download: Number(raw.download_count) || 0,
+    },
+    author: {
+      id: raw.author?.id || '',
+      fullname: raw.author?.unique_id || '',
+      nickname: raw.author?.nickname || '',
+      avatar: normalizeImage(raw.author?.avatar),
+    },
+  }
 }
 
 const pluginConfig = {
-    name: ['tiktok', 'tt', 'ttmp4'],
-    alias: ['tiktokdl', 'ttdown'],
-    category: 'download',
-    description: 'Download video/slide TikTok tanpa watermark',
-    usage: '.tiktok <url>',
-    example: '.tiktok https://vt.tiktok.com/xxx',
-    isOwner: false,
-    isPremium: false,
-    isGroup: false,
-    isPrivate: false,
-    cooldown: 10,
-    energi: 1,
-    isEnabled: true
+  name: ['tiktok', 'tt'],
+  alias: ['tiktokdl', 'ttdown'],
+  category: 'download',
+  description: 'Download video/slide TikTok tanpa watermark',
+  usage: '.tiktok <url>',
+  example: '.tiktok https://vt.tiktok.com/xxx',
+  isOwner: false,
+  isPremium: false,
+  isGroup: false,
+  isPrivate: false,
+  cooldown: 10,
+  energi: 1,
+  isEnabled: true,
 }
 
 async function handler(m, { sock }) {
-    const text = m.text?.trim()
-    const prefix = m.prefix
-    const command = m?.command
-    if (!text) {
-        m.react('❌')
-        return m.reply(`📌 Contoh: *${prefix + command} https://vt.tiktok.com/...*`)
-    }
-    m.react('🕕')
-    try {
-        const result = await tiktokDl(text)
-        if (result.durations > 0 && result.duration !== "0 Seconds") {
-        let zann = await result.data.find(e => e.type == "nowatermark_hd" || e.type == "nowatermark");
-        await sock.sendMedia(m.chat, zann.url, result.title, m, {
-                type: 'video',
-                contextInfo: {
-                    forwardingScore: 99,
-                    isForwarded: true
-                }
-            })
-            } else {
-            const sabila = result.data?.map(zan => ({
-            	image: { url: zan.url }
-            }))
-            await sock.sendMessage(m.chat, {
-            	albumMessage: sabila
-            }, { quoted: m })
-            }
-        m.react('✅')
+  let url
+  try {
+    url = parseHttpUrl(m.text?.trim(), { allowedHosts: ['tiktok.com'] }).toString()
+  } catch {
+    return m.reply(`📌 Contoh: *${m.prefix}${m.command} https://vt.tiktok.com/...*`)
+  }
 
-    } catch (e) {
-        console.error(e)
-        m.react('❌')
-        m.reply('Coba lagi nanti, atau bisa coba ' + m.prefix + 'tt2')
+  await m.react('🕕')
+  try {
+    const result = await tiktokDl(url)
+    if (result.durations > 0) {
+      const selected = result.data.find((item) => item.type === 'nowatermark_hd') || result.data.find((item) => item.type === 'nowatermark')
+      if (!selected) throw new Error('Video TikTok tidak ditemukan.')
+      await sock.sendMedia(m.chat, selected.url, result.title, m, { type: 'video' })
+    } else {
+      for (const item of result.data) {
+        await sock.sendMessage(m.chat, { image: { url: item.url } }, { quoted: m })
+      }
     }
+    await m.react('✅')
+  } catch (error) {
+    console.error('[TikTokDL] Gagal:', error.message)
+    await m.react('❌')
+    await m.reply('Gagal mengunduh media TikTok. Coba lagi nanti atau gunakan .tt2.')
+  }
 }
 
-export { pluginConfig as config, handler }
+export { pluginConfig as config, handler, tiktokDl }

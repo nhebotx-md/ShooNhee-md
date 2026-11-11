@@ -8,15 +8,17 @@ const pluginConfig = {
     example: '.delstickercmd menu',
     isOwner: false,
     isPremium: false,
-    isGroup: false,
+    isGroup: true,
     isPrivate: false,
-    isAdmin: false,
+    isAdmin: true,
     cooldown: 5,
     energi: 0,
     isEnabled: true
 }
 
 async function handler(m, { sock }) {
+    if (!m.isGroup) return m.reply('⚠️ Perintah ini hanya dapat dipakai di grup.')
+    if (!m.isAdmin && !m.isOwner) return m.reply('⛔ Hanya admin grup yang dapat menghapus shortcut sticker.')
     const args = m.args || []
     const commandName = args[0]
     if (!commandName && !m.quoted) {

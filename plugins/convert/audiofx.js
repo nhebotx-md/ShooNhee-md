@@ -133,7 +133,7 @@ async function handler(m, { sock }) {
         }
 
         fs.writeFileSync(inputPath, buffer)
-        await queueFFmpeg(`ffmpeg -y -i "${inputPath}" -af "${fx.filter}" -vn "${outputPath}"`)
+        await queueFFmpeg(['-y', '-i', inputPath, '-af', fx.filter, '-vn', outputPath])
 
         if (!fs.existsSync(outputPath)) {
             return m.reply(`❌ Gagal memproses audio`)

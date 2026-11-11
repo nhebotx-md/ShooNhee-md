@@ -99,7 +99,7 @@ async function handler(m, { sock }) {
 
         fs.writeFileSync(inputPath, buffer)
 
-        await queueFFmpeg(`ffmpeg -y -i "${inputPath}" -vn -ar 44100 -ac 2 -b:a 192k "${outputPath}"`)
+        await queueFFmpeg(['-y', '-i', inputPath, '-vn', '-ar', '44100', '-ac', '2', '-b:a', '192k', outputPath])
 
         if (!fs.existsSync(outputPath)) {
             await m.reply(

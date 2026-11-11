@@ -1,343 +1,203 @@
 import FormData from 'form-data'
 import fetch from 'node-fetch'
-import fs from 'fs'
 import mime from 'mime-types'
 import { fileTypeFromBuffer } from 'file-type'
 import { downloadMediaMessage, getContentType } from 'ShooNhee'
 import te from '../../src/lib/Shon-error.js'
+import { assertBufferSize, parseHttpUrl, sanitizeFilename } from '../../src/lib/Shon-media-safety.js'
+
+const MAX_UPLOAD_BYTES = 20 * 1024 * 1024
 const pluginConfig = {
-    name: 'tourl',
-    alias: ['upload', 'catbox', 'url'],
-    category: 'tools',
-    description: 'Upload media ke multiple host dan dapatkan URL',
-    usage: '.tourl (reply/kirim media)',
-    example: '.tourl',
-    cooldown: 10,
-    energi: 1,
-    isEnabled: true
+  name: 'tourl',
+  alias: ['upload', 'catbox', 'url'],
+  category: 'tools',
+  description: 'Upload media ke satu host pilihan dan dapatkan URL',
+  usage: '.tourl [catbox|litterbox|tmpfiles|gofile|quax|ypnk|puticu] (reply/kirim media)',
+  example: '.tourl litterbox',
+  cooldown: 10,
+  energi: 1,
+  isEnabled: true,
 }
 
-const termaiKey = 'AIzaBj7z2z3xBjsk'
-const termaiDomain = 'https://c.termai.cc'
+function extensionFor(mimetype, detected) {
+  return detected?.ext || mime.extension(mimetype || '') || 'bin'
+}
 
-async function detectExt(buffer, fallback = 'bin') {
-    try {
-        const type = await fileTypeFromBuffer(buffer)
-        return type?.ext || fallback
-    } catch {
-        return fallback
-    }
+function extractHttpResponseUrl(value, allowedHosts) {
+  const url = parseHttpUrl(String(value || '').trim(), { requireHttps: true, allowedHosts })
+  return url.toString()
+}
+
+async function postForm(url, form, timeout = 60_000) {
+  const response = await fetch(url, {
+    method: 'POST',
+    body: form,
+    headers: form.getHeaders(),
+    timeout,
+    size: MAX_UPLOAD_BYTES,
+  })
+  if (!response.ok) throw new Error(`HTTP ${response.status}`)
+  return response
 }
 
 async function uploadToCatbox(buffer, filename) {
-    const form = new FormData()
-    form.append('reqtype', 'fileupload')
-    form.append('fileToUpload', buffer, {
-        filename,
-        contentType: mime.lookup(filename) || 'application/octet-stream'
-    })
-
-    const res = await fetch('https://catbox.moe/user/api.php', {
-        method: 'POST',
-        body: form,
-        headers: form.getHeaders(),
-        timeout: 30000
-    })
-
-    if (!res.ok) throw new Error('Catbox gagal')
-    const url = await res.text()
-    if (!url.startsWith('http')) throw new Error('Invalid response')
-    return { host: 'Catbox', url, expires: 'Permanent' }
+  const form = new FormData()
+  form.append('reqtype', 'fileupload')
+  form.append('fileToUpload', buffer, { filename, contentType: mime.lookup(filename) || 'application/octet-stream' })
+  const response = await postForm('https://catbox.moe/user/api.php', form)
+  const url = extractHttpResponseUrl(await response.text(), ['catbox.moe'])
+  return { host: 'Catbox', url, expires: 'Tidak ada masa kedaluwarsa yang dinyatakan' }
 }
 
 async function uploadToLitterbox(buffer, filename) {
-    const form = new FormData()
-    form.append('reqtype', 'fileupload')
-    form.append('time', '72h')
-    form.append('fileToUpload', buffer, {
-        filename,
-        contentType: mime.lookup(filename) || 'application/octet-stream'
-    })
-
-    const res = await fetch('https://litterbox.catbox.moe/resources/internals/api.php', {
-        method: 'POST',
-        body: form,
-        headers: form.getHeaders(),
-        timeout: 30000
-    })
-
-    if (!res.ok) throw new Error('Litterbox gagal')
-    const url = await res.text()
-    if (!url.startsWith('http')) throw new Error('Invalid response')
-    return { host: 'Litterbox', url, expires: '72 jam' }
+  const form = new FormData()
+  form.append('reqtype', 'fileupload')
+  form.append('time', '72h')
+  form.append('fileToUpload', buffer, { filename, contentType: mime.lookup(filename) || 'application/octet-stream' })
+  const response = await postForm('https://litterbox.catbox.moe/resources/internals/api.php', form)
+  const url = extractHttpResponseUrl(await response.text(), ['litter.catbox.moe', 'catbox.moe'])
+  return { host: 'Litterbox', url, expires: '72 jam' }
 }
 
 async function uploadToTmpFiles(buffer, filename) {
-    const form = new FormData()
-    form.append('file', buffer, {
-        filename,
-        contentType: mime.lookup(filename) || 'application/octet-stream'
-    })
-
-    const res = await fetch('https://tmpfiles.org/api/v1/upload', {
-        method: 'POST',
-        body: form,
-        headers: form.getHeaders(),
-        timeout: 30000
-    })
-
-    if (!res.ok) throw new Error('TmpFiles gagal')
-    const data = await res.json()
-    if (!data?.data?.url) throw new Error('Invalid response')
-
-    let url = data.data.url
-    const idMatch = url.match(/\/(\d+)(?:\/|$)/)
-    if (idMatch) {
-        url = `https://tmpfiles.org/dl/${idMatch[1]}/${filename}`
-    } else {
-        url = url.replace('tmpfiles.org/', 'tmpfiles.org/dl/')
-    }
-
-    return { host: 'TmpFiles', url, expires: '60 menit' }
+  const form = new FormData()
+  form.append('file', buffer, { filename, contentType: mime.lookup(filename) || 'application/octet-stream' })
+  const response = await postForm('https://tmpfiles.org/api/v1/upload', form)
+  const data = await response.json()
+  const rawUrl = data?.data?.url
+  if (!rawUrl) throw new Error('Respons TmpFiles tidak valid.')
+  const match = String(rawUrl).match(/tmpfiles\.org\/(?:dl\/)?(\d+)/i)
+  if (!match) throw new Error('Tautan TmpFiles tidak valid.')
+  const url = extractHttpResponseUrl(`https://tmpfiles.org/dl/${match[1]}/${encodeURIComponent(filename)}`, ['tmpfiles.org'])
+  return { host: 'TmpFiles', url, expires: 'Berlaku terbatas; durasi dapat berubah sesuai kebijakan layanan' }
 }
 
 async function uploadToGofile(buffer, filename) {
-    const serverRes = await fetch('https://api.gofile.io/servers', { timeout: 10000 })
-    const serverData = await serverRes.json()
-    if (!serverData?.data?.servers?.[0]?.name) throw new Error('Gofile server gagal')
+  const serverResponse = await fetch('https://api.gofile.io/servers', { timeout: 15_000, size: 1024 * 1024 })
+  if (!serverResponse.ok) throw new Error('Gagal mendapatkan server GoFile.')
+  const serverData = await serverResponse.json()
+  const server = String(serverData?.data?.servers?.[0]?.name || '')
+  if (!/^[a-z0-9-]{1,40}$/i.test(server)) throw new Error('Nama server GoFile tidak valid.')
 
-    const server = serverData.data.servers[0].name
-    const form = new FormData()
-    form.append('file', buffer, {
-        filename,
-        contentType: mime.lookup(filename) || 'application/octet-stream'
-    })
-
-    const res = await fetch(`https://${server}.gofile.io/uploadFile`, {
-        method: 'POST',
-        body: form,
-        headers: form.getHeaders(),
-        timeout: 60000
-    })
-
-    if (!res.ok) throw new Error('Gofile upload gagal')
-    const data = await res.json()
-    if (!data?.data?.downloadPage) throw new Error('Invalid response')
-    return { host: 'Gofile', url: data.data.downloadPage, expires: 'Permanent' }
+  const form = new FormData()
+  form.append('file', buffer, { filename, contentType: mime.lookup(filename) || 'application/octet-stream' })
+  const response = await postForm(`https://${server}.gofile.io/uploadFile`, form)
+  const data = await response.json()
+  const url = extractHttpResponseUrl(data?.data?.downloadPage, ['gofile.io'])
+  return { host: 'GoFile', url, expires: 'Bervariasi mengikuti kebijakan layanan' }
 }
 
 async function uploadToQuax(buffer, filename) {
-    const form = new FormData()
-    form.append('files[]', buffer, {
-        filename,
-        contentType: mime.lookup(filename) || 'application/octet-stream'
-    })
-
-    const res = await fetch('https://qu.ax/upload.php', {
-        method: 'POST',
-        body: form,
-        headers: form.getHeaders(),
-        timeout: 60000
-    })
-
-    if (!res.ok) throw new Error('Qu.ax gagal')
-    const data = await res.json()
-
-    if (!data?.success || !Array.isArray(data.files) || !data.files[0]?.url) {
-        throw new Error('Invalid response')
-    }
-
-    return { host: 'Qu.ax', url: data.files[0].url, expires: 'Permanent' }
+  const form = new FormData()
+  form.append('files[]', buffer, { filename, contentType: mime.lookup(filename) || 'application/octet-stream' })
+  const response = await postForm('https://qu.ax/upload.php', form)
+  const data = await response.json()
+  if (!data?.success || !data.files?.[0]?.url) throw new Error('Respons Qu.ax tidak valid.')
+  const url = extractHttpResponseUrl(data.files[0].url, ['qu.ax'])
+  return { host: 'Qu.ax', url, expires: 'Tidak diketahui' }
 }
 
 async function uploadToYpnk(buffer, filename) {
-    const form = new FormData()
-    form.append('files', buffer, {
-        filename,
-        contentType: mime.lookup(filename) || 'application/octet-stream'
-    })
-
-    const res = await fetch('https://cdn.ypnk.biz.id/upload', {
-        method: 'POST',
-        body: form,
-        headers: {
-            ...form.getHeaders(),
-            'User-Agent': 'Mozilla/5.0 (Linux; Android 10; K) AppleWebKit/537.36'
-        },
-        timeout: 120000
-    })
-
-    if (!res.ok) throw new Error('YPNK gagal')
-    const data = await res.json()
-
-    if (!data?.success || !data?.files?.[0]?.url) {
-        throw new Error('Invalid response')
-    }
-
-    return {
-        host: 'YPNK',
-        url: `https://cdn.ypnk.biz.id${data.files[0].url}`,
-        expires: 'Unknown'
-    }
+  const form = new FormData()
+  form.append('files', buffer, { filename, contentType: mime.lookup(filename) || 'application/octet-stream' })
+  const response = await postForm('https://cdn.ypnk.biz.id/upload', form, 90_000)
+  const data = await response.json()
+  const raw = data?.files?.[0]?.url
+  if (!data?.success || !raw) throw new Error('Respons YPNK tidak valid.')
+  const url = extractHttpResponseUrl(new URL(raw, 'https://cdn.ypnk.biz.id').toString(), ['ypnk.biz.id'])
+  return { host: 'YPNK', url, expires: 'Tidak diketahui' }
 }
 
 async function uploadToPutIcu(buffer, filename) {
-    const res = await fetch('https://put.icu/upload/', {
-        method: 'PUT',
-        body: buffer,
-        headers: {
-            'Accept': 'application/json',
-            'Content-Type': mime.lookup(filename) || 'application/octet-stream'
-        },
-        timeout: 120000
-    })
-
-    if (!res.ok) throw new Error('Put.icu gagal')
-    const data = await res.json()
-
-    if (data?.direct_url) {
-        return { host: 'Put.icu', url: data.direct_url, expires: '1 hari' }
-    }
-
-    if (data?.url) {
-        return { host: 'Put.icu', url: data.url, expires: '1 hari' }
-    }
-
-    throw new Error('Invalid response')
+  const response = await fetch('https://put.icu/upload/', {
+    method: 'PUT',
+    body: buffer,
+    headers: { Accept: 'application/json', 'Content-Type': mime.lookup(filename) || 'application/octet-stream' },
+    timeout: 90_000,
+    size: MAX_UPLOAD_BYTES,
+  })
+  if (!response.ok) throw new Error(`HTTP ${response.status}`)
+  const data = await response.json()
+  const url = extractHttpResponseUrl(data?.direct_url || data?.url, ['put.icu'])
+  return { host: 'Put.icu', url, expires: 'Sekitar 1 hari menurut konfigurasi provider' }
 }
 
-async function uploadToTermai(buffer) {
-    const ext = await detectExt(buffer, 'bin')
+const UPLOADERS = new Map([
+  ['catbox', uploadToCatbox],
+  ['litterbox', uploadToLitterbox],
+  ['tmpfiles', uploadToTmpFiles],
+  ['gofile', uploadToGofile],
+  ['quax', uploadToQuax],
+  ['ypnk', uploadToYpnk],
+  ['puticu', uploadToPutIcu],
+])
+
+if (process.env.SHON_TERMAI_KEY) {
+  UPLOADERS.set('termai', async (buffer, filename) => {
     const form = new FormData()
-    form.append('file', buffer, { filename: `file.${ext}` })
-
-    const res = await fetch(`${termaiDomain}/api/upload?key=${termaiKey}`, {
-        method: 'POST',
-        body: form,
-        headers: form.getHeaders(),
-        timeout: 120000
-    })
-
-    if (!res.ok) throw new Error('Termai gagal')
-    const data = await res.json()
-
-    if (!data?.status || !data?.path) {
-        throw new Error('Invalid response')
-    }
-
-    return { host: 'Termai', url: data.path, expires: 'Unknown' }
+    form.append('file', buffer, { filename })
+    const endpoint = new URL('https://c.termai.cc/api/upload')
+    endpoint.searchParams.set('key', process.env.SHON_TERMAI_KEY)
+    const response = await postForm(endpoint.toString(), form, 90_000)
+    const data = await response.json()
+    const url = extractHttpResponseUrl(data?.path, ['termai.cc'])
+    if (!data?.status || !url) throw new Error('Respons Termai tidak valid.')
+    return { host: 'Termai', url, expires: 'Tidak diketahui' }
+  })
 }
 
-const UPLOADERS = [
-    { name: 'Catbox', fn: uploadToCatbox },
-    { name: 'Litterbox', fn: uploadToLitterbox },
-    { name: 'TmpFiles', fn: uploadToTmpFiles },
-    { name: 'Gofile', fn: uploadToGofile },
-    { name: 'Qu.ax', fn: uploadToQuax },
-    { name: 'YPNK', fn: uploadToYpnk },
-    { name: 'Put.icu', fn: uploadToPutIcu },
-    { name: 'Termai', fn: uploadToTermai }
-]
-
-function getFileExtension(mimetype) {
-    const mimeMap = {
-        'image/jpeg': 'jpg',
-        'image/png': 'png',
-        'image/gif': 'gif',
-        'image/webp': 'webp',
-        'video/mp4': 'mp4',
-        'video/3gpp': '3gp',
-        'video/quicktime': 'mov',
-        'audio/mpeg': 'mp3',
-        'audio/ogg': 'ogg',
-        'audio/wav': 'wav',
-        'audio/mp4': 'm4a',
-        'application/pdf': 'pdf',
-        'application/zip': 'zip'
-    }
-    return mimeMap[mimetype] || 'bin'
+function getMediaContent(message) {
+  const actualMessage = message?.documentWithCaptionMessage?.message || message
+  const type = getContentType(actualMessage)
+  if (!type || type === 'conversation' || type === 'extendedTextMessage') return null
+  return { type, content: actualMessage[type] || {} }
 }
 
 async function handler(m, { sock }) {
-    let media = null
-    let mimetype = null
-    let filename = 'file'
+  const hostName = String(m.args?.[0] || 'catbox').toLowerCase().replace(/[^a-z0-9]/g, '')
+  if (!UPLOADERS.has(hostName)) {
+    const choices = [...UPLOADERS.keys()].join(', ')
+    return m.reply(`Pilih satu host: \`${m.prefix}tourl [${choices}]\`. Default: catbox.`)
+  }
 
-    if (m.quoted?.message) {
-        const type = getContentType(m.quoted.message)
-        if (!type || type === 'conversation' || type === 'extendedTextMessage') {
-            return m.reply('⚠️ Reply media (gambar/video/audio/file)!')
-        }
+  const selectedHost = [...UPLOADERS.keys()].find((key) => key === hostName)
+  const quoted = m.quoted?.message ? { key: m.quoted.key, message: m.quoted.message } : null
+  const sourceMessage = quoted || (m.message ? { key: m.key, message: m.message } : null)
+  if (!sourceMessage) return m.reply('⚠️ Reply media, atau kirim media dengan caption `.tourl [host]`.')
 
-        try {
-            media = await downloadMediaMessage(
-                { key: m.quoted.key, message: m.quoted.message },
-                'buffer',
-                {}
-            )
-            const content = m.quoted.message[type]
-            mimetype = content?.mimetype || 'application/octet-stream'
-            filename = content?.fileName || `file.${getFileExtension(mimetype)}`
-        } catch (e) {
-            m.reply(te(m.prefix, m.command, m.pushName))
-        }
-    } else if (m.message) {
-        const type = getContentType(m.message)
-        if (!type || type === 'conversation' || type === 'extendedTextMessage') {
-            return m.reply('⚠️ Kirim media + caption `.tourl` atau reply media')
-        }
+  const details = getMediaContent(sourceMessage.message)
+  if (!details) return m.reply('⚠️ Reply/kirim gambar, video, audio, atau dokumen.')
+  const declaredLength = Number(details.content?.fileLength)
+  if (Number.isFinite(declaredLength) && declaredLength > MAX_UPLOAD_BYTES) {
+    return m.reply('❌ Ukuran file melebihi batas 20 MiB.')
+  }
 
-        try {
-            media = await downloadMediaMessage(
-                { key: m.key, message: m.message },
-                'buffer',
-                {}
-            )
-            const content = m.message[type]
-            mimetype = content?.mimetype || 'application/octet-stream'
-            filename = content?.fileName || `file.${getFileExtension(mimetype)}`
-        } catch (e) {
-            m.reply(te(m.prefix, m.command, m.pushName))
-        }
-    }
+  await m.reply(`ℹ️ File akan diunggah hanya ke layanan pihak ketiga *${selectedHost}*. Pastikan file boleh dibagikan ke layanan tersebut.`)
+  await m.react('🕕')
 
-    if (!media || media.length === 0) {
-        return m.reply('⚠️ Media tidak ditemukan!')
-    }
+  try {
+    const media = await downloadMediaMessage(sourceMessage, 'buffer', {})
+    assertBufferSize(media, MAX_UPLOAD_BYTES, 'Media')
+    const mimetype = details.content?.mimetype || 'application/octet-stream'
+    const detected = await fileTypeFromBuffer(media)
+    const extension = extensionFor(mimetype, detected)
+    const originalName = details.content?.fileName || `file.${extension}`
+    let filename = sanitizeFilename(originalName, `file.${extension}`)
+    if (!/\.[a-z0-9]{1,10}$/i.test(filename)) filename = `${filename}.${extension}`
 
-    m.react('🕕')
-
-    const results = []
-    const failed = []
-
-    for (const uploader of UPLOADERS) {
-        try {
-            const result = await uploader.fn(media, filename)
-            results.push(result)
-        } catch (e) {
-            failed.push(uploader.name)
-        }
-    }
-
-    if (results.length === 0) {
-        m.react('❌')
-        return m.reply(`❌ Semua upload gagal!\n\n> Failed: ${failed.join(', ')}`)
-    }
-
-
-    let caption = `╭┈┈⬡「 📋 *ʀᴇsᴜʟᴛ* 」\n`
-    results.forEach((r, i) => {
-        caption += `┃ ${r.url}\n`
-    })
-    caption += `╰┈┈┈┈┈┈┈┈⬡\n\n`    
-    
-    if (failed.length > 0) {
-        caption += `> ❌ Gagal: ${failed.join(', ')}`
-    }
-
-    await m.reply(caption)
-
-    m.react('✅')
+    const uploaded = await UPLOADERS.get(selectedHost)(media, filename)
+    await m.reply(
+      `✅ *Upload berhasil*\n\n` +
+      `Host: ${uploaded.host}\n` +
+      `Retensi: ${uploaded.expires}\n` +
+      `URL: ${uploaded.url}`,
+    )
+    await m.react('✅')
+  } catch (error) {
+    console.error('[TOURL] Upload gagal:', error.message)
+    await m.react('❌')
+    await m.reply(`❌ Upload ke ${selectedHost} gagal. Coba host lain atau ulangi nanti.\n${te(m.prefix, m.command, m.pushName)}`)
+  }
 }
 
-export { pluginConfig as config, handler }
+export { pluginConfig as config, handler, UPLOADERS }
