@@ -21,7 +21,7 @@
 
 ## Ringkasan
 
-**ShooNhee MD** adalah bot WhatsApp berbasis Multi-Device yang dirancang untuk penggunaan personal, komunitas, dan pengembangan fitur berbasis plugin. Proyek memakai Node.js, ES Modules, dan Baileys, dengan konfigurasi utama yang terpusat di [`config.js`](./config.js).
+**ShooNhee MD** adalah bot WhatsApp berbasis Multi-Device yang dirancang untuk penggunaan personal, komunitas, dan pengembangan fitur berbasis plugin. Proyek memakai Node.js, ES Modules, dan Baileys, dengan konfigurasi utama yang terpusat di [`config.js`](./config.js). Lihat [catatan pembaruan sistem plugin](./docs/PLUGIN_UPDATE_NHEBOTRIN.md) untuk perubahan downloader, sticker, tools, serta konfigurasi environment opsional.
 
 Strukturnya memisahkan core runtime, plugin, penyimpanan data, dan aset media agar penambahan fitur dapat dilakukan tanpa mengubah seluruh sistem. Instalasi Termux disediakan melalui [`install.sh`](./install.sh), sedangkan runtime dapat dijalankan secara langsung pada Linux atau VPS yang memenuhi dependensi proyek.
 
@@ -112,7 +112,7 @@ const config = {
 
   bot: {
     name: 'ShooNhee MD',
-    version: '1.0.1',
+    version: '1.0.2',
     developer: 'Nama Anda'
   },
 

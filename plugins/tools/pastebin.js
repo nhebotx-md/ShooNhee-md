@@ -17,7 +17,7 @@ const pluginConfig = {
 }
 
 async function handler(m, { sock }) {
-    let text = m.args.join(' ')
+    let text = (m.args || []).join(' ')
     
     if (m.quoted?.text) {
         text = m.quoted.text
@@ -33,8 +33,16 @@ async function handler(m, { sock }) {
             `> Contoh: \`${m.prefix}pastebin console.log("Hello")\``
         )
     }
+
+    if (text.length > 500_000) {
+        return m.reply('❌ Teks terlalu panjang. Batas maksimal 500.000 karakter.')
+    }
+
+    const api_dev_key = process.env.SHON_PASTEBIN_API_KEY
+    if (!api_dev_key) {
+        return m.reply('⚠️ Fitur Pastebin belum dikonfigurasi. Atur SHON_PASTEBIN_API_KEY pada environment bot.')
+    }
     
-    const api_dev_key = 'h9WMT2Mn9QW-qDhvUSc-KObqAYcjI0he'
     const api_paste_code = text.trim()
     const api_paste_name = `Paste dari ${m.pushName || 'User'} - ${new Date().toLocaleDateString('id-ID')}`
     

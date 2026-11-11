@@ -7,6 +7,7 @@ async function getSharp() {
 }
 import te from "../../src/lib/Shon-error.js";
 import { addExifToWebp } from "../../src/lib/Shon-exif.js";
+import { assertBufferSize, parseHttpUrl } from "../../src/lib/Shon-media-safety.js";
 
 const pluginConfig = {
   name: "stickerpack",
@@ -32,7 +33,7 @@ class StickerAPI {
         .post("https://getstickerpack.com/api/v1/stickerdb/search", {
           query,
           page,
-        })
+        }, { timeout: 20000, maxContentLength: 2 * 1024 * 1024 })
         .then((r) => r.data);
       const data = res.data.map((item) => ({
         name: item.title,
@@ -52,7 +53,7 @@ class StickerAPI {
       const match = slug.match(/stickers\/([a-zA-Z0-9-]+)$/);
       const id = match ? match[1] : slug;
       const res = await axios
-        .get(`https://getstickerpack.com/api/v1/stickerdb/stickers/${id}`)
+        .get(`https://getstickerpack.com/api/v1/stickerdb/stickers/${encodeURIComponent(id)}`, { timeout: 20000, maxContentLength: 2 * 1024 * 1024 })
         .then((r) => r.data.data);
       const stickers = res.images.map((item) => ({
         index: item.sticker_index,
@@ -70,12 +71,16 @@ const MAX_STICKERS = 20;
 const DOWNLOAD_DELAY = 700;
 
 async function downloadBuffer(url) {
-  const res = await axios.get(url, {
+  const safeUrl = parseHttpUrl(url, { allowedHosts: ["s3.getstickerpack.com"], requireHttps: true }).toString();
+  const res = await axios.get(safeUrl, {
     responseType: "arraybuffer",
     timeout: 15000,
+    maxContentLength: 5 * 1024 * 1024,
+    maxBodyLength: 5 * 1024 * 1024,
+    maxRedirects: 3,
     headers: { "User-Agent": "Mozilla/5.0" },
   });
-  return Buffer.from(res.data);
+  return assertBufferSize(Buffer.from(res.data), 5 * 1024 * 1024, "Sticker pack");
 }
 
 async function toWebpSticker(buffer) {
@@ -89,7 +94,7 @@ async function toWebpSticker(buffer) {
 }
 
 async function handler(m, { sock }) {
-  const query = m.args?.join(" ")?.trim();
+    const query = m.args?.join(" ")?.trim()?.slice(0, 100);
 
   if (!query) {
     return m.reply(

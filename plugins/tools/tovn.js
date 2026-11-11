@@ -90,19 +90,10 @@ async function handler(m, { sock }) {
 
         fs.writeFileSync(inputPath, buffer)
 
-        const ffmpegCmd = [
-            'ffmpeg -y',
-            `-i "${inputPath}"`,
-            '-vn',
-            '-c:a libopus',
-            '-b:a 128k',
-            '-ar 48000',
-            '-ac 1',
-            '-application voip',
-            `"${outputPath}"`
-        ].join(' ')
-
-        await queueFFmpeg(ffmpegCmd)
+        await queueFFmpeg([
+            '-y', '-i', inputPath, '-vn', '-c:a', 'libopus', '-b:a', '128k',
+            '-ar', '48000', '-ac', '1', '-application', 'voip', outputPath
+        ])
 
         if (!fs.existsSync(outputPath)) {
             await m.react('❌')

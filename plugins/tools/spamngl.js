@@ -1,72 +1,62 @@
 import axios from 'axios'
-import te from '../../src/lib/Shon-error.js'
+import { parseHttpUrl } from '../../src/lib/Shon-media-safety.js'
+
+const MAX_SENDS = 3
 const pluginConfig = {
-    name: 'sendngl',
-    alias: [],
-    category: 'tools',
-    description: 'Send NGL',
-    usage: '.sendngl <url> | <text>',
-    example: '.sendngl https://ngl.link/xxxx | hai',
-    isOwner: false,
-    isPremium: false,
-    isGroup: false,
-    isPrivate: false,
-    cooldown: 5,
-    energi: 0,
-    isEnabled: true
+  name: 'spamngl',
+  alias: ['ngltest'],
+  category: 'tools',
+  description: 'Uji pengiriman NGL terbatas untuk owner',
+  usage: '.spamngl <ngl.link> | <pesan> | <1-3>',
+  example: '.spamngl https://ngl.link/xxxx | hai | 2',
+  isOwner: true,
+  isPremium: false,
+  isGroup: false,
+  isPrivate: false,
+  cooldown: 30,
+  energi: 0,
+  isEnabled: true,
 }
 
-async function handler(m, { sock }) {
-    const text = m.text?.split('|')
-    const [ link, kata, jumlah ] = text
-    if(!link) return m.reply(`*LINK NGL NYA MANA ??*\nContoh: \`${m?.prefix}sendngl https://ngl.link/xxxx | hai`)
-    if(!kata) return m.reply(`*KATA KATA NYA MANA ??*\n\nContoh: \`${m?.prefix}sendngl https://ngl.link/xxxx | hai`)
-    if(!jumlah) return m.reply(`*JUMLAH NYA MANA ??*\n\nContoh: \`${m?.prefix}sendngl https://ngl.link/xxxx | hai | 10`)
-    if(isNaN(jumlah)) return m.reply(`*JUMLAH NYA HARUS ANGKA*\n\nContoh: \`${m?.prefix}sendngl https://ngl.link/xxxx | hai | 10`)
-    m.react('🎴')
-    
-    try {
-        for(let i = 0; i < jumlah; i++) {
-            axios.get(`https://api.cuki.biz.id/api/tools/sendngl?apikey=cuki-x&link=${encodeURIComponent(link)}&text=${encodeURIComponent(kata)}`, {
-                timeout: 30000
-            })
-            await new Promise(resolve => setTimeout(resolve, 4000))
-        }
-        await m.react('✅')
-        await sock.sendMessage(m.chat, {
-            text: `✅ *DONE*`,
-            contextInfo: {
-                externalAdReply: {
-                    title: 'Bitly Shortlink',
-                    body: shortUrl,
-                    sourceUrl: shortUrl,
-                    mediaType: 1
-                }
-            }
-        }, { quoted: m })
-        
-        await sock.sendMessage(m.chat, {
-            text: shortUrl,
-            interactiveMessage: {
-                body: { text: `🔗 *ʙɪᴛʟʏ sʜᴏʀᴛʟɪɴᴋ*\n\n${shortUrl}` },
-                nativeFlowMessage: {
-                    buttons: [
-                        {
-                            name: 'cta_copy',
-                            buttonParamsJson: JSON.stringify({
-                                display_text: '📋 Copy Link',
-                                copy_code: shortUrl
-                            })
-                        }
-                    ]
-                }
-            }
-        })
-        
-    } catch (error) {
-        m.react('☢')
-        m.reply(te(m.prefix, m.command, m.pushName))
+async function handler(m) {
+  if (!m.isOwner) return m.reply('⛔ Perintah ini hanya tersedia untuk owner bot.')
+  const [linkInput, messageInput, countInput] = (m.text || '').split('|').map((value) => value?.trim())
+  if (!linkInput || !messageInput || !countInput) {
+    return m.reply(`Contoh: \`${m.prefix}spamngl https://ngl.link/xxxx | hai | 2\` (maksimal ${MAX_SENDS})`)
+  }
+
+  let link
+  try {
+    link = parseHttpUrl(linkInput, { allowedHosts: ['ngl.link'] }).toString()
+  } catch {
+    return m.reply('❌ Gunakan URL publik dari domain ngl.link.')
+  }
+  if (messageInput.length > 300) return m.reply('❌ Pesan terlalu panjang. Batas maksimal 300 karakter.')
+  const count = Number(countInput)
+  if (!Number.isInteger(count) || count < 1 || count > MAX_SENDS) {
+    return m.reply(`❌ Jumlah harus bilangan bulat 1–${MAX_SENDS}.`)
+  }
+
+  await m.react('🎴')
+  let sent = 0
+  try {
+    for (let i = 0; i < count; i++) {
+      const { data } = await axios.get('https://api.cuki.biz.id/api/tools/sendngl', {
+        params: { apikey: 'cuki-x', link, text: messageInput },
+        timeout: 30000,
+        maxContentLength: 1024 * 1024,
+      })
+      if (data?.status === false || data?.success === false) throw new Error('Penyedia menolak permintaan.')
+      sent++
+      if (i < count - 1) await new Promise((resolve) => setTimeout(resolve, 3000))
     }
+    await m.react('✅')
+    await m.reply(`✅ Selesai: ${sent} dari ${count} pesan berhasil dikirim.`)
+  } catch (error) {
+    console.error('[SpamNGL] Permintaan gagal:', error.message)
+    await m.react('❌')
+    await m.reply(`⚠️ Berhasil dikirim: ${sent}. Permintaan berikutnya gagal; proses dihentikan.`)
+  }
 }
 
 export { pluginConfig as config, handler }

@@ -4,6 +4,7 @@ import crypto from 'crypto'
 import { generateWAMessage, generateWAMessageFromContent, jidNormalizedUser } from 'ShooNhee'
 import config from '../../config.js'
 import te from '../../src/lib/Shon-error.js'
+import { assertBufferSize, parseHttpUrl } from '../../src/lib/Shon-media-safety.js'
 const headers = {
     'Content-Type': 'application/x-www-form-urlencoded',
     Accept: 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8',
@@ -13,10 +14,10 @@ const headers = {
 }
 
 async function getToken() {
-    const res = await axios.get('https://savett.cc/en1/download')
+    const res = await axios.get('https://savett.cc/en1/download', { timeout: 30000, maxContentLength: 3 * 1024 * 1024 })
     return {
         csrf: res.data.match(/name="csrf_token" value="([^"]+)"/)?.[1],
-        cookie: res.headers['set-cookie'].map(v => v.split(';')[0]).join('; ')
+        cookie: Array.isArray(res.headers['set-cookie']) ? res.headers['set-cookie'].map(v => v.split(';')[0]).join('; ') : ''
     }
 }
 
@@ -24,7 +25,7 @@ async function fetchTikTok(url, csrf, cookie) {
     const res = await axios.post(
         'https://savett.cc/en1/download',
         `csrf_token=${encodeURIComponent(csrf)}&url=${encodeURIComponent(url)}`,
-        { headers: { ...headers, Cookie: cookie } }
+        { headers: { ...headers, Cookie: cookie }, timeout: 30000, maxContentLength: 5 * 1024 * 1024 }
     )
     return res.data
 }
@@ -101,7 +102,7 @@ async function savett(url) {
 }
 
 const pluginConfig = {
-    name: ['tiktok2', 'tt2', 'ttmp4'],
+    name: ['tiktok2', 'tt2'],
     alias: ['tiktokdl2', 'ttdown2'],
     category: 'download',
     description: 'Download video/slide TikTok tanpa watermark',
@@ -117,7 +118,13 @@ const pluginConfig = {
 }
 
 async function handler(m, { sock }) {
-    const url = m.text?.trim()
+    let url
+
+    try {
+        url = parseHttpUrl(m.text?.trim(), { allowedHosts: ['tiktok.com'] }).toString()
+    } catch {
+        return m.reply(`📌 Contoh: *${m.prefix}tiktok2 https://vt.tiktok.com/...*`)
+    }
 
     if (!url) {
         return m.reply(
@@ -126,10 +133,6 @@ async function handler(m, { sock }) {
             `╰┈┈⬡\n\n` +
             `> Contoh: ${m.prefix}tiktok2 https://vt.tiktok.com/xxx`
         )
-    }
-
-    if (!url.match(/tiktok\.com|vt\.tiktok/i)) {
-        return m.reply('❌ URL tidak valid. Gunakan link TikTok.')
     }
 
     m.react('⏱️')
@@ -145,9 +148,13 @@ async function handler(m, { sock }) {
             `⏱️ Duration: ${result.duration || '-'}`
 
         if (result.type === 'video' && result.downloads.nowm.length > 0) {
-            const videoRes = await axios.get(result.downloads.nowm[0], {
+            const videoUrl = parseHttpUrl(result.downloads.nowm[0], { requireHttps: true }).toString()
+            const videoRes = await axios.get(videoUrl, {
                 responseType: 'arraybuffer',
                 timeout: 60000,
+                maxContentLength: 60 * 1024 * 1024,
+                maxBodyLength: 60 * 1024 * 1024,
+                maxRedirects: 3,
                 headers: {
                     'User-Agent': 'Mozilla/5.0 (Linux; Android 10; K) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Mobile Safari/537.36',
                     'Referer': 'https://www.tiktok.com/'
@@ -177,12 +184,16 @@ async function handler(m, { sock }) {
                 if (!imgUrl) continue
 
                 try {
-                    const res = await axios.get(imgUrl, {
+                    const safeImageUrl = parseHttpUrl(imgUrl, { requireHttps: true }).toString()
+                    const res = await axios.get(safeImageUrl, {
                         responseType: 'arraybuffer',
-                        timeout: 30000
+                        timeout: 30000,
+                        maxContentLength: 15 * 1024 * 1024,
+                        maxBodyLength: 15 * 1024 * 1024,
+                        maxRedirects: 3
                     })
                     mediaList.push({
-                        image: Buffer.from(res.data),
+                        image: assertBufferSize(Buffer.from(res.data), 15 * 1024 * 1024, 'Slide TikTok'),
                         caption: i === 0 ? caption : ''
                     })
                 } catch (e) {
